@@ -11,3 +11,6 @@ worker/.wrangler/
 node_modules/
 worker/worker-configuration.d.ts
 *.apk
+
+# on-device ASR models (too large for git; see AGENTS.md)
+app/src/main/assets/models/

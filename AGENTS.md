@@ -1,4 +1,12 @@
 
+## On-device ASR models (not in git)
+
+`app/src/main/assets/models/whisper-tiny/` is gitignored (the ONNX files are ~100 MB).
+A fresh clone needs these files before building:
+
+- `tiny-encoder.int8.onnx`, `tiny-decoder.int8.onnx`, `tiny-tokens.txt`
+- Source: sherpa-onnx Whisper tiny int8 export — https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny
+
 <!-- codeview:start -->
 
 ## Reference codebases (codeview)

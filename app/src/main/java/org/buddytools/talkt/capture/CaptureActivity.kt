@@ -61,6 +61,7 @@ import org.buddytools.talkt.data.TranscriptStore
 import org.buddytools.talkt.data.TranscriptionMode
 import org.buddytools.talkt.trigger.EditorBridge
 import org.buddytools.talkt.transcription.RecordedClip
+import org.buddytools.talkt.transcription.local.LocalAsrWarmer
 import org.buddytools.talkt.transcription.Transcriber
 import org.buddytools.talkt.transcription.TranscriptSource
 import org.buddytools.talkt.transcription.TranscriptionGraph
@@ -91,6 +92,9 @@ class CaptureActivity : ComponentActivity() {
         claimedActive = true
         settings = TalktSettings(this)
         transcriber = TranscriptionGraph.create(this, settings)
+        if (settings.transcriptionMode != TranscriptionMode.GeminiOnly) {
+            LocalAsrWarmer.prewarm(this, settings.languageCodes.singleOrNull().orEmpty())
+        }
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
         // Never take window focus: the overlay only needs touches, and a focusable
         // window would steal focus from the editor beneath and hide its keyboard.

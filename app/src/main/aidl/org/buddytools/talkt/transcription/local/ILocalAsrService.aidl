@@ -5,4 +5,5 @@ import org.buddytools.talkt.transcription.local.ILocalAsrCallback;
 
 interface ILocalAsrService {
     void transcribe(in ParcelFileDescriptor wav, long durationMillis, String languageHint, ILocalAsrCallback callback);
+    oneway void warmUp(String languageHint);
 }

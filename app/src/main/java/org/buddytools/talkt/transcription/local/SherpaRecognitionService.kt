@@ -40,16 +40,7 @@ class SherpaRecognitionService : Service() {
                         return@launch
                     }
                     val samples = readSamples(wav)
-                    val normalizedLanguage = languageHint.trim().lowercase().takeIf { it in SUPPORTED_LANGUAGE_HINTS }.orEmpty()
-                    val engine = if (recognizer == null || recognizerLanguage != normalizedLanguage) {
-                        releaseRecognizer()
-                        createRecognizer(normalizedLanguage).also {
-                            recognizer = it
-                            recognizerLanguage = normalizedLanguage
-                        }
-                    } else {
-                        checkNotNull(recognizer)
-                    }
+                    val engine = ensureRecognizer(languageHint)
                     val stream = engine.createStream()
                     try {
                         stream.acceptWaveform(samples, SAMPLE_RATE)
@@ -75,6 +66,24 @@ class SherpaRecognitionService : Service() {
                     wav.close()
                 }
             }
+        }
+
+        override fun warmUp(languageHint: String) {
+            scope.launch {
+                runCatching { ensureRecognizer(languageHint) }
+                    .onFailure { if (it is OutOfMemoryError) releaseRecognizer() }
+            }
+        }
+    }
+
+    private fun ensureRecognizer(languageHint: String): OfflineRecognizer {
+        val normalizedLanguage = languageHint.trim().lowercase().takeIf { it in SUPPORTED_LANGUAGE_HINTS }.orEmpty()
+        val existing = recognizer
+        if (existing != null && recognizerLanguage == normalizedLanguage) return existing
+        releaseRecognizer()
+        return createRecognizer(normalizedLanguage).also {
+            recognizer = it
+            recognizerLanguage = normalizedLanguage
         }
     }
 

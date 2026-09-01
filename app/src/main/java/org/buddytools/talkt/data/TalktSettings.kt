@@ -22,7 +22,7 @@ class TalktSettings(context: Context) {
         set(value) = preferences.edit().putString(API_URL, value.trim().trimEnd('/')).apply()
 
     var appToken: String
-        get() = preferences.getString(APP_TOKEN, BuildConfig.DEFAULT_APP_TOKEN) ?: BuildConfig.DEFAULT_APP_TOKEN
+        get() = preferences.getString(APP_TOKEN, null)?.takeIf(String::isNotBlank) ?: BuildConfig.DEFAULT_APP_TOKEN
         set(value) = preferences.edit().putString(APP_TOKEN, value.trim()).apply()
 
     var latestResult: String

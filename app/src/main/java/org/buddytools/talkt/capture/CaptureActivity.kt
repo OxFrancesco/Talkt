@@ -78,6 +78,7 @@ class CaptureActivity : ComponentActivity() {
     private var state by mutableStateOf<CaptureState>(CaptureState.Preparing)
     private var editorMode = false
     private var source = ""
+    private var claimedActive = false
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) beginRecording() else state = CaptureState.Error("Microphone permission is required")
@@ -85,6 +86,9 @@ class CaptureActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        current?.get()?.finish()
+        current = java.lang.ref.WeakReference(this)
+        claimedActive = true
         settings = TalktSettings(this)
         transcriber = TranscriptionGraph.create(this, settings)
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
@@ -105,8 +109,11 @@ class CaptureActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        if (state is CaptureState.Listening) recorder.cancel()
-        if (source == "power") CaptureBus.finishPowerSession()
+        if (claimedActive) {
+            if (current?.get() === this) current = null
+            if (state is CaptureState.Listening) recorder.cancel()
+            if (source == "power") CaptureBus.finishPowerSession()
+        }
         super.onDestroy()
     }
 
@@ -204,6 +211,10 @@ class CaptureActivity : ComponentActivity() {
 
     private fun copy(text: String) {
         val clipboard = getSystemService(ClipboardManager::class.java)
+        val existing = runCatching {
+            clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
+        }.getOrNull()
+        if (existing == text) return
         clipboard.setPrimaryClip(ClipData.newPlainText("Talkt transcript", text))
     }
 
@@ -216,6 +227,7 @@ class CaptureActivity : ComponentActivity() {
     companion object {
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_AUTOSTART = "auto_start"
+        private var current: java.lang.ref.WeakReference<CaptureActivity>? = null
 
         fun intent(context: Context, source: String, autoStart: Boolean = true): Intent =
             Intent(context, CaptureActivity::class.java)

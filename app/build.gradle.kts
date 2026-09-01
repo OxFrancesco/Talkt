@@ -4,7 +4,19 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val talktAppToken = System.getenv("TALKT_APP_TOKEN").orEmpty()
+val talktAppToken = System.getenv("TALKT_APP_TOKEN").orEmpty().ifBlank {
+    val devVars = rootProject.file("worker/.dev.vars")
+    if (devVars.exists()) {
+        devVars.readLines()
+            .firstOrNull { it.startsWith("TALKT_APP_TOKEN=") }
+            ?.substringAfter("=")
+            ?.trim()
+            ?.removeSurrounding("\"")
+            .orEmpty()
+    } else {
+        ""
+    }
+}
 
 android {
     namespace = "org.buddytools.talkt"

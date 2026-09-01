@@ -92,10 +92,10 @@ class CaptureActivity : ComponentActivity() {
         settings = TalktSettings(this)
         transcriber = TranscriptionGraph.create(this, settings)
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
-        editorMode = EditorBridge.hasFreshTarget()
-        if (editorMode) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        }
+        // Never take window focus: the overlay only needs touches, and a focusable
+        // window would steal focus from the editor beneath and hide its keyboard.
+        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        editorMode = EditorBridge.captureTarget(preserveExisting = true) != null || EditorBridge.hasFreshTarget()
         setContent {
             TalktTheme {
                 CaptureScreen(

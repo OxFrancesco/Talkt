@@ -27,7 +27,7 @@ class TalktAccessibilityService : AccessibilityService() {
     private val triggerLongPress = Runnable {
         if (!volumeDown) return@Runnable
         longPressTriggered = true
-        captureEditorTarget()
+        captureEditorTarget(preserveExisting = true)
         startActivity(CaptureActivity.intent(this, source = "volume", autoStart = true).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -113,7 +113,11 @@ class TalktAccessibilityService : AccessibilityService() {
     }
 
     internal fun captureEditorTarget(preserveExisting: Boolean = false): EditorSnapshot? {
-        val captured = if (Build.VERSION.SDK_INT >= 33) captureInputConnection() else captureNodeTarget()
+        val captured = if (Build.VERSION.SDK_INT >= 33) {
+            captureInputConnection() ?: captureNodeTarget()
+        } else {
+            captureNodeTarget()
+        }
         if (captured != null) {
             target = captured
         } else if (!preserveExisting) {
@@ -125,6 +129,7 @@ class TalktAccessibilityService : AccessibilityService() {
     internal fun hasFreshEditorTarget(): Boolean = target?.isFresh() == true
 
     internal fun commitToCapturedEditor(text: String): Boolean {
+        captureEditorTarget(preserveExisting = true)
         val selected = target ?: return false
         if (!selected.isFresh()) {
             target = null
@@ -160,14 +165,15 @@ class TalktAccessibilityService : AccessibilityService() {
         if (!node.isEditable || node.isPassword) return null
         if (!node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_SET_TEXT }) return null
         val copy = AccessibilityNodeInfo.obtain(node)
-        val original = copy.text?.toString().orEmpty()
-        val start = copy.textSelectionStart.coerceIn(0, original.length)
-        val end = copy.textSelectionEnd.coerceIn(start, original.length)
         return object : TextTarget {
             override val packageName = copy.packageName?.toString().orEmpty()
             override val capturedAt = System.currentTimeMillis()
 
             override fun commit(text: String): Boolean {
+                copy.refresh()
+                val original = copy.text?.toString().orEmpty()
+                val start = copy.textSelectionStart.coerceIn(0, original.length)
+                val end = copy.textSelectionEnd.coerceIn(start, original.length)
                 val replacement = original.substring(0, start) + text + original.substring(end)
                 val arguments = Bundle().apply {
                     putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, replacement)
@@ -191,7 +197,6 @@ class TalktAccessibilityService : AccessibilityService() {
         if (info.inputType and InputType.TYPE_MASK_CLASS != InputType.TYPE_CLASS_TEXT) return false
         val variation = info.inputType and InputType.TYPE_MASK_VARIATION
         if (variation in PASSWORD_VARIATIONS) return false
-        if (info.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING != 0) return false
         val privateOptions = info.privateImeOptions.orEmpty().lowercase()
         return !privateOptions.contains("payment") && !privateOptions.contains("sensitive")
     }

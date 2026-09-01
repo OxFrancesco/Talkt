@@ -11,13 +11,13 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,18 +32,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.GraphicEq
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -51,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -102,8 +96,6 @@ class CaptureActivity : ComponentActivity() {
             TalktTheme {
                 CaptureScreen(
                     state = state,
-                    editorMode = editorMode,
-                    source = source,
                     onStop = ::finishRecording,
                     onClose = ::finish,
                 )
@@ -175,12 +167,12 @@ class CaptureActivity : ComponentActivity() {
                         TranscriptSource.OnDevice -> "Transcribed on device"
                         TranscriptSource.Gemini -> "Gemini fallback"
                     }
+                    copy(transcript.text)
                     if (editorMode) {
                         if (EditorBridge.commit(transcript.text)) {
                             archive(transcript.text, kind = "insert", source = source)
-                            CaptureState.Complete("Inserted", transcript.text, false, source)
+                            CaptureState.Complete("Inserted · copied", transcript.text, false, source)
                         } else {
-                            copy(transcript.text)
                             archive(transcript.text, kind = "copy", source = source)
                             CaptureState.Complete("Copied for pasting", transcript.text, false, source)
                         }
@@ -248,8 +240,6 @@ private sealed interface CaptureState {
 @Composable
 private fun CaptureScreen(
     state: CaptureState,
-    editorMode: Boolean,
-    source: String,
     onStop: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -257,53 +247,40 @@ private fun CaptureScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.58f))
-            .padding(20.dp),
+            .padding(16.dp),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = SurfaceRaised,
-            shape = RoundedCornerShape(30.dp),
+            shape = RoundedCornerShape(22.dp),
             tonalElevation = 0.dp,
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 22.dp),
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (editorMode) "DICTATION" else "AGENT",
-                        color = Mint,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.8.sp,
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(source.uppercase(), color = Muted, fontSize = 10.sp, letterSpacing = 1.sp)
-                    IconButton(onClick = onClose, modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Rounded.Close, null, tint = Muted)
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
                 when (state) {
-                    CaptureState.Preparing -> CircularProgressIndicator(color = Mint)
-                    CaptureState.Listening -> ListeningContent(source, onStop)
-                    is CaptureState.Processing -> ProcessingContent(state.label, state.engine)
+                    CaptureState.Preparing -> CircularProgressIndicator(color = Mint, strokeWidth = 3.dp)
+                    CaptureState.Listening -> ListeningContent(onStop)
+                    is CaptureState.Processing -> CircularProgressIndicator(color = Mint, strokeWidth = 3.dp)
                     is CaptureState.Complete -> CompleteContent(state)
                     is CaptureState.Error -> ErrorContent(state.message, onClose)
                 }
-                Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
 
 @Composable
-private fun ListeningContent(source: String, onStop: () -> Unit) {
+private fun ListeningContent(onStop: () -> Unit) {
     val transition = rememberInfiniteTransition(label = "voice")
     Row(
-        modifier = Modifier.height(72.dp),
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(72.dp)
+            .clickable(onClick = onStop),
+        horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         repeat(9) { index ->
@@ -324,45 +301,14 @@ private fun ListeningContent(source: String, onStop: () -> Unit) {
             )
         }
     }
-    Text("Listening", color = Cloud, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
-    Text(
-        when (source) {
-            "power" -> "Release Power or tap stop"
-            "volume" -> "Release Volume Down or tap stop"
-            else -> "Pause for silence or tap stop"
-        },
-        color = Muted,
-        fontSize = 14.sp,
-    )
-    Spacer(Modifier.height(22.dp))
-    Button(
-        onClick = onStop,
-        colors = ButtonDefaults.buttonColors(containerColor = Mint, contentColor = Ink),
-        shape = RoundedCornerShape(18.dp),
-    ) {
-        Icon(Icons.Rounded.GraphicEq, null)
-        Spacer(Modifier.size(8.dp))
-        Text("Stop", fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-private fun ProcessingContent(label: String, engine: String) {
-    CircularProgressIndicator(color = Mint, strokeWidth = 3.dp)
-    Spacer(Modifier.height(22.dp))
-    Text(label, color = Cloud, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-    Text(engine, color = Muted, fontSize = 13.sp)
 }
 
 @Composable
 private fun CompleteContent(state: CaptureState.Complete) {
-    Box(Modifier.size(54.dp).clip(CircleShape).background(Mint), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(44.dp).clip(CircleShape).background(Mint), contentAlignment = Alignment.Center) {
         Icon(Icons.Rounded.Check, null, tint = Ink)
     }
-    Spacer(Modifier.height(18.dp))
-    Text(state.title, color = Cloud, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-    Text(state.source, color = Mint, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(12.dp))
     Text(
         state.detail,
         color = if (state.isAgent) Cloud else Muted,
@@ -375,9 +321,7 @@ private fun CompleteContent(state: CaptureState.Complete) {
 
 @Composable
 private fun ErrorContent(message: String, onClose: () -> Unit) {
-    Text("Couldn't finish", color = MaterialTheme.colorScheme.error, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-    Spacer(Modifier.height(8.dp))
-    Text(message, color = Muted, textAlign = TextAlign.Center)
-    Spacer(Modifier.height(18.dp))
-    Button(onClick = onClose) { Text("Close") }
+    Text(message, color = MaterialTheme.colorScheme.error, fontSize = 14.sp, textAlign = TextAlign.Center)
+    Spacer(Modifier.height(12.dp))
+    TextButton(onClick = onClose) { Text("Close", color = Mint) }
 }

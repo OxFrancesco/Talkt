@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/talkt_mint"
+        android:fillType="evenOdd"
+        android:pathData="M54,21C38.5,21 29,32.5 29,48L29,58C29,72 38.5,81.2 50.5,82.4L49.6,86C49.3,86.8 50.8,87 52.1,86.3L64.4,80.2C73.4,76.6 79,68.5 79,58L79,48C79,32.5 69.5,21 54,21ZM41,39C38.2,39 36,41.2 36,44L36,62C36,64.8 38.2,67 41,67C43.8,67 46,64.8 46,62L46,44C46,41.2 43.8,39 41,39ZM54,31C51.2,31 49,33.2 49,36L49,68C49,70.8 51.2,73 54,73C56.8,73 59,70.8 59,68L59,36C59,33.2 56.8,31 54,31ZM67,39C64.2,39 62,41.2 62,44L62,62C62,64.8 64.2,67 67,67C69.8,67 72,64.8 72,62L72,44C72,41.2 69.8,39 67,39Z" />
+</vector>

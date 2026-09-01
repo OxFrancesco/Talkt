@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="420" viewBox="0 0 768 420">
+  <rect width="768" height="420" rx="28" fill="#111318"/>
+  <defs>
+    <path id="talkt-mark" fill-rule="evenodd" d="M54 21C38.5 21 29 32.5 29 48V58C29 72 38.5 81.2 50.5 82.4L49.6 86C49.3 86.8 50.8 87 52.1 86.3L64.4 80.2C73.4 76.6 79 68.5 79 58V48C79 32.5 69.5 21 54 21ZM41 39C38.2 39 36 41.2 36 44V62C36 64.8 38.2 67 41 67C43.8 67 46 64.8 46 62V44C46 41.2 43.8 39 41 39ZM54 31C51.2 31 49 33.2 49 36V68C49 70.8 51.2 73 54 73C56.8 73 59 70.8 59 68V36C59 33.2 56.8 31 54 31ZM67 39C64.2 39 62 41.2 62 44V62C62 64.8 64.2 67 67 67C69.8 67 72 64.8 72 62V44C72 41.2 69.8 39 67 39Z"/>
+    <clipPath id="circle"><circle cx="54" cy="54" r="54"/></clipPath>
+    <clipPath id="squircle"><rect width="108" height="108" rx="25"/></clipPath>
+  </defs>
+
+  <g transform="translate(48 76) scale(1.7)" clip-path="url(#circle)">
+    <rect width="108" height="108" fill="#090A0C"/>
+    <use href="#talkt-mark" fill="#B9F6D2"/>
+  </g>
+  <g transform="translate(292 76) scale(1.7)" clip-path="url(#squircle)">
+    <rect width="108" height="108" fill="#090A0C"/>
+    <use href="#talkt-mark" fill="#B9F6D2"/>
+  </g>
+  <g transform="translate(536 76) scale(1.7)" clip-path="url(#circle)">
+    <rect width="108" height="108" fill="#C8EBD4"/>
+    <use href="#talkt-mark" fill="#173D2C"/>
+  </g>
+
+  <text x="140" y="362" fill="#A8ADB5" font-family="sans-serif" font-size="16" text-anchor="middle">circle mask</text>
+  <text x="384" y="362" fill="#A8ADB5" font-family="sans-serif" font-size="16" text-anchor="middle">squircle mask</text>
+  <text x="628" y="362" fill="#A8ADB5" font-family="sans-serif" font-size="16" text-anchor="middle">Material You themed</text>
+</svg>

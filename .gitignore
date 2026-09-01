@@ -1,0 +1,13 @@
+
+# codeview reference codebases
+resources/
+.gradle/
+.idea/
+.kotlin/
+**/build/
+local.properties
+worker/.dev.vars
+worker/.wrangler/
+node_modules/
+worker/worker-configuration.d.ts
+*.apk

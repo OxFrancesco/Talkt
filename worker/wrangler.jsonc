@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "talkt-api",
+  "account_id": "157a8b025a13404b16f11ad7078e53f1",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "TALKT_AGENT",
+        "class_name": "TalktAgent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["TalktAgent"]
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "PRIMARY_MODEL": "openrouter/openai/gpt-5.6-luna@xhigh",
+    "OPENROUTER_FALLBACK_MODEL": "openrouter/anthropic/claude-sonnet-4.6"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

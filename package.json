@@ -1,0 +1,13 @@
+{
+  "name": "talkt",
+  "private": true,
+  "workspaces": [
+    "worker"
+  ],
+  "scripts": {
+    "check": "bun run --cwd worker check",
+    "test": "bun run --cwd worker test",
+    "dev": "bun run --cwd worker dev",
+    "deploy": "bun run --cwd worker deploy"
+  }
+}

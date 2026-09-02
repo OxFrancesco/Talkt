@@ -5,6 +5,7 @@ import android.app.role.RoleManager
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
+import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.cabinet.CabinetActivity
 import org.buddytools.talkt.data.AgentStatus
 import org.buddytools.talkt.data.TalktApi
@@ -77,11 +79,16 @@ class MainActivity : ComponentActivity() {
     private val assistantRole = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         refreshLocalState()
     }
+    private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         settings = TalktSettings(this)
         refreshLocalState()
+        // Agent answers arrive as notifications once the capture bubble has closed.
+        if (Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         setContent {
             TalktTheme {
                 TalktHome(

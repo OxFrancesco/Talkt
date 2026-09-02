@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.SystemClock
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -55,7 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.buddytools.talkt.data.TalktApi
+import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptStore
 import org.buddytools.talkt.data.TranscriptionMode
@@ -131,7 +133,8 @@ class CaptureActivity : ComponentActivity() {
 
     private fun beginRecording() {
         runCatching {
-            recorder.start(settings.silenceTimeoutSeconds * 1_000L) {
+            recorder.start(settings.silenceTimeoutSeconds * 1_000L) { reason ->
+                Log.i(TAG, "recorder auto-stop: $reason")
                 runOnUiThread(::finishRecording)
             }
         }
@@ -152,18 +155,29 @@ class CaptureActivity : ComponentActivity() {
 
     private fun finishRecording() {
         if (state !is CaptureState.Listening) return
-        val wav = recorder.stop()
-        if (wav.size <= 44) {
+        val recording = recorder.stop()
+        Log.i(
+            TAG,
+            "recording stopped: reason=${recording.reason} duration=${recording.durationMillis}ms " +
+                "heardSpeech=${recording.heardSpeech} peakRms=${"%.0f".format(recording.peakRms)} " +
+                "noiseFloor=${"%.0f".format(recording.noiseFloor)} speechRatio=${"%.2f".format(recording.speechRatio)} " +
+                "silenced=${recording.silenced}",
+        )
+        if (recording.silenced && !recording.heardSpeech) {
+            state = CaptureState.Error("Another app is using the microphone")
+            return
+        }
+        if (!recording.hasAudio || recording.reason == StopReason.NoSpeech) {
             state = CaptureState.Error("I didn't hear anything")
             return
         }
-        val clip = runCatching { RecordedClip.create(cacheDir, wav) }
+        val clip = runCatching { RecordedClip.create(cacheDir, recording.wav) }
             .getOrElse {
                 state = CaptureState.Error(it.message ?: "Could not prepare the recording")
                 return
             }
         state = CaptureState.Processing(
-            label = if (editorMode) "Fixing your text" else "Starting your agent",
+            label = "Transcribing",
             engine = when (settings.transcriptionMode) {
                 TranscriptionMode.LocalFirst -> "On-device first · Gemini fallback"
                 TranscriptionMode.OnDeviceOnly -> "On-device only"
@@ -171,43 +185,40 @@ class CaptureActivity : ComponentActivity() {
             },
         )
         lifecycleScope.launch {
+            val startedAt = SystemClock.elapsedRealtime()
             runCatching {
                 try {
-                    val transcript = transcriber.transcribe(clip)
-                    val source = when (transcript.source) {
-                        TranscriptSource.OnDevice -> "Transcribed on device"
-                        TranscriptSource.Gemini -> "Gemini fallback"
-                    }
-                    copy(transcript.text)
-                    if (editorMode) {
-                        if (EditorBridge.commit(transcript.text)) {
-                            archive(transcript.text, kind = "insert", source = source)
-                            CaptureState.Complete("Inserted · copied", transcript.text, false, source)
-                        } else {
-                            archive(transcript.text, kind = "copy", source = source)
-                            CaptureState.Complete("Copied for pasting", transcript.text, false, source)
-                        }
-                    } else {
-                        val reply = TalktApi(settings).prompt(transcript.text)
-                        archive(transcript.text, kind = "agent", source = source, reply = reply.text)
-                        CaptureState.Complete(
-                            title = if (reply.fallback) "Claude answered" else "GPT answered",
-                            detail = reply.text,
-                            isAgent = true,
-                            source = source,
-                        )
-                    }
+                    transcriber.transcribe(clip)
                 } finally {
                     clip.close()
                 }
-            }.onSuccess { result ->
-                state = result
-                settings.latestResult = result.detail
-                if (editorMode) {
-                    delay(1_100)
-                    finish()
+            }.onSuccess { transcript ->
+                val elapsed = SystemClock.elapsedRealtime() - startedAt
+                val source = when (transcript.source) {
+                    TranscriptSource.OnDevice -> "On device"
+                    TranscriptSource.Gemini -> "Gemini"
                 }
+                Log.i(TAG, "transcribed via $source in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
+                val footer = "$source · ${"%.1f".format(elapsed / 1_000.0)}s"
+                copy(transcript.text)
+                state = if (editorMode) {
+                    if (EditorBridge.commit(transcript.text)) {
+                        archive(transcript.text, kind = "insert", source = source)
+                        CaptureState.Complete("Inserted · copied", transcript.text, footer)
+                    } else {
+                        archive(transcript.text, kind = "copy", source = source)
+                        CaptureState.Complete("Copied for pasting", transcript.text, footer)
+                    }
+                } else {
+                    AgentRunService.start(this@CaptureActivity, transcript.text, source)
+                    val hint = if (AgentRunService.canNotify(this@CaptureActivity)) "" else " · enable notifications to see the answer"
+                    CaptureState.Complete("Sent to your agent", transcript.text, footer + hint)
+                }
+                settings.latestResult = transcript.text
+                delay(if (editorMode) 1_100 else 1_800)
+                finish()
             }.onFailure { error ->
+                Log.w(TAG, "transcription failed after ${SystemClock.elapsedRealtime() - startedAt}ms: ${error.message}")
                 state = CaptureState.Error(error.message ?: "Talkt could not finish")
             }
         }
@@ -229,6 +240,7 @@ class CaptureActivity : ComponentActivity() {
     }
 
     companion object {
+        private const val TAG = "Talkt"
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_AUTOSTART = "auto_start"
         private var current: java.lang.ref.WeakReference<CaptureActivity>? = null
@@ -247,8 +259,8 @@ private sealed interface CaptureState {
     data class Complete(
         val title: String,
         val detail: String,
-        val isAgent: Boolean,
-        val source: String,
+        /** Engine and wall-clock transcription time, e.g. "Gemini · 2.4s". */
+        val footer: String,
     ) : CaptureState
     data class Error(val message: String) : CaptureState
 }
@@ -327,11 +339,19 @@ private fun CompleteContent(state: CaptureState.Complete) {
     Spacer(Modifier.height(12.dp))
     Text(
         state.detail,
-        color = if (state.isAgent) Cloud else Muted,
+        color = Cloud,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         textAlign = TextAlign.Center,
-        maxLines = if (state.isAgent) 8 else 4,
+        maxLines = 4,
+    )
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "${state.title} · ${state.footer}",
+        color = Muted,
+        fontSize = 12.sp,
+        textAlign = TextAlign.Center,
+        maxLines = 2,
     )
 }
 

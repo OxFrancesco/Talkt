@@ -1,4 +1,20 @@
 
+## Build, test, debug (Android app)
+
+Gradle needs a JDK 17-21; the Homebrew default (`java` 26) fails with a bare `26.0.1` error.
+Use the Android Studio JBR:
+
+```
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+./gradlew :app:testDebugUnitTest -q      # JVM unit tests (~5s warm)
+./gradlew :app:assembleDebug -q && adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+Every app log line uses the tag `Talkt`: `adb logcat -s Talkt:*` shows why a recording stopped
+(reason, duration, noise floor, silenced flag), transcription engine and time, and agent run time.
+Launch a capture without touching the phone: `adb shell am start -n org.buddytools.talkt/.capture.CaptureActivity`.
+Screenshots on the Fold need the physical display id: `adb shell screencap -d 4630947123231501204 -p /sdcard/x.png`.
+
 ## On-device ASR models (not in git)
 
 `app/src/main/assets/models/whisper-tiny/` is gitignored (the ONNX files are ~100 MB).

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.util.Log
 import com.k2fsa.sherpa.onnx.FeatureConfig
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizer
@@ -41,11 +43,13 @@ class SherpaRecognitionService : Service() {
                     }
                     val samples = readSamples(wav)
                     val engine = ensureRecognizer(languageHint)
+                    val decodeStartedAt = SystemClock.elapsedRealtime()
                     val stream = engine.createStream()
                     try {
                         stream.acceptWaveform(samples, SAMPLE_RATE)
                         engine.decode(stream)
                         val result = engine.getResult(stream)
+                        Log.i(TAG, "local decode: audio=${durationMillis}ms took ${SystemClock.elapsedRealtime() - decodeStartedAt}ms, ${result.text.length} chars")
                         if (result.text.isBlank()) {
                             callback.onNoSpeech()
                         } else {
@@ -56,8 +60,10 @@ class SherpaRecognitionService : Service() {
                     }
                 } catch (_: OutOfMemoryError) {
                     releaseRecognizer()
+                    Log.w(TAG, "local decode out of memory")
                     callback.onFailure(LocalAsrProtocol.OUT_OF_MEMORY, "out_of_memory")
                 } catch (error: Throwable) {
+                    Log.w(TAG, "local decode failed: ${error.javaClass.simpleName}: ${error.message}")
                     callback.onFailure(
                         LocalAsrProtocol.INFERENCE_FAILED,
                         error.javaClass.simpleName.take(80),
@@ -81,9 +87,11 @@ class SherpaRecognitionService : Service() {
         val existing = recognizer
         if (existing != null && recognizerLanguage == normalizedLanguage) return existing
         releaseRecognizer()
+        val startedAt = SystemClock.elapsedRealtime()
         return createRecognizer(normalizedLanguage).also {
             recognizer = it
             recognizerLanguage = normalizedLanguage
+            Log.i(TAG, "whisper model loaded in ${SystemClock.elapsedRealtime() - startedAt}ms (lang='$normalizedLanguage')")
         }
     }
 
@@ -147,6 +155,7 @@ class SherpaRecognitionService : Service() {
     }
 
     private companion object {
+        const val TAG = "Talkt"
         const val SAMPLE_RATE = 16_000
         const val WAV_HEADER_BYTES = 44
         const val MAX_LOCAL_DURATION_MILLIS = 60_000L

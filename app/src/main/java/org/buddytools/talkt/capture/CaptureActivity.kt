@@ -13,11 +13,6 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,9 +65,11 @@ import org.buddytools.talkt.transcription.TranscriptionGraph
 import org.buddytools.talkt.ui.Cloud
 import org.buddytools.talkt.ui.Ink
 import org.buddytools.talkt.ui.Mint
-import org.buddytools.talkt.ui.Muted
 import org.buddytools.talkt.ui.SurfaceRaised
 import org.buddytools.talkt.ui.TalktTheme
+import org.buddytools.thinkingorbs.ThinkingOrb
+import org.buddytools.thinkingorbs.ThinkingOrbColors
+import org.buddytools.thinkingorbs.ThinkingOrbParameters
 
 class CaptureActivity : ComponentActivity() {
     private val recorder = WavRecorder()
@@ -176,14 +173,7 @@ class CaptureActivity : ComponentActivity() {
                 state = CaptureState.Error(it.message ?: "Could not prepare the recording")
                 return
             }
-        state = CaptureState.Processing(
-            label = "Transcribing",
-            engine = when (settings.transcriptionMode) {
-                TranscriptionMode.LocalFirst -> "On-device first · Gemini fallback"
-                TranscriptionMode.OnDeviceOnly -> "On-device only"
-                TranscriptionMode.GeminiOnly -> "Gemini"
-            },
-        )
+        state = CaptureState.Processing(label = "Transcribing")
         lifecycleScope.launch {
             val startedAt = SystemClock.elapsedRealtime()
             runCatching {
@@ -196,23 +186,21 @@ class CaptureActivity : ComponentActivity() {
                 val elapsed = SystemClock.elapsedRealtime() - startedAt
                 val source = when (transcript.source) {
                     TranscriptSource.OnDevice -> "On device"
-                    TranscriptSource.Gemini -> "Gemini"
+                    TranscriptSource.Gemini -> "Cloud"
                 }
                 Log.i(TAG, "transcribed via $source in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
-                val footer = "$source · ${"%.1f".format(elapsed / 1_000.0)}s"
                 copy(transcript.text)
                 state = if (editorMode) {
                     if (EditorBridge.commit(transcript.text)) {
                         archive(transcript.text, kind = "insert", source = source)
-                        CaptureState.Complete("Inserted · copied", transcript.text, footer)
+                        CaptureState.Complete(transcript.text)
                     } else {
                         archive(transcript.text, kind = "copy", source = source)
-                        CaptureState.Complete("Copied for pasting", transcript.text, footer)
+                        CaptureState.Complete(transcript.text)
                     }
                 } else {
                     AgentRunService.start(this@CaptureActivity, transcript.text, source)
-                    val hint = if (AgentRunService.canNotify(this@CaptureActivity)) "" else " · enable notifications to see the answer"
-                    CaptureState.Complete("Sent to your agent", transcript.text, footer + hint)
+                    CaptureState.Complete(transcript.text)
                 }
                 settings.latestResult = transcript.text
                 delay(if (editorMode) 1_100 else 1_800)
@@ -255,13 +243,8 @@ class CaptureActivity : ComponentActivity() {
 private sealed interface CaptureState {
     data object Preparing : CaptureState
     data object Listening : CaptureState
-    data class Processing(val label: String, val engine: String) : CaptureState
-    data class Complete(
-        val title: String,
-        val detail: String,
-        /** Engine and wall-clock transcription time, e.g. "Gemini · 2.4s". */
-        val footer: String,
-    ) : CaptureState
+    data class Processing(val label: String) : CaptureState
+    data class Complete(val detail: String) : CaptureState
     data class Error(val message: String) : CaptureState
 }
 
@@ -289,9 +272,9 @@ private fun CaptureScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 when (state) {
-                    CaptureState.Preparing -> CircularProgressIndicator(color = Mint, strokeWidth = 3.dp)
+                    CaptureState.Preparing -> ThinkingContent(label = "Getting ready")
                     CaptureState.Listening -> ListeningContent(onStop)
-                    is CaptureState.Processing -> CircularProgressIndicator(color = Mint, strokeWidth = 3.dp)
+                    is CaptureState.Processing -> ThinkingContent(label = state.label)
                     is CaptureState.Complete -> CompleteContent(state)
                     is CaptureState.Error -> ErrorContent(state.message, onClose)
                 }
@@ -301,33 +284,68 @@ private fun CaptureScreen(
 }
 
 @Composable
+private fun ThinkingContent(label: String) {
+    val colors = MaterialTheme.colorScheme
+    ThinkingOrb(
+        size = 62.dp,
+        parameters = ThinkingOrbParameters(
+            speed = 0.72f,
+            dots = 0.78f,
+            spread = 0.92f,
+            perspective = 0.9f,
+        ),
+        colors = ThinkingOrbColors(
+            accent = colors.primary,
+            dots = colors.onSurface,
+            pill = colors.surfaceContainerHigh,
+            label = colors.onSurface,
+        ),
+        contentDescription = label,
+    )
+    Spacer(Modifier.height(10.dp))
+    Text(
+        "$label…",
+        color = colors.onSurface,
+        fontSize = 14.sp,
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
 private fun ListeningContent(onStop: () -> Unit) {
-    val transition = rememberInfiniteTransition(label = "voice")
-    Row(
+    val colors = MaterialTheme.colorScheme
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp)
-            .clickable(onClick = onStop),
-        horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
+            .clickable(
+                onClickLabel = "Stop recording",
+                role = Role.Button,
+                onClick = onStop,
+            )
+            .padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        repeat(9) { index ->
-            val height by transition.animateFloat(
-                initialValue = 12f + (index % 3) * 5,
-                targetValue = 34f + ((index * 7) % 4) * 6,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(430 + index * 35),
-                    repeatMode = RepeatMode.Reverse,
-                ),
-                label = "bar$index",
-            )
-            Box(
-                Modifier
-                    .size(width = 5.dp, height = height.dp)
-                    .clip(CircleShape)
-                    .background(Mint),
-            )
-        }
+        ThinkingOrb(
+            size = 68.dp,
+            parameters = ThinkingOrbParameters(
+                speed = 1.8f,
+                spin = 1f,
+                dots = 0.86f,
+                spread = 0.96f,
+                perspective = 0.92f,
+            ),
+            colors = ThinkingOrbColors(
+                accent = colors.primary,
+                dots = colors.onSurface,
+                pill = colors.surfaceContainerHigh,
+                label = colors.onSurface,
+            ),
+            contentDescription = "Listening",
+        )
+        Spacer(Modifier.height(6.dp))
+        Text("Listening…", color = colors.onSurface, fontSize = 14.sp)
+        Spacer(Modifier.height(2.dp))
+        Text("Tap to stop", color = colors.onSurfaceVariant, fontSize = 12.sp)
     }
 }
 
@@ -344,14 +362,6 @@ private fun CompleteContent(state: CaptureState.Complete) {
         lineHeight = 20.sp,
         textAlign = TextAlign.Center,
         maxLines = 4,
-    )
-    Spacer(Modifier.height(8.dp))
-    Text(
-        "${state.title} · ${state.footer}",
-        color = Muted,
-        fontSize = 12.sp,
-        textAlign = TextAlign.Center,
-        maxLines = 2,
     )
 }
 

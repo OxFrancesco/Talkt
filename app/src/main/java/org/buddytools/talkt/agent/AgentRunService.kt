@@ -66,7 +66,7 @@ class AgentRunService : Service() {
                     notify(
                         RESULT_ID_BASE + runId,
                         answerNotification(
-                            title = if (reply.fallback) "Claude answered" else "GPT answered",
+                            title = "Talkt Answer!",
                             body = reply.text,
                             elapsedMillis = elapsed,
                         ),

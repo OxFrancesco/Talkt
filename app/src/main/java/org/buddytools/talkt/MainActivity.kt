@@ -23,13 +23,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -37,12 +34,10 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,16 +47,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.launch
 import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.cabinet.CabinetActivity
-import org.buddytools.talkt.data.AgentStatus
-import org.buddytools.talkt.data.TalktApi
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptionMode
 import org.buddytools.talkt.trigger.TalktAccessibilityService
 import org.buddytools.talkt.ui.Cloud
-import org.buddytools.talkt.ui.Hairline
 import org.buddytools.talkt.ui.Ink
 import org.buddytools.talkt.ui.Mint
 import org.buddytools.talkt.ui.Muted
@@ -112,11 +103,17 @@ class MainActivity : ComponentActivity() {
         val accessibilityEnabled = manager
             .getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
             .any { it.resolveInfo.serviceInfo.packageName == packageName && it.resolveInfo.serviceInfo.name == TalktAccessibilityService::class.java.name }
-        val roleManager = getSystemService(RoleManager::class.java)
+        val assistantEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            roleManager.isRoleAvailable(RoleManager.ROLE_ASSISTANT) &&
+                roleManager.isRoleHeld(RoleManager.ROLE_ASSISTANT)
+        } else {
+            false
+        }
         localState = LocalState(
             microphone = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED,
             accessibility = accessibilityEnabled,
-            assistant = roleManager.isRoleAvailable(RoleManager.ROLE_ASSISTANT) && roleManager.isRoleHeld(RoleManager.ROLE_ASSISTANT),
+            assistant = assistantEnabled,
         )
     }
 
@@ -127,12 +124,14 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        val roleManager = getSystemService(RoleManager::class.java)
-        if (roleManager.isRoleAvailable(RoleManager.ROLE_ASSISTANT) &&
-            !roleManager.isRoleHeld(RoleManager.ROLE_ASSISTANT)
-        ) {
-            assistantRole.launch(roleManager.createRequestRoleIntent(RoleManager.ROLE_ASSISTANT))
-            return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_ASSISTANT) &&
+                !roleManager.isRoleHeld(RoleManager.ROLE_ASSISTANT)
+            ) {
+                assistantRole.launch(roleManager.createRequestRoleIntent(RoleManager.ROLE_ASSISTANT))
+                return
+            }
         }
 
         val defaultAppsIntent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
@@ -164,32 +163,11 @@ private fun TalktHome(
     onRequestAssistant: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var agentStatus by remember { mutableStateOf<AgentStatus?>(null) }
-    var cloudError by remember { mutableStateOf<String?>(null) }
-    var checkingCloud by remember { mutableStateOf(false) }
     var silenceTimeoutSeconds by remember { mutableIntStateOf(settings.silenceTimeoutSeconds) }
     var volumeTriggerEnabled by remember { mutableStateOf(settings.volumeTriggerEnabled) }
     var powerTriggerEnabled by remember { mutableStateOf(settings.powerTriggerEnabled) }
     var transcriptionMode by remember { mutableStateOf(settings.transcriptionMode) }
     var languageCodes by remember { mutableStateOf(settings.languageCodes) }
-
-    fun refreshCloud() {
-        checkingCloud = true
-        scope.launch {
-            runCatching { TalktApi(settings).status() }
-                .onSuccess {
-                    agentStatus = it
-                    cloudError = null
-                }
-                .onFailure { cloudError = it.message }
-            checkingCloud = false
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (settings.appToken.isNotBlank()) refreshCloud()
-    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(Ink).statusBarsPadding(),
@@ -277,7 +255,7 @@ private fun TalktHome(
                                 when (mode) {
                                     TranscriptionMode.LocalFirst -> "Local first"
                                     TranscriptionMode.OnDeviceOnly -> "Device only"
-                                    TranscriptionMode.GeminiOnly -> "Gemini"
+                                    TranscriptionMode.GeminiOnly -> "Cloud"
                                 },
                                 fontSize = 12.sp,
                             )
@@ -344,28 +322,9 @@ private fun TalktHome(
             }
         }
 
-        item { GroupHeader("Cloud") }
-        item {
-            GroupRow(shape = GroupShape.Top, onClick = ::refreshCloud) {
-                Column(Modifier.weight(1f)) {
-                    Text("Agent", color = Cloud, fontSize = 16.sp)
-                    Text(
-                        when {
-                            agentStatus?.connected == true -> "OpenRouter · ${agentStatus?.label ?: "connected"}"
-                            cloudError != null -> cloudError.orEmpty()
-                            checkingCloud -> "Checking…"
-                            else -> "Not connected"
-                        },
-                        color = if (cloudError == null) Muted else MaterialTheme.colorScheme.error,
-                        fontSize = 12.sp,
-                    )
-                }
-                StatusDot(agentStatus?.hostHealthy == true)
-            }
-        }
         item {
             GroupRow(
-                shape = GroupShape.Bottom,
+                shape = GroupShape.Single,
                 onClick = { context.startActivity(Intent(context, CabinetActivity::class.java)) },
             ) {
                 Column(Modifier.weight(1f)) {
@@ -462,11 +421,4 @@ private fun updatedLanguages(current: Set<String>, toggled: String): Set<String>
     toggled.isEmpty() -> emptySet()
     toggled in current -> current - toggled
     else -> current + toggled
-}
-
-@Composable
-private fun StatusDot(ready: Boolean) {
-    Box(
-        Modifier.size(10.dp).clip(CircleShape).background(if (ready) Mint else Hairline),
-    )
 }

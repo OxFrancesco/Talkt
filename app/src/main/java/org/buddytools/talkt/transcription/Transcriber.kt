@@ -42,13 +42,13 @@ internal fun interface RemoteDecoder {
 class NoSpeechException : Exception("I didn't hear anything")
 
 class OnDeviceTranscriptionException(reason: String) :
-    Exception("On-device transcription could not finish ($reason). Select On-device first or Gemini in Talkt settings.")
+    Exception("On-device transcription could not finish ($reason). Select On-device first or Cloud in Talkt settings.")
 
 class TranscriptionUnavailableException(
     localFailure: String,
     remoteCause: Throwable,
 ) : Exception(
-    "On-device transcription failed ($localFailure), and Gemini could not finish: " +
+    "On-device transcription failed ($localFailure), and Cloud could not finish: " +
         (remoteCause.message ?: "unknown error"),
     remoteCause,
 )

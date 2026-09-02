@@ -92,7 +92,7 @@ class TalktApi(private val settings: TalktSettings) {
         return if ("provider.auth" in normalized) {
             "OpenRouter rejected the request. Check the API key connected to your Talkt agent."
         } else {
-            message
+            message.replace(Regex("Gemini", RegexOption.IGNORE_CASE), "Cloud")
         }
     }
 }

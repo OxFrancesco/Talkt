@@ -36,5 +36,6 @@ folder to gather information, feedback, patterns, and templates before writing c
 - `resources/cloudflare-sandbox-sdk` — Official Cloudflare Sandbox SDK source, current API types, lifecycle, tunnels, and examples for iChef runtime proof
 - `resources/aosp-latinime` — AOSP LatinIME reference for pointer tracking, key detection, layout state, editor integration, and compatibility
 - `resources/sherpa-onnx` — Official Sherpa-ONNX source — Android offline ASR JNI/AAR integration, models, and streaming/offline examples
+- `resources/thinking-orbs-kotlin` — Native Jetpack Compose Thinking Orbs band animation reference
 
 <!-- codeview:end -->

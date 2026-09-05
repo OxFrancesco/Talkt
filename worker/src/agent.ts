@@ -16,8 +16,8 @@ export class TalktAgent extends DurableObject<Env> {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env)
     const createOpenCode = async () => {
-      const { OpenCodeWorkerd } = await import("@opencode-ai/sdk/workerd")
-      return OpenCodeWorkerd.create({
+      const { create } = await import("@opencode-ai/sdk/workerd")
+      return create({
         storage: ctx.storage,
         config: {
           default_agent: "build",
@@ -28,7 +28,7 @@ export class TalktAgent extends DurableObject<Env> {
         },
       })
     }
-    this.opencode = new RestartableResource(createOpenCode, ctx.blockConcurrencyWhile(createOpenCode))
+    this.opencode = new RestartableResource(createOpenCode, createOpenCode())
   }
 
   async health(): Promise<{ readonly healthy: boolean; readonly version?: string }> {
@@ -40,11 +40,11 @@ export class TalktAgent extends DurableObject<Env> {
   async connectionStatus(): Promise<{ readonly connected: boolean; readonly label?: string }> {
     const client = await this.opencode.current()
     const result = await client.integration.get({ integrationID: "openrouter" })
-    const connection = result.data?.connections[0]
+    const connection = result.data?.connections.find(connection => connection.type === "credential")
     if (!connection) return { connected: false }
     return {
       connected: true,
-      label: connection.type === "credential" ? connection.label : `env ${connection.name}`,
+      label: connection.label,
     }
   }
 
@@ -55,6 +55,9 @@ export class TalktAgent extends DurableObject<Env> {
   }
 
   async prompt(text: string): Promise<AgentReply> {
+    if (!(await this.connectionStatus()).connected) {
+      throw new Error("Connect your OpenRouter API key in Talkt before asking your agent")
+    }
     try {
       return await this.runAttempt(text, this.env.PRIMARY_MODEL, "primary")
     } catch (error) {

@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { TalktAgent } from "./agent"
-import { MAX_AUDIO_BYTES, MAX_PROMPT_BYTES, parseLanguageCodes, secureEqual } from "./domain"
+import { MAX_AUDIO_BYTES, MAX_PROMPT_BYTES, parseLanguageCodes } from "./domain"
+import { authenticate } from "./auth"
 import { transcribeWav } from "./gemini"
 
 export { TalktAgent }
@@ -19,8 +20,9 @@ export default {
         return json({ ok: true, service: "talkt-api", environment: env.ENVIRONMENT, requestID })
       }
 
-      if (!(await authorized(request, env))) return json({ error: "Unauthorized", requestID }, 401)
-      const agent = env.TALKT_AGENT.getByName("owner")
+      const identity = await authenticate(request, env)
+      if (!identity) return json({ error: "Sign in to Talkt to continue", requestID }, 401)
+      const agent = env.TALKT_AGENT.getByName(`clerk:${identity}`)
 
       if (request.method === "POST" && url.pathname === "/v1/agent/openrouter/key") {
         if (!bounded(request, MAX_PROMPT_BYTES)) return json({ error: "Body is too large", requestID }, 413)
@@ -66,12 +68,6 @@ export default {
     }
   },
 } satisfies ExportedHandler<Env>
-
-async function authorized(request: Request, env: Env): Promise<boolean> {
-  const header = request.headers.get("authorization")
-  if (!header?.startsWith("Bearer ")) return false
-  return secureEqual(header.slice(7), env.TALKT_APP_TOKEN)
-}
 
 function bounded(request: Request, limit: number): boolean {
   const raw = request.headers.get("content-length")

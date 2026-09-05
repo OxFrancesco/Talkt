@@ -14,8 +14,9 @@ data class TranscriptEntry(
 )
 
 /** Append-only local archive of every transcript, stored as JSON lines in app-private storage. */
-class TranscriptStore(context: Context) {
-    private val file = File(context.filesDir, FILE_NAME)
+class TranscriptStore(context: Context, userId: String? = org.buddytools.talkt.auth.TalktAuth.userId) {
+    private val suffix = accountStorageSuffix(userId)
+    private val file = File(context.filesDir, if (suffix.isEmpty()) FILE_NAME else "transcripts-$suffix.jsonl")
 
     fun append(text: String, kind: String, source: String, reply: String? = null) {
         if (text.isBlank()) return

@@ -17,17 +17,18 @@ enum class TranscriptionMode(val storedValue: String) {
 class TalktSettings(context: Context) {
     private val preferences = context.getSharedPreferences("talkt", Context.MODE_PRIVATE)
 
+    init { preferences.edit().remove("app_token").apply() }
+
     var apiUrl: String
         get() = preferences.getString(API_URL, BuildConfig.DEFAULT_API_URL) ?: BuildConfig.DEFAULT_API_URL
         set(value) = preferences.edit().putString(API_URL, value.trim().trimEnd('/')).apply()
 
-    var appToken: String
-        get() = preferences.getString(APP_TOKEN, null)?.takeIf(String::isNotBlank) ?: BuildConfig.DEFAULT_APP_TOKEN
-        set(value) = preferences.edit().putString(APP_TOKEN, value.trim()).apply()
-
     var latestResult: String
-        get() = preferences.getString(LATEST_RESULT, "") ?: ""
-        set(value) = preferences.edit().putString(LATEST_RESULT, value).apply()
+        get() = preferences.getString(resultKey, "") ?: ""
+        set(value) = preferences.edit().putString(resultKey, value).apply()
+
+    private val resultKey: String
+        get() = LATEST_RESULT + accountStorageSuffix(org.buddytools.talkt.auth.TalktAuth.userId)
 
     var silenceTimeoutSeconds: Int
         get() = preferences.getInt(SILENCE_TIMEOUT_SECONDS, DEFAULT_SILENCE_TIMEOUT_SECONDS)
@@ -66,7 +67,6 @@ class TalktSettings(context: Context) {
         const val MAX_SILENCE_TIMEOUT_SECONDS = 10
 
         const val API_URL = "api_url"
-        const val APP_TOKEN = "app_token"
         const val LATEST_RESULT = "latest_result"
         const val SILENCE_TIMEOUT_SECONDS = "silence_timeout_seconds"
         const val VOLUME_TRIGGER_ENABLED = "volume_trigger_enabled"

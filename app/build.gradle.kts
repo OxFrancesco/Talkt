@@ -4,18 +4,11 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val talktAppToken = System.getenv("TALKT_APP_TOKEN").orEmpty().ifBlank {
-    val devVars = rootProject.file("worker/.dev.vars")
-    if (devVars.exists()) {
-        devVars.readLines()
-            .firstOrNull { it.startsWith("TALKT_APP_TOKEN=") }
-            ?.substringAfter("=")
-            ?.trim()
-            ?.removeSurrounding("\"")
-            .orEmpty()
-    } else {
-        ""
-    }
+val clerkPublishableKey = providers.environmentVariable("CLERK_PUBLISHABLE_KEY")
+    .orElse(providers.gradleProperty("CLERK_PUBLISHABLE_KEY"))
+    .getOrElse("pk_test_dW5pcXVlLWFhcmR2YXJrLTk4MDQuY2xlcmsuYWNjb3VudHMuZGV2JA")
+require(clerkPublishableKey.isEmpty() || clerkPublishableKey.matches(Regex("pk_(test|live)_[A-Za-z0-9]+"))) {
+    "Invalid Clerk publishable key"
 }
 
 android {
@@ -35,7 +28,7 @@ android {
         }
 
         buildConfigField("String", "DEFAULT_API_URL", "\"https://talkt-api.oddofrancesco000.workers.dev\"")
-        buildConfigField("String", "DEFAULT_APP_TOKEN", "\"$talktAppToken\"")
+        buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"$clerkPublishableKey\"")
     }
 
     buildTypes {
@@ -49,7 +42,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     buildFeatures {
         aidl = true
         compose = true
@@ -58,9 +50,13 @@ android {
     androidResources {
         noCompress += "onnx"
     }
+    packaging.resources.excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
 }
 
 dependencies {
+    implementation("com.clerk:clerk-android-api:1.1.5")
+    implementation("com.clerk:clerk-android-ui:1.1.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
     implementation(files("libs/sherpa-onnx-1.13.6.aar"))
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
@@ -75,4 +71,8 @@ dependencies {
     testImplementation(kotlin("test"))
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
+}
+
+kotlin {
+    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
 }

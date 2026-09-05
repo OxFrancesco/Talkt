@@ -82,7 +82,11 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             TalktTheme {
-                TalktHome(
+                var signingIn by remember { mutableStateOf(false) }
+                if (signingIn) {
+                    org.buddytools.talkt.auth.TalktSignIn { signingIn = false }
+                } else TalktHome(
+                    onSignIn = { signingIn = true },
                     settings = settings,
                     localState = localState,
                     onRequestMicrophone = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
@@ -158,6 +162,7 @@ private data class LocalState(
 private fun TalktHome(
     settings: TalktSettings,
     localState: LocalState,
+    onSignIn: () -> Unit,
     onRequestMicrophone: () -> Unit,
     onOpenAccessibility: () -> Unit,
     onRequestAssistant: () -> Unit,
@@ -183,6 +188,8 @@ private fun TalktHome(
                 modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 20.dp),
             )
         }
+
+        item { org.buddytools.talkt.auth.AccountSection(settings, onSignIn) }
 
         if (!localState.microphone) {
             item {

@@ -1,3 +1,2 @@
-TALKT_APP_TOKEN=replace-with-a-long-random-value
+CLERK_JWT_KEY="-----BEGIN PUBLIC KEY-----\nreplace-with-your-clerk-public-key\n-----END PUBLIC KEY-----"
 GEMINI_API_KEY=replace-with-a-gemini-api-key
-OPENROUTER_API_KEY=replace-with-an-openrouter-api-key

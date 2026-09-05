@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talkt accounts · FRA-518</title>
+<style>
+:root{color-scheme:dark;--ink:#111713;--paper:#eef2e9;--muted:#a9b5a7;--mint:#b8ed9a}*{box-sizing:border-box}body{margin:0;background:var(--ink);color:var(--paper);font:18px/1.6 Georgia,serif}main{max-width:860px;margin:0 auto;padding:72px 28px 96px}.meta,dt,th,footer{font:12px/1.6 ui-monospace,monospace;letter-spacing:.06em}.meta{color:var(--mint)}h1{font-size:clamp(48px,9vw,88px);font-weight:400;line-height:1.03;letter-spacing:-.045em;max-width:650px;margin:22px 0 30px}h2{font-size:28px;font-weight:400;margin-top:42px}p{max-width:690px}a{color:var(--mint);text-underline-offset:4px}.lead{font-size:24px;line-height:1.45}.note{border-left:2px solid var(--mint);padding-left:20px;color:var(--muted);margin:32px 0}table{border-collapse:collapse;width:100%;margin:24px 0;font-size:16px}th{text-align:left;color:var(--muted)}td,th{border-bottom:1px solid #344134;padding:13px 10px 13px 0}td:last-child{color:var(--mint)}code{font:13px ui-monospace,monospace;overflow-wrap:anywhere}footer{margin-top:60px;border-top:1px solid #344134;padding-top:20px;color:var(--muted)}@media(max-width:540px){main{padding:40px 22px}.lead{font-size:21px}td{vertical-align:top}h1{margin-bottom:24px}}
+</style>
+<main>
+<div class="meta">TALKT / FRA-518 / 5 SEPTEMBER 2026</div>
+<h1>One account.<br>Your own agent.</h1>
+<p class="lead">Clerk sign-in now selects a private Cloudflare Durable Object for each Talkt user. Provider keys, conversations and agent storage stay with that account.</p>
+<p>Android refreshes its Clerk session token for each cloud request. The API verifies the token before selecting the user's agent. The old shared app token no longer grants access.</p>
+<div class="note">The Clerk application is named Talkt and currently uses a development instance. Production Clerk keys and domain setup remain a release step.</div>
+<h2>What changed</h2>
+<p>The app has sign-in, sign-up, sign-out and OpenRouter connection controls. Device transcription works without an account. Local transcript archives are separated by account, and sign-out stops background agent work and clears Talkt notifications.</p>
+<p>The existing shared agent was preserved. Users connect their own OpenRouter key after signing in. No old credentials or conversations are assigned automatically.</p>
+<h2>Verification</h2>
+<table>
+<thead><tr><th>Check</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Worker type check and security tests</td><td>Passed, 27 tests</td></tr>
+<tr><td>Android build and JVM tests</td><td>Passed, 20 tests</td></tr>
+<tr><td>Two real Clerk users on the Fold, validation Worker</td><td>Passed</td></tr>
+<tr><td>Main API rejects requests without a session</td><td>Verified, HTTP 401</td></tr>
+<tr><td>Two real Clerk users on the Fold, main API</td><td id="production-result">Passed</td></tr>
+<tr><td>Google callback regression tests</td><td>Passed, 6 tests</td></tr>
+<tr><td>Returning Google account, clean installed build</td><td>Passed twice</td></tr>
+<tr><td>Sign-in screen on the unlocked Fold</td><td>Verified, screenshot and video</td></tr>
+</tbody>
+</table>
+<p>The device test connects a synthetic OpenRouter key for Alice and verifies that Bob has no provider connection or access to Alice's local archive. It also checks that cloud access stops after sign-out. No paid model inference runs.</p>
+<h2>Google sign-in follow-up</h2>
+<p>A real Google login exposed a gap in the original verification. The browser returned to sign-in without an error. Clerk's server had approved an account transfer, but the callback omitted the fields its Android SDK expected.</p>
+<p>The app now checks the server's OAuth verification before restoring the missing transfer fields. Six callback regression tests pass. The clean build completed two returning-account Google logins on the Fold and loaded the signed-in account's provider status. The first account creation also passed during diagnosis.</p>
+<p>The original email-account isolation tests did not cover browser Google sign-in. Both first-time and returning Google login are now part of the verification instructions.</p>
+<h2>On the Fold</h2>
+<p>The installed app displays the Talkt account screen and Clerk email and Google sign-in. This visual check covers opening and closing the sign-in screen. The two-account test above covers the authenticated API flow.</p>
+<p><a href="sign-in.png">View the sign-in screenshot</a> · <a href="sign-in-demo.mp4">Watch the device recording</a></p>
+<h2>Deployment</h2>
+<p><a href="https://talkt-api.oddofrancesco000.workers.dev/health">Talkt API</a> runs on Francesco's personal Cloudflare account. It uses one Worker deployment with a separate Durable Object for each Clerk account.</p>
+<p>Verified Worker version <code>747f93f2-6327-4ecc-bcc5-d17d061a27f4</code>.<br>Implementation branch <code>t3code/add-clerk-auth</code>.</p>
+<p><a href="implementation.md">Read the implementation and test instructions</a> · <a href="https://linear.app/francesco-oddo/issue/FRA-518">Open FRA-518</a></p>
+<footer>Built and checked by Codex. Visual checks and live device API tests passed.</footer>
+</main>
+</html>

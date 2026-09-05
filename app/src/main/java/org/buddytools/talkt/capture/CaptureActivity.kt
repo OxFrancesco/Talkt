@@ -93,6 +93,8 @@ class CaptureActivity : ComponentActivity() {
         transcriber = TranscriptionGraph.create(this, settings)
         if (settings.transcriptionMode != TranscriptionMode.GeminiOnly) {
             LocalAsrWarmer.prewarm(this, settings.languageCodes.singleOrNull().orEmpty())
+        } else {
+            LocalAsrWarmer.release()
         }
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
         // Never take window focus: the overlay only needs touches, and a focusable

@@ -1,0 +1,122 @@
+[
+  {
+    "model": "tiny",
+    "byLanguage": [
+      {
+        "language": "en",
+        "clips": 20,
+        "referenceWords": 440,
+        "errors": 67,
+        "wer": 0.15227272727272728
+      },
+      {
+        "language": "it",
+        "clips": 20,
+        "referenceWords": 486,
+        "errors": 168,
+        "wer": 0.345679012345679
+      }
+    ],
+    "loadMs": 522.725,
+    "firstDecodeMs": 473.959,
+    "warmMedianMs": 740.214,
+    "warmP95Ms": 1542.525,
+    "warmRtf": 0.07523355014033056,
+    "peakRssMiB": 481.875,
+    "silence": [
+      "子,子,子,子,子,子,子,",
+      "子,子,子,子,子,子,子,"
+    ],
+    "changedPredictions": 0
+  },
+  {
+    "model": "base",
+    "byLanguage": [
+      {
+        "language": "en",
+        "clips": 20,
+        "referenceWords": 440,
+        "errors": 48,
+        "wer": 0.10909090909090909
+      },
+      {
+        "language": "it",
+        "clips": 20,
+        "referenceWords": 486,
+        "errors": 104,
+        "wer": 0.2139917695473251
+      }
+    ],
+    "loadMs": 1023.048,
+    "firstDecodeMs": 816.634,
+    "warmMedianMs": 952.643,
+    "warmP95Ms": 2723.935,
+    "warmRtf": 0.10930416091237138,
+    "peakRssMiB": 661.12109375,
+    "silence": [
+      "1.0",
+      "1.0"
+    ],
+    "changedPredictions": 0
+  },
+  {
+    "model": "small",
+    "byLanguage": [
+      {
+        "language": "en",
+        "clips": 20,
+        "referenceWords": 440,
+        "errors": 37,
+        "wer": 0.08409090909090909
+      },
+      {
+        "language": "it",
+        "clips": 20,
+        "referenceWords": 486,
+        "errors": 45,
+        "wer": 0.09259259259259259
+      }
+    ],
+    "loadMs": 2673.972,
+    "firstDecodeMs": 2429.584,
+    "warmMedianMs": 2913.893,
+    "warmP95Ms": 7590.081,
+    "warmRtf": 0.3128359357597897,
+    "peakRssMiB": 1168.19921875,
+    "silence": [
+      "",
+      ""
+    ],
+    "changedPredictions": 0
+  },
+  {
+    "model": "parakeet",
+    "byLanguage": [
+      {
+        "language": "en",
+        "clips": 20,
+        "referenceWords": 440,
+        "errors": 32,
+        "wer": 0.07272727272727272
+      },
+      {
+        "language": "it",
+        "clips": 20,
+        "referenceWords": 486,
+        "errors": 13,
+        "wer": 0.026748971193415638
+      }
+    ],
+    "loadMs": 2313.12,
+    "firstDecodeMs": 622.864,
+    "warmMedianMs": 598.487,
+    "warmP95Ms": 1144.654,
+    "warmRtf": 0.06100679600837528,
+    "peakRssMiB": 1518.2421875,
+    "silence": [
+      "",
+      ""
+    ],
+    "changedPredictions": 0
+  }
+]

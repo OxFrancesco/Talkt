@@ -8,6 +8,8 @@ import android.view.KeyEvent
 import org.buddytools.talkt.capture.CaptureActivity
 import org.buddytools.talkt.capture.CaptureBus
 import org.buddytools.talkt.data.TalktSettings
+import org.buddytools.talkt.wakeword.AssistantInvocation
+import org.buddytools.talkt.wakeword.WakeWordService
 
 class TalktVoiceSessionService : VoiceInteractionSessionService() {
     override fun onNewSession(args: Bundle?): VoiceInteractionSession = TalktVoiceSession(this)
@@ -26,17 +28,27 @@ private class TalktVoiceSession(
     override fun onShow(args: Bundle?, showFlags: Int) {
         super.onShow(args, showFlags)
         if (captureActive) return
-        if (!TalktSettings(context).powerTriggerEnabled) {
+        val invocation = AssistantInvocation.fromWireValue(args?.getString(AssistantInvocation.ARG_SOURCE))
+        if (invocation.requiresPowerTrigger && !TalktSettings(context).powerTriggerEnabled) {
             finish()
             return
         }
         captureActive = true
-        CaptureBus.bindPowerSession {
-            captureActive = false
-            finish()
+        if (invocation == AssistantInvocation.Power) {
+            CaptureBus.bindPowerSession {
+                captureActive = false
+                finish()
+            }
         }
         EditorBridge.captureTarget(preserveExisting = true)
-        val intent = CaptureActivity.intent(context, source = "power", autoStart = true).apply {
+        val microphoneHandoffMillis = WakeWordService.pauseForCapture()
+        val intent = CaptureActivity.intent(
+            context,
+            source = invocation.captureSource,
+            autoStart = true,
+            wakeDetectedAt = args?.getLong(AssistantInvocation.ARG_DETECTED_AT, 0L) ?: 0L,
+            microphoneHandoffMillis = microphoneHandoffMillis,
+        ).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
@@ -45,6 +57,10 @@ private class TalktVoiceSession(
             )
         }
         context.startActivity(intent)
+        if (invocation == AssistantInvocation.Hotword) {
+            captureActive = false
+            finish()
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean =

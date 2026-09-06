@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Talkt</string>
-    <string name="accessibility_description">Hold Volume Down to dictate into the focused field or send a voice command to your cloud agent.</string>
+    <string name="accessibility_description">Hold Volume Down to transcribe speech, then choose whether to use the transcription directly or send it to your agent.</string>
 </resources>

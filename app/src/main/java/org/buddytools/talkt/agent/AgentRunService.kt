@@ -48,6 +48,11 @@ class AgentRunService : Service() {
             if (inFlight.get() == 0) stopSelf(startId)
             return START_NOT_STICKY
         }
+        if (!TalktSettings(this).agentEnabled) {
+            Log.i(TAG, "agent run skipped because the agent is disabled")
+            stopSelf()
+            return START_NOT_STICKY
+        }
         ensureChannels()
         val runId = inFlight.incrementAndGet()
         promoteToForeground(progressNotification(text))
@@ -95,6 +100,7 @@ class AgentRunService : Service() {
 
     override fun onDestroy() {
         scope.cancel()
+        stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
 
@@ -165,6 +171,10 @@ class AgentRunService : Service() {
                 .putExtra(EXTRA_TEXT, text)
                 .putExtra(EXTRA_SOURCE, source)
             ContextCompat.startForegroundService(context, intent)
+        }
+
+        fun stop(context: Context) {
+            context.stopService(Intent(context, AgentRunService::class.java))
         }
 
         fun canNotify(context: Context): Boolean =

@@ -44,6 +44,14 @@ class TalktSettings(context: Context) {
         get() = preferences.getBoolean(POWER_TRIGGER_ENABLED, true)
         set(value) = preferences.edit().putBoolean(POWER_TRIGGER_ENABLED, value).apply()
 
+    var wakeWordEnabled: Boolean
+        get() = preferences.getBoolean(WAKE_WORD_ENABLED, false)
+        set(value) = preferences.edit().putBoolean(WAKE_WORD_ENABLED, value).apply()
+
+    var agentEnabled: Boolean
+        get() = preferences.getBoolean(AGENT_ENABLED, true)
+        set(value) = preferences.edit().putBoolean(AGENT_ENABLED, value).apply()
+
     var transcriptionMode: TranscriptionMode
         get() = TranscriptionMode.fromStored(preferences.getString(TRANSCRIPTION_MODE, null))
         set(value) = preferences.edit().putString(TRANSCRIPTION_MODE, value.storedValue).apply()
@@ -71,6 +79,8 @@ class TalktSettings(context: Context) {
         const val SILENCE_TIMEOUT_SECONDS = "silence_timeout_seconds"
         const val VOLUME_TRIGGER_ENABLED = "volume_trigger_enabled"
         const val POWER_TRIGGER_ENABLED = "power_trigger_enabled"
+        const val WAKE_WORD_ENABLED = "wake_word_enabled"
+        const val AGENT_ENABLED = "agent_enabled"
         const val TRANSCRIPTION_MODE = "transcription_mode"
         const val LANGUAGE_CODES = "language_codes"
     }

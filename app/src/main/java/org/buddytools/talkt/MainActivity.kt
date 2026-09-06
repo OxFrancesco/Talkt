@@ -59,6 +59,10 @@ import org.buddytools.talkt.ui.Muted
 import org.buddytools.talkt.ui.SurfaceRaised
 import org.buddytools.talkt.ui.TalktTheme
 import org.buddytools.talkt.ui.Warning
+import org.buddytools.talkt.wakeword.WakeWordAvailability
+import org.buddytools.talkt.wakeword.WakeWordModel
+import org.buddytools.talkt.wakeword.WakeWordPrerequisites
+import org.buddytools.talkt.wakeword.WakeWordService
 
 class MainActivity : ComponentActivity() {
     private lateinit var settings: TalktSettings
@@ -77,7 +81,7 @@ class MainActivity : ComponentActivity() {
         settings = TalktSettings(this)
         refreshLocalState()
         // Agent answers arrive as notifications once the capture bubble has closed.
-        if (Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
+        if (settings.agentEnabled && Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
             notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
         setContent {
@@ -88,6 +92,8 @@ class MainActivity : ComponentActivity() {
                     onRequestMicrophone = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
                     onOpenAccessibility = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
                     onRequestAssistant = ::requestAssistantRole,
+                    onWakeWordEnabled = ::setWakeWordEnabled,
+                    onAgentEnabled = ::requestAgentNotifications,
                 )
             }
         }
@@ -96,6 +102,9 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         refreshLocalState()
+        if (settings.wakeWordEnabled && localState.wakeWordAvailability == WakeWordAvailability.Ready) {
+            WakeWordService.start(this)
+        }
     }
 
     private fun refreshLocalState() {
@@ -114,6 +123,7 @@ class MainActivity : ComponentActivity() {
             microphone = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED,
             accessibility = accessibilityEnabled,
             assistant = assistantEnabled,
+            wakeWordPrerequisites = WakeWordService.prerequisites(this),
         )
     }
 
@@ -143,6 +153,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun requestAgentNotifications(enabled: Boolean) {
+        if (!enabled) {
+            AgentRunService.stop(this)
+        } else if (Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    private fun setWakeWordEnabled(enabled: Boolean) {
+        settings.wakeWordEnabled = enabled
+        if (enabled) {
+            WakeWordService.start(this)
+            if (Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            WakeWordService.stop(this)
+        }
+        refreshLocalState()
+    }
+
     private companion object {
         const val SAMSUNG_SIDE_BUTTON_SETTINGS = "com.samsung.android.intent.action.SIDE_KEY_SETTINGS"
     }
@@ -152,7 +183,11 @@ private data class LocalState(
     val microphone: Boolean = false,
     val accessibility: Boolean = false,
     val assistant: Boolean = false,
-)
+    val wakeWordPrerequisites: WakeWordPrerequisites = WakeWordPrerequisites(),
+) {
+    val wakeWordAvailability: WakeWordAvailability
+        get() = org.buddytools.talkt.wakeword.WakeWordPolicy.availability(wakeWordPrerequisites)
+}
 
 @Composable
 private fun TalktHome(
@@ -161,11 +196,15 @@ private fun TalktHome(
     onRequestMicrophone: () -> Unit,
     onOpenAccessibility: () -> Unit,
     onRequestAssistant: () -> Unit,
+    onWakeWordEnabled: (Boolean) -> Unit,
+    onAgentEnabled: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     var silenceTimeoutSeconds by remember { mutableIntStateOf(settings.silenceTimeoutSeconds) }
     var volumeTriggerEnabled by remember { mutableStateOf(settings.volumeTriggerEnabled) }
     var powerTriggerEnabled by remember { mutableStateOf(settings.powerTriggerEnabled) }
+    var wakeWordEnabled by remember { mutableStateOf(settings.wakeWordEnabled) }
+    var agentEnabled by remember { mutableStateOf(settings.agentEnabled) }
     var transcriptionMode by remember { mutableStateOf(settings.transcriptionMode) }
     var languageCodes by remember { mutableStateOf(settings.languageCodes) }
 
@@ -219,7 +258,7 @@ private fun TalktHome(
         }
         item {
             GroupRow(
-                shape = GroupShape.Bottom,
+                shape = GroupShape.Middle,
                 onClick = if (localState.accessibility) null else onOpenAccessibility,
             ) {
                 Column(Modifier.weight(1f)) {
@@ -233,6 +272,65 @@ private fun TalktHome(
                     onCheckedChange = {
                         volumeTriggerEnabled = it
                         settings.volumeTriggerEnabled = it
+                    },
+                )
+            }
+        }
+        item {
+            val setupAction = when {
+                !localState.wakeWordPrerequisites.microphoneGranted -> onRequestMicrophone
+                !localState.wakeWordPrerequisites.activeAssistant -> onRequestAssistant
+                else -> null
+            }
+            GroupRow(shape = GroupShape.Bottom, onClick = setupAction) {
+                Column(Modifier.weight(1f)) {
+                    Text("\"${WakeWordModel.phrase}\"", color = Cloud, fontSize = 16.sp)
+                    Text(
+                        when {
+                            !localState.wakeWordPrerequisites.modelAvailable -> "Local wake-word model is missing"
+                            !localState.wakeWordPrerequisites.microphoneGranted -> "Tap to allow microphone access"
+                            !localState.wakeWordPrerequisites.activeAssistant -> "Tap to set Talkt as assistant"
+                            wakeWordEnabled -> "Enabled · processed only on this device"
+                            else -> "Wake Talkt by voice, including while locked"
+                        },
+                        color = if (
+                            localState.wakeWordPrerequisites.modelAvailable &&
+                            localState.wakeWordPrerequisites.microphoneGranted &&
+                            localState.wakeWordPrerequisites.activeAssistant
+                        ) Muted else Warning,
+                        fontSize = 12.sp,
+                    )
+                }
+                Switch(
+                    checked = wakeWordEnabled,
+                    enabled = localState.wakeWordPrerequisites.modelAvailable &&
+                        localState.wakeWordPrerequisites.microphoneGranted &&
+                        localState.wakeWordPrerequisites.activeAssistant,
+                    onCheckedChange = {
+                        wakeWordEnabled = it
+                        onWakeWordEnabled(it)
+                    },
+                )
+            }
+        }
+
+        item { GroupHeader("Agent") }
+        item {
+            GroupRow(shape = GroupShape.Single) {
+                Column(Modifier.weight(1f)) {
+                    Text("Agent", color = Cloud, fontSize = 16.sp)
+                    Text(
+                        if (agentEnabled) "Choose for each recording" else "Every recording is transcription only",
+                        color = Muted,
+                        fontSize = 12.sp,
+                    )
+                }
+                Switch(
+                    checked = agentEnabled,
+                    onCheckedChange = {
+                        agentEnabled = it
+                        settings.agentEnabled = it
+                        onAgentEnabled(it)
                     },
                 )
             }

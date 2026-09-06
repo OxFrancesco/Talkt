@@ -31,6 +31,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,6 +59,9 @@ import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptStore
 import org.buddytools.talkt.data.TranscriptionMode
+import org.buddytools.talkt.data.VoiceAction
+import org.buddytools.talkt.data.defaultVoiceAction
+import org.buddytools.talkt.data.withAgentEnabled
 import org.buddytools.talkt.trigger.EditorBridge
 import org.buddytools.talkt.transcription.RecordedClip
 import org.buddytools.talkt.transcription.local.LocalAsrWarmer
@@ -67,6 +73,7 @@ import org.buddytools.talkt.ui.Ink
 import org.buddytools.talkt.ui.Mint
 import org.buddytools.talkt.ui.SurfaceRaised
 import org.buddytools.talkt.ui.TalktTheme
+import org.buddytools.talkt.wakeword.WakeWordService
 import org.buddytools.thinkingorbs.ThinkingOrb
 import org.buddytools.thinkingorbs.ThinkingOrbColors
 import org.buddytools.thinkingorbs.ThinkingOrbParameters
@@ -77,8 +84,11 @@ class CaptureActivity : ComponentActivity() {
     private lateinit var transcriber: Transcriber
     private var state by mutableStateOf<CaptureState>(CaptureState.Preparing)
     private var editorMode = false
+    private var selectedAction by mutableStateOf(VoiceAction.Transcribe)
     private var source = ""
     private var claimedActive = false
+    private var wakeDetectedAt = 0L
+    private var microphoneHandoffMillis = 0L
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) beginRecording() else state = CaptureState.Error("Microphone permission is required")
@@ -95,14 +105,23 @@ class CaptureActivity : ComponentActivity() {
             LocalAsrWarmer.prewarm(this, settings.languageCodes.singleOrNull().orEmpty())
         }
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
+        wakeDetectedAt = intent.getLongExtra(EXTRA_WAKE_DETECTED_AT, 0L)
+        microphoneHandoffMillis = maxOf(
+            intent.getLongExtra(EXTRA_MICROPHONE_HANDOFF_MILLIS, 0L),
+            WakeWordService.pauseForCapture(),
+        )
         // Never take window focus: the overlay only needs touches, and a focusable
         // window would steal focus from the editor beneath and hide its keyboard.
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         editorMode = EditorBridge.captureTarget(preserveExisting = true) != null || EditorBridge.hasFreshTarget()
+        selectedAction = defaultVoiceAction(settings.agentEnabled, editorMode)
         setContent {
             TalktTheme {
                 CaptureScreen(
                     state = state,
+                    selectedAction = selectedAction,
+                    agentEnabled = settings.agentEnabled,
+                    onActionSelected = { selectedAction = it },
                     onStop = ::finishRecording,
                     onClose = ::finish,
                 )
@@ -113,9 +132,11 @@ class CaptureActivity : ComponentActivity() {
 
     override fun onDestroy() {
         if (claimedActive) {
-            if (current?.get() === this) current = null
+            val wasCurrent = current?.get() === this
+            if (wasCurrent) current = null
             if (state is CaptureState.Listening) recorder.cancel()
             if (source == "power") CaptureBus.finishPowerSession()
+            if (wasCurrent) WakeWordService.resume(this)
         }
         super.onDestroy()
     }
@@ -136,6 +157,14 @@ class CaptureActivity : ComponentActivity() {
             }
         }
             .onSuccess {
+                val detectionToMicMillis = wakeDetectedAt
+                    .takeIf { it > 0L }
+                    ?.let { SystemClock.elapsedRealtime() - it }
+                Log.i(
+                    TAG,
+                    "capture microphone started source=$source " +
+                        "wakeToMicMs=${detectionToMicMillis ?: -1} handoffMs=$microphoneHandoffMillis",
+                )
                 state = CaptureState.Listening
                 lifecycleScope.launch {
                     while (state is CaptureState.Listening) {
@@ -190,20 +219,20 @@ class CaptureActivity : ComponentActivity() {
                 }
                 Log.i(TAG, "transcribed via $source in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
                 copy(transcript.text)
-                state = if (editorMode) {
-                    if (EditorBridge.commit(transcript.text)) {
-                        archive(transcript.text, kind = "insert", source = source)
-                        CaptureState.Complete(transcript.text)
-                    } else {
-                        archive(transcript.text, kind = "copy", source = source)
+                val action = selectedAction.withAgentEnabled(settings.agentEnabled)
+                state = when (action) {
+                    VoiceAction.Transcribe -> {
+                        val inserted = editorMode && EditorBridge.commit(transcript.text)
+                        archive(transcript.text, kind = if (inserted) "insert" else "copy", source = source)
                         CaptureState.Complete(transcript.text)
                     }
-                } else {
-                    AgentRunService.start(this@CaptureActivity, transcript.text, source)
-                    CaptureState.Complete(transcript.text)
+                    VoiceAction.AskAgent -> {
+                        AgentRunService.start(this@CaptureActivity, transcript.text, source)
+                        CaptureState.Complete(transcript.text)
+                    }
                 }
                 settings.latestResult = transcript.text
-                delay(if (editorMode) 1_100 else 1_800)
+                delay(if (action == VoiceAction.AskAgent) 1_800 else 1_100)
                 finish()
             }.onFailure { error ->
                 Log.w(TAG, "transcription failed after ${SystemClock.elapsedRealtime() - startedAt}ms: ${error.message}")
@@ -231,12 +260,22 @@ class CaptureActivity : ComponentActivity() {
         private const val TAG = "Talkt"
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_AUTOSTART = "auto_start"
+        private const val EXTRA_WAKE_DETECTED_AT = "wake_detected_at"
+        private const val EXTRA_MICROPHONE_HANDOFF_MILLIS = "microphone_handoff_millis"
         private var current: java.lang.ref.WeakReference<CaptureActivity>? = null
 
-        fun intent(context: Context, source: String, autoStart: Boolean = true): Intent =
+        fun intent(
+            context: Context,
+            source: String,
+            autoStart: Boolean = true,
+            wakeDetectedAt: Long = 0L,
+            microphoneHandoffMillis: Long = 0L,
+        ): Intent =
             Intent(context, CaptureActivity::class.java)
                 .putExtra(EXTRA_SOURCE, source)
                 .putExtra(EXTRA_AUTOSTART, autoStart)
+                .putExtra(EXTRA_WAKE_DETECTED_AT, wakeDetectedAt)
+                .putExtra(EXTRA_MICROPHONE_HANDOFF_MILLIS, microphoneHandoffMillis)
     }
 }
 
@@ -251,6 +290,9 @@ private sealed interface CaptureState {
 @Composable
 private fun CaptureScreen(
     state: CaptureState,
+    selectedAction: VoiceAction,
+    agentEnabled: Boolean,
+    onActionSelected: (VoiceAction) -> Unit,
     onStop: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -271,6 +313,10 @@ private fun CaptureScreen(
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if ((state is CaptureState.Preparing || state is CaptureState.Listening) && agentEnabled) {
+                    VoiceActionSelector(selectedAction, onActionSelected)
+                    Spacer(Modifier.height(14.dp))
+                }
                 when (state) {
                     CaptureState.Preparing -> ThinkingContent(label = "Getting ready")
                     CaptureState.Listening -> ListeningContent(onStop)
@@ -278,6 +324,31 @@ private fun CaptureScreen(
                     is CaptureState.Complete -> CompleteContent(state)
                     is CaptureState.Error -> ErrorContent(state.message, onClose)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VoiceActionSelector(
+    selectedAction: VoiceAction,
+    onActionSelected: (VoiceAction) -> Unit,
+) {
+    val actions = VoiceAction.entries
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+        actions.forEachIndexed { index, action ->
+            SegmentedButton(
+                selected = selectedAction == action,
+                onClick = { onActionSelected(action) },
+                shape = SegmentedButtonDefaults.itemShape(index, actions.size),
+            ) {
+                Text(
+                    text = when (action) {
+                        VoiceAction.Transcribe -> "Transcript only"
+                        VoiceAction.AskAgent -> "Also ask agent"
+                    },
+                    fontSize = 12.sp,
+                )
             }
         }
     }

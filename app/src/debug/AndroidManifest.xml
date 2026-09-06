@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- Debug builds only: allow launching the capture overlay from adb for testing. -->
     <application>
         <activity
             android:name=".capture.CaptureActivity"
             android:exported="true"
             tools:replace="android:exported" />
+        <activity
+            android:name=".auth.AccountPreviewActivity"
+            android:exported="true" />
     </application>
 </manifest>

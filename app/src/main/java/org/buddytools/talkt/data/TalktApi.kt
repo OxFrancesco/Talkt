@@ -19,11 +19,6 @@ data class AgentReply(
 )
 
 class TalktApi(private val settings: TalktSettings) {
-    suspend fun connectOpenRouter(key: String) = withContext(Dispatchers.IO) {
-        request("POST", "/v1/agent/openrouter/key", JSONObject().put("key", key).toString().toByteArray(), "application/json")
-        Unit
-    }
-
     suspend fun status(): AgentStatus = withContext(Dispatchers.IO) {
         val json = request("GET", "/v1/agent/status")
         AgentStatus(
@@ -99,7 +94,7 @@ class TalktApi(private val settings: TalktSettings) {
     private fun userFacingError(message: String): String {
         val normalized = message.lowercase()
         return if ("provider.auth" in normalized) {
-            "OpenRouter rejected the request. Check the API key connected to your Talkt agent."
+            "The cloud agent is unavailable. Please try again later."
         } else {
             message.replace(Regex("Gemini", RegexOption.IGNORE_CASE), "Cloud")
         }

@@ -56,6 +56,8 @@ android {
 dependencies {
     implementation("com.clerk:clerk-android-api:1.1.5")
     implementation("com.clerk:clerk-android-ui:1.1.5")
+    implementation("io.coil-kt.coil3:coil-compose:3.5.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
     implementation(files("libs/sherpa-onnx-1.13.6.aar"))
     implementation("androidx.core:core-ktx:1.16.0")

@@ -10,7 +10,10 @@
     "types": "wrangler types"
   },
   "dependencies": {
-    "@opencode-ai/sdk": "0.0.0-dev-18729",
+    "@clerk/backend": "3.17.1",
+    "@opencode-ai/plugin": "0.0.0-dev-19146",
+    "@opencode-ai/schema": "0.0.0-dev-19146",
+    "@opencode-ai/sdk": "0.0.0-dev-19146",
     "zod": "^4.1.11"
   },
   "devDependencies": {

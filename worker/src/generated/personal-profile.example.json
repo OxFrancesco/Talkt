@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "generatedAt": null,
+  "instructions": null,
+  "skills": [],
+  "mcps": [],
+  "plugins": [],
+  "clis": [],
+  "gaps": ["Personal profile has not been imported. Run bun scripts/import-personal-profile.ts on the owner's Mac."]
+}

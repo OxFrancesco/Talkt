@@ -1,0 +1,1538 @@
+{
+  "date": "2026-09-05",
+  "issue": "FRA-527",
+  "scope": "Installed/configured inventory, not proof of usage or successful authentication. No credentials included. Plugin cache skills and project-scoped configs require a full import pass.",
+  "instructions": [
+    {
+      "source": "/Users/francescooddo/.codex/AGENTS.md",
+      "sha256": "a0157d83587e85f8618a7482b2cbaaa84ac03925c85810dcb56899fde6e550f7"
+    },
+    {
+      "source": "/Volumes/T6-7/Coding/Personal/Talkt/AGENTS.md",
+      "sha256": "b35b2aa1320a99996c9e3389c47d3acb7895a8cfda1114e6140c140cffda95ae"
+    }
+  ],
+  "configurations": [
+    {
+      "source": "/Users/francescooddo/.codex/config.toml",
+      "mcp_servers": [
+        {
+          "name": "convex",
+          "transport": "stdio",
+          "enabled": true,
+          "command": "bunx",
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "shadcn",
+          "transport": "stdio",
+          "enabled": true,
+          "command": "/opt/homebrew/bin/bunx",
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "node_repl",
+          "transport": "stdio",
+          "enabled": true,
+          "command": "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl",
+          "url_without_query": "",
+          "environment_variable_names": [
+            "NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS",
+            "NODE_REPL_NODE_MODULE_DIRS",
+            "NODE_REPL_NODE_PATH",
+            "NODE_REPL_TRUSTED_CODE_PATHS",
+            "CODEX_HOME",
+            "BROWSER_USE_AVAILABLE_BACKENDS",
+            "BROWSER_USE_TINYSKY_ENABLED",
+            "NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER",
+            "NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME",
+            "NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE",
+            "BROWSER_USE_CODEX_APP_BUILD_FLAVOR",
+            "BROWSER_USE_CODEX_APP_VERSION",
+            "NODE_REPL_TRUSTED_SERVICES",
+            "SKY_CUA_SERVICE_PATH",
+            "CODEX_CLI_PATH"
+          ]
+        },
+        {
+          "name": "computer-use",
+          "transport": "stdio",
+          "enabled": false,
+          "command": "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
+          "url_without_query": "",
+          "environment_variable_names": []
+        }
+      ],
+      "enabled_plugins": [
+        "github@openai-curated",
+        "build-ios-apps@openai-curated",
+        "build-macos-apps@openai-curated",
+        "sentry@openai-curated",
+        "linear@openai-curated",
+        "expo@openai-curated",
+        "cloudflare@openai-curated",
+        "documents@openai-primary-runtime",
+        "spreadsheets@openai-primary-runtime",
+        "presentations@openai-primary-runtime",
+        "notion@openai-curated",
+        "figma@openai-curated",
+        "gmail@openai-curated",
+        "google-calendar@openai-curated",
+        "granola@openai-curated",
+        "codex-security@openai-curated",
+        "google-drive@openai-curated",
+        "convex@openai-curated",
+        "pdf@openai-primary-runtime",
+        "computer-use@openai-bundled",
+        "chrome@openai-bundled",
+        "template-creator@openai-primary-runtime",
+        "visualize@openai-bundled",
+        "sites@openai-bundled",
+        "browser@openai-bundled",
+        "codex-app-tools@openai-bundled",
+        "computer-history@openai-bundled",
+        "unified-computer-use@openai-bundled"
+      ]
+    },
+    {
+      "source": "/Users/francescooddo/.config/opencode/opencode.json",
+      "mcp_servers": [
+        {
+          "name": "convex",
+          "transport": "local",
+          "enabled": true,
+          "command": [
+            "bunx",
+            "convex@1.44.0",
+            "mcp",
+            "start"
+          ],
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "shadcn",
+          "transport": "local",
+          "enabled": true,
+          "command": [
+            "/opt/homebrew/bin/bunx",
+            "shadcn@latest",
+            "mcp"
+          ],
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "node_repl",
+          "transport": "local",
+          "enabled": true,
+          "command": [
+            "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+          ],
+          "url_without_query": "",
+          "environment_variable_names": [
+            "NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS",
+            "NODE_REPL_NODE_MODULE_DIRS",
+            "NODE_REPL_NODE_PATH",
+            "NODE_REPL_TRUSTED_CODE_PATHS",
+            "CODEX_HOME",
+            "BROWSER_USE_AVAILABLE_BACKENDS",
+            "BROWSER_USE_TINYSKY_ENABLED",
+            "NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER",
+            "NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME",
+            "NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE",
+            "BROWSER_USE_CODEX_APP_BUILD_FLAVOR",
+            "BROWSER_USE_CODEX_APP_VERSION",
+            "NODE_REPL_TRUSTED_SERVICES",
+            "SKY_CUA_SERVICE_PATH",
+            "CODEX_CLI_PATH"
+          ]
+        },
+        {
+          "name": "computer-use",
+          "transport": "local",
+          "enabled": false,
+          "command": [
+            "/Users/francescooddo/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
+            "mcp"
+          ],
+          "url_without_query": "",
+          "environment_variable_names": []
+        }
+      ],
+      "enabled_plugins": []
+    },
+    {
+      "source": "/Users/francescooddo/.claude.json",
+      "mcp_servers": [
+        {
+          "name": "convex",
+          "transport": "stdio",
+          "enabled": true,
+          "command": "bunx",
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "Playwright",
+          "transport": "stdio",
+          "enabled": false,
+          "command": "bunx",
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "vercel",
+          "transport": "http",
+          "enabled": true,
+          "command": null,
+          "url_without_query": "https://mcp.vercel.com",
+          "environment_variable_names": []
+        },
+        {
+          "name": "exa",
+          "transport": "stdio",
+          "enabled": false,
+          "command": "bunx",
+          "url_without_query": "",
+          "environment_variable_names": [
+            "EXA_API_KEY"
+          ]
+        },
+        {
+          "name": "chrome-devtools",
+          "transport": "stdio",
+          "enabled": true,
+          "command": "bunx",
+          "url_without_query": "",
+          "environment_variable_names": []
+        },
+        {
+          "name": "mobbin",
+          "transport": "http",
+          "enabled": true,
+          "command": null,
+          "url_without_query": "https://api.mobbin.com/mcp",
+          "environment_variable_names": []
+        },
+        {
+          "name": "open-computer-use",
+          "transport": "stdio",
+          "enabled": true,
+          "command": "/Users/francescooddo/.bun/bin/open-computer-use",
+          "url_without_query": "",
+          "environment_variable_names": []
+        }
+      ],
+      "enabled_plugins": []
+    }
+  ],
+  "skills": [
+    {
+      "name": "agent-browser",
+      "source": "/Users/francescooddo/.agents/skills/agent-browser/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/agent-browser/SKILL.md",
+      "sha256": "9caba4d013daf731c9f78803c9a73178400c04e2c033541939d77d0f5bc9248c"
+    },
+    {
+      "name": "animate",
+      "source": "/Users/francescooddo/.agents/skills/animate/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/animate/SKILL.md",
+      "sha256": "f6317335da2662e92270dc0a6128bea95d7216cd751f86628e3ac6b72804e805"
+    },
+    {
+      "name": "animate-expo",
+      "source": "/Users/francescooddo/.agents/skills/animate-expo/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/animate-expo/SKILL.md",
+      "sha256": "2121fc72ffa476492c1b91ccf96c7b26aade9d1a332dc5834ba3526e1102b00d"
+    },
+    {
+      "name": "animation-vocabulary",
+      "source": "/Users/francescooddo/.agents/skills/animation-vocabulary/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/animation-vocabulary/SKILL.md",
+      "sha256": "d718b48fe3c7898804d588f050a2e266d82c9f5ef51da256c8cb8b5951527757"
+    },
+    {
+      "name": "apple-design",
+      "source": "/Users/francescooddo/.agents/skills/apple-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/apple-design/SKILL.md",
+      "sha256": "11840b24a11d7f94f39c6aaab074750ae4e4de4ef54ee4b1dd97e16ebd485e61"
+    },
+    {
+      "name": "architect",
+      "source": "/Users/francescooddo/.agents/skills/architect/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/architect/SKILL.md",
+      "sha256": "585d7a9e03c0cced84c80d4b60c09c8dc76010bb36c579f92d9e4deafec53df7"
+    },
+    {
+      "name": "arena",
+      "source": "/Users/francescooddo/.agents/skills/arena/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/arena/SKILL.md",
+      "sha256": "a2241e8500a44d9c16bd3260c8c70e28c4bb8a857c33061d42b267057e6f7093"
+    },
+    {
+      "name": "ask-matt",
+      "source": "/Users/francescooddo/.agents/skills/ask-matt/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/ask-matt/SKILL.md",
+      "sha256": "3d38910535f5f01e15bc5fd7f6ca8880d628cd248741f08e6780dd7c1828e832"
+    },
+    {
+      "name": "ask-sonner",
+      "source": "/Users/francescooddo/.agents/skills/ask-sonner/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/ask-sonner/SKILL.md",
+      "sha256": "be1b04511aadb4d7d81aa8cd2b55c260a626aae534983bc8ae3fbe26bbf48632"
+    },
+    {
+      "name": "automate-me",
+      "source": "/Users/francescooddo/.agents/skills/automate-me/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/automate-me/SKILL.md",
+      "sha256": "34e7eab6f495093d474817bc4c13f26bcf5fafa439f2761b8c1ec72b07487764"
+    },
+    {
+      "name": "blast-radius",
+      "source": "/Users/francescooddo/.agents/skills/blast-radius/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/blast-radius/SKILL.md",
+      "sha256": "b060df3ca85803eabbce9fab53f5cc024ca8d784bdde5513c1c1a784947523f8"
+    },
+    {
+      "name": "bro",
+      "source": "/Users/francescooddo/.agents/skills/bro/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/bro/SKILL.md",
+      "sha256": "aa329d0ceeeecb6822a7174ad76bb07a7826a3c52ceb6a588dec4138815084bb"
+    },
+    {
+      "name": "buddytg",
+      "source": "/Users/francescooddo/.agents/skills/buddytg/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/buddytg/SKILL.md",
+      "sha256": "0d8fd166398874d266e65dbe7b31658b5aaced38f2627064c85e3b73d8f68ddb"
+    },
+    {
+      "name": "code-review",
+      "source": "/Users/francescooddo/.agents/skills/code-review/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/code-review/SKILL.md",
+      "sha256": "9cf46653dd9c710ea1e6c22423caf31a794c88773bc94bdaa23140277f470442"
+    },
+    {
+      "name": "codebase-design",
+      "source": "/Users/francescooddo/.agents/skills/codebase-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/codebase-design/SKILL.md",
+      "sha256": "a8d50abac5a4018f60e1d911d4b6f4e36454ca14d6c390c0695a578c7de65dad"
+    },
+    {
+      "name": "conventional-commits",
+      "source": "/Users/francescooddo/.agents/skills/conventional-commits/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/conventional-commits/SKILL.md",
+      "sha256": "a3d82f23727fd3f7d0153491ef46f24e2c6851f8b5ff49e8ffe7068f6f46a015"
+    },
+    {
+      "name": "create-verification-skill",
+      "source": "/Users/francescooddo/.agents/skills/create-verification-skill/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/create-verification-skill/SKILL.md",
+      "sha256": "644f2551403c1bca01a2855b34611b6e7be0ce0dc5b204514c376c0f6a6e6ac4"
+    },
+    {
+      "name": "diagnosing-bugs",
+      "source": "/Users/francescooddo/.agents/skills/diagnosing-bugs/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/diagnosing-bugs/SKILL.md",
+      "sha256": "b9339b09ee3980808d8c5a35c7251b891b8b1e0036ec4ca37812b976ebddf6b6"
+    },
+    {
+      "name": "domain-modeling",
+      "source": "/Users/francescooddo/.agents/skills/domain-modeling/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/domain-modeling/SKILL.md",
+      "sha256": "152e2c97239affb12a60c5f4a7e74ab546a49ae169688c81f4e2ccc42dafa579"
+    },
+    {
+      "name": "effect",
+      "source": "/Users/francescooddo/.agents/skills/effect/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/effect/SKILL.md",
+      "sha256": "66314e7e70c752f2c5b999123dea5fefc526841f48e9ec34c27615f01be2bfa1"
+    },
+    {
+      "name": "emil-design-eng",
+      "source": "/Users/francescooddo/.agents/skills/emil-design-eng/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/emil-design-eng/SKILL.md",
+      "sha256": "e71de849347050c2c573c1cf24d742d5a13459557ecffa6e562f08006f46b5b7"
+    },
+    {
+      "name": "figure-it-out",
+      "source": "/Users/francescooddo/.agents/skills/figure-it-out/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/figure-it-out/SKILL.md",
+      "sha256": "548616d04909de854f36869af2af127ce321fc6aaf95ea5a626997709fd46a2a"
+    },
+    {
+      "name": "find-animation-opportunities",
+      "source": "/Users/francescooddo/.agents/skills/find-animation-opportunities/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/find-animation-opportunities/SKILL.md",
+      "sha256": "91c1243164057fbf824088d12faea937878a757a7ac653e8288b775e8b27b882"
+    },
+    {
+      "name": "frontend-design",
+      "source": "/Users/francescooddo/.agents/skills/frontend-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/frontend-design/SKILL.md",
+      "sha256": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0"
+    },
+    {
+      "name": "grill-me",
+      "source": "/Users/francescooddo/.agents/skills/grill-me/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/grill-me/SKILL.md",
+      "sha256": "6189dfceb7304a6e5558f75d87e68fa3bc7fcf7ba120e44f21f8a61fe01eba54"
+    },
+    {
+      "name": "grill-with-docs",
+      "source": "/Users/francescooddo/.agents/skills/grill-with-docs/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/grill-with-docs/SKILL.md",
+      "sha256": "610d091047bcfb9db0f75c057d15538481a721111579fc5ec7f83ad9131a2165"
+    },
+    {
+      "name": "grilling",
+      "source": "/Users/francescooddo/.agents/skills/grilling/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/grilling/SKILL.md",
+      "sha256": "fa5c1e5ee76b1c8f1ae56101f52c9e239de75d5c578adc61227b92d10b7e52ef"
+    },
+    {
+      "name": "handoff",
+      "source": "/Users/francescooddo/.agents/skills/handoff/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/handoff/SKILL.md",
+      "sha256": "57c9f1f392d7352cdc85b1e39ca49eddc70ce1dc278bd9653fb4f23dfc2560fc"
+    },
+    {
+      "name": "how",
+      "source": "/Users/francescooddo/.agents/skills/how/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/how/SKILL.md",
+      "sha256": "fe503e7a9b2a3a7ad2622a2de6124cb06c466922fb44bc61817b49b52042b885"
+    },
+    {
+      "name": "implement",
+      "source": "/Users/francescooddo/.agents/skills/implement/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/implement/SKILL.md",
+      "sha256": "6d3fd9e83b8f36e5213854779db49b256a457a7ebb4a503e53fa7dcff696adc3"
+    },
+    {
+      "name": "improve-animations",
+      "source": "/Users/francescooddo/.agents/skills/improve-animations/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/improve-animations/SKILL.md",
+      "sha256": "68f17bbc4671593d2f43dba26a679243e2153ba5f26965fb7d59df52842534ff"
+    },
+    {
+      "name": "improve-codebase-architecture",
+      "source": "/Users/francescooddo/.agents/skills/improve-codebase-architecture/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/improve-codebase-architecture/SKILL.md",
+      "sha256": "7b76f01b0eefe49a127754c9027a6235a036a21348df5dad988893d8b2f384d6"
+    },
+    {
+      "name": "install-anti-slop",
+      "source": "/Users/francescooddo/.agents/skills/install-anti-slop/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/install-anti-slop/SKILL.md",
+      "sha256": "4d769c56bcaa5217a39570196a246741c4f460f999676a76115baadc48146599"
+    },
+    {
+      "name": "interrogate",
+      "source": "/Users/francescooddo/.agents/skills/interrogate/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/interrogate/SKILL.md",
+      "sha256": "a009220dfe6869c8f7980a94fb1c9c7763a081a0b32fb6d0afb65b8ff1868146"
+    },
+    {
+      "name": "maintain-verification-skill",
+      "source": "/Users/francescooddo/.agents/skills/maintain-verification-skill/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/maintain-verification-skill/SKILL.md",
+      "sha256": "515c0eaa054b3f6be1b1fb06f2c2f173c80fddb58bbcac57576f89c479bc68e8"
+    },
+    {
+      "name": "no-comments",
+      "source": "/Users/francescooddo/.agents/skills/no-comments/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/no-comments/SKILL.md",
+      "sha256": "72d3b153712ab641875f1d7424de0f77375af1cec03707935f08fa7d8f17bbf3"
+    },
+    {
+      "name": "pick-ui-library",
+      "source": "/Users/francescooddo/.agents/skills/pick-ui-library/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/pick-ui-library/SKILL.md",
+      "sha256": "4b889bd6c08358499ac4a7202b8af71ffbd3485d2468f7b09d0613bbe7b24bf4"
+    },
+    {
+      "name": "poteto-mode",
+      "source": "/Users/francescooddo/.agents/skills/poteto-mode/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/poteto-mode/SKILL.md",
+      "sha256": "2bb72869dc864cc961be6d477a8bae1871b5031084964e9b35da07b6f6178464"
+    },
+    {
+      "name": "principle-boundary-discipline",
+      "source": "/Users/francescooddo/.agents/skills/principle-boundary-discipline/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-boundary-discipline/SKILL.md",
+      "sha256": "ab3c690ce361542ca00446b8406f5afd47776f544b8ce06a9ef2eaa2338bde6d"
+    },
+    {
+      "name": "principle-build-the-lever",
+      "source": "/Users/francescooddo/.agents/skills/principle-build-the-lever/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-build-the-lever/SKILL.md",
+      "sha256": "3a0b02b1b890538810f27d00c525b2e677bb5d931f602fd7a774d5cd13b61c93"
+    },
+    {
+      "name": "principle-encode-lessons-in-structure",
+      "source": "/Users/francescooddo/.agents/skills/principle-encode-lessons-in-structure/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-encode-lessons-in-structure/SKILL.md",
+      "sha256": "4acdb3f466efd0a433899aafce3e0f100566228b63ccff43f363a83e80624d81"
+    },
+    {
+      "name": "principle-exhaust-the-design-space",
+      "source": "/Users/francescooddo/.agents/skills/principle-exhaust-the-design-space/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-exhaust-the-design-space/SKILL.md",
+      "sha256": "8583310d7297b7823d75494faa57b003564d436807febecdecbd8321abe5cf6e"
+    },
+    {
+      "name": "principle-experience-first",
+      "source": "/Users/francescooddo/.agents/skills/principle-experience-first/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-experience-first/SKILL.md",
+      "sha256": "f8d643ddf2f6aa91d9607d1bb340fd2baf227d702e9738848b85312a312bb971"
+    },
+    {
+      "name": "principle-fix-root-causes",
+      "source": "/Users/francescooddo/.agents/skills/principle-fix-root-causes/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-fix-root-causes/SKILL.md",
+      "sha256": "cfae13b5a3e27bc88d069092cae97b3e95246879d5bf14f0e9a4db719c781952"
+    },
+    {
+      "name": "principle-foundational-thinking",
+      "source": "/Users/francescooddo/.agents/skills/principle-foundational-thinking/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-foundational-thinking/SKILL.md",
+      "sha256": "a522488c9d4481e8bfcbe35cbf3838169c8e3801ee0738ae2859067684144579"
+    },
+    {
+      "name": "principle-guard-the-context-window",
+      "source": "/Users/francescooddo/.agents/skills/principle-guard-the-context-window/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-guard-the-context-window/SKILL.md",
+      "sha256": "291d0125125eabbc2109c880b1c1083aa95826187119a648b26c1c8ea6367179"
+    },
+    {
+      "name": "principle-laziness-protocol",
+      "source": "/Users/francescooddo/.agents/skills/principle-laziness-protocol/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-laziness-protocol/SKILL.md",
+      "sha256": "8999fda9fde65fd905835c86e3bfc64190369a84bba30b1e93769f39ad6580fe"
+    },
+    {
+      "name": "principle-make-operations-idempotent",
+      "source": "/Users/francescooddo/.agents/skills/principle-make-operations-idempotent/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-make-operations-idempotent/SKILL.md",
+      "sha256": "540738217c3da7bf513b9886924ad6a2bc77e58be867f5bd2e1831c74bf2ce70"
+    },
+    {
+      "name": "principle-migrate-callers-then-delete-legacy-apis",
+      "source": "/Users/francescooddo/.agents/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md",
+      "sha256": "e29b6b6534a23dcaf8c7e16fc25d6484000d7b6e289c48eb0a32a97280633c5d"
+    },
+    {
+      "name": "principle-minimize-reader-load",
+      "source": "/Users/francescooddo/.agents/skills/principle-minimize-reader-load/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-minimize-reader-load/SKILL.md",
+      "sha256": "480f4ddec29e7e3058a8f17eb97c0cec4a2c8b4b33ba6401e960167c1fc95a81"
+    },
+    {
+      "name": "principle-model-the-domain",
+      "source": "/Users/francescooddo/.agents/skills/principle-model-the-domain/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-model-the-domain/SKILL.md",
+      "sha256": "6b359783c5c9be87860d0999321e864940ff17729b9f9a27f38abae449640022"
+    },
+    {
+      "name": "principle-never-block-on-the-human",
+      "source": "/Users/francescooddo/.agents/skills/principle-never-block-on-the-human/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-never-block-on-the-human/SKILL.md",
+      "sha256": "f656f3b7581df55e79f53cc47df93905c3a940b822c25071ba95f40e530d102a"
+    },
+    {
+      "name": "principle-outcome-oriented-execution",
+      "source": "/Users/francescooddo/.agents/skills/principle-outcome-oriented-execution/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-outcome-oriented-execution/SKILL.md",
+      "sha256": "beedcaed75572a6a1662d47f16da203c2bd2c9dbffbbd678d4ba187d67b7e670"
+    },
+    {
+      "name": "principle-prove-it-works",
+      "source": "/Users/francescooddo/.agents/skills/principle-prove-it-works/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-prove-it-works/SKILL.md",
+      "sha256": "9bbe6138505be34d81e9395d95d3639b384f71d71d65cc1903075126e1da1508"
+    },
+    {
+      "name": "principle-redesign-from-first-principles",
+      "source": "/Users/francescooddo/.agents/skills/principle-redesign-from-first-principles/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-redesign-from-first-principles/SKILL.md",
+      "sha256": "9ae97b35d6338cc9e34c7023c995a39cb7afdaf4bfd41e1d3d665da04d7515d5"
+    },
+    {
+      "name": "principle-separate-before-serializing-shared-state",
+      "source": "/Users/francescooddo/.agents/skills/principle-separate-before-serializing-shared-state/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-separate-before-serializing-shared-state/SKILL.md",
+      "sha256": "5b14fd656441580061f760968c828f3f4ba034242d8fa06b544763efb25e89ee"
+    },
+    {
+      "name": "principle-sequence-verifiable-units",
+      "source": "/Users/francescooddo/.agents/skills/principle-sequence-verifiable-units/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-sequence-verifiable-units/SKILL.md",
+      "sha256": "7478f8160ba5701ca40c742a81e90aff12d45f53ac9191e80ad79b9763e4489f"
+    },
+    {
+      "name": "principle-subtract-before-you-add",
+      "source": "/Users/francescooddo/.agents/skills/principle-subtract-before-you-add/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-subtract-before-you-add/SKILL.md",
+      "sha256": "3999888dc21ced33b86054c2ffde1a3cb438e16bed1213f5dab2b5c000446292"
+    },
+    {
+      "name": "principle-type-system-discipline",
+      "source": "/Users/francescooddo/.agents/skills/principle-type-system-discipline/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-type-system-discipline/SKILL.md",
+      "sha256": "662ed1ad53fb491e97b9c4eac7317fba8ec5ed722fec8d71beb94da0111619cf"
+    },
+    {
+      "name": "prototype",
+      "source": "/Users/francescooddo/.agents/skills/prototype/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/prototype/SKILL.md",
+      "sha256": "2ad8401c4deaddb54947fb65247f790e7b3d8784e35312bcbedbfb1d59cd89ce"
+    },
+    {
+      "name": "recall",
+      "source": "/Users/francescooddo/.agents/skills/recall/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/recall/SKILL.md",
+      "sha256": "90d290daec500f548a167bbd20d69a3a248e345c546ca847ca12967d1c99cbf3"
+    },
+    {
+      "name": "reflect",
+      "source": "/Users/francescooddo/.agents/skills/reflect/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/reflect/SKILL.md",
+      "sha256": "5485347991eb60ee226ca78c5972f9c694f6927cff3263b7f48b631ed7a9de56"
+    },
+    {
+      "name": "research",
+      "source": "/Users/francescooddo/.agents/skills/research/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/research/SKILL.md",
+      "sha256": "af378829f015775a3bcd65ff466826722e99359017ae6bae227ca4c9bd14049c"
+    },
+    {
+      "name": "resolving-merge-conflicts",
+      "source": "/Users/francescooddo/.agents/skills/resolving-merge-conflicts/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/resolving-merge-conflicts/SKILL.md",
+      "sha256": "c7c9ba81362a786aac05d2223123bf1bd2f8a99c3243a72882ede9c68bedfb24"
+    },
+    {
+      "name": "review-animations",
+      "source": "/Users/francescooddo/.agents/skills/review-animations/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/review-animations/SKILL.md",
+      "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d"
+    },
+    {
+      "name": "sandbox-agent",
+      "source": "/Users/francescooddo/.agents/skills/sandbox-agent/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/sandbox-agent/SKILL.md",
+      "sha256": "51237eabb472fcbda303852cfd9036b0c597b2923018e0c12b8ea45103a76a34"
+    },
+    {
+      "name": "setup-matt-pocock-skills",
+      "source": "/Users/francescooddo/.agents/skills/setup-matt-pocock-skills/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/setup-matt-pocock-skills/SKILL.md",
+      "sha256": "310fb1a73c0467e617e17d7c41d4a2278b5405c4a27f36d7cd22bb4599aee6bb"
+    },
+    {
+      "name": "setup-pstack",
+      "source": "/Users/francescooddo/.agents/skills/setup-pstack/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/setup-pstack/SKILL.md",
+      "sha256": "3b62d9fd4cce8f450b36b2bc6b1df2f00d887e0a3abd55e7fc1ccbde5db96cea"
+    },
+    {
+      "name": "show-me-your-work",
+      "source": "/Users/francescooddo/.agents/skills/show-me-your-work/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/show-me-your-work/SKILL.md",
+      "sha256": "b99833c41a8781a6af191487f1af37711a3198b98f9373e3c02292b8a6e09aba"
+    },
+    {
+      "name": "swarm",
+      "source": "/Users/francescooddo/.agents/skills/swarm/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/swarm/SKILL.md",
+      "sha256": "8e6494e296af5496cacb0fb83f33f647c84286d2e1d1b85580bc0f0f577a81cd"
+    },
+    {
+      "name": "swiftui-expert-skill",
+      "source": "/Users/francescooddo/.agents/skills/swiftui-expert-skill/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/swiftui-expert-skill/SKILL.md",
+      "sha256": "e74c27b66f5ff5da524ede219348e7f9ddb7602ca9288cc5e3972e8e05e3ba29"
+    },
+    {
+      "name": "tdd",
+      "source": "/Users/francescooddo/.agents/skills/tdd/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/tdd/SKILL.md",
+      "sha256": "5e6b9c16b547113e90afbb946489d1c1384be5c2128f0159bd0bee57251ecf08"
+    },
+    {
+      "name": "teach",
+      "source": "/Users/francescooddo/.agents/skills/teach/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/teach/SKILL.md",
+      "sha256": "6d2dbe5e03084cf26fef66b535127b36cd1bcbe9478e26b0626029cd51dc2259"
+    },
+    {
+      "name": "technical-writing",
+      "source": "/Users/francescooddo/.agents/skills/technical-writing/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/technical-writing/SKILL.md",
+      "sha256": "bd0cb21034f4fe6695cfdf8cd3561026eec943f0bb6e9300bc78a2b3340865a7"
+    },
+    {
+      "name": "telegram-notify",
+      "source": "/Users/francescooddo/.agents/skills/telegram-notify/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/telegram-notify/SKILL.md",
+      "sha256": "35cfc9af6d4cf1d169864677278c5cf0377eba3073dd13fe4be905b0704ea837"
+    },
+    {
+      "name": "thermo-nuclear-code-quality-review",
+      "source": "/Users/francescooddo/.agents/skills/thermo-nuclear-code-quality-review/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/thermo-nuclear-code-quality-review/SKILL.md",
+      "sha256": "3fe9fb20c10a3aeffc059c4c9e0624e2cc5972b02811ded56334daedec4186b2"
+    },
+    {
+      "name": "to-spec",
+      "source": "/Users/francescooddo/.agents/skills/to-spec/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/to-spec/SKILL.md",
+      "sha256": "5d26479544b08048d3a8f79d937b39bc613a617f026b3fd083bafc1e99a7b811"
+    },
+    {
+      "name": "to-tickets",
+      "source": "/Users/francescooddo/.agents/skills/to-tickets/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/to-tickets/SKILL.md",
+      "sha256": "5ecdf1d4df8a360ed39df21a2347f97ba177afd449a577da4f6b6ea8e1ebb808"
+    },
+    {
+      "name": "triage",
+      "source": "/Users/francescooddo/.agents/skills/triage/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/triage/SKILL.md",
+      "sha256": "91e2817ecb688c4df4e2444eab472d1d79d2a0a57abf9f6726967664c460ff2e"
+    },
+    {
+      "name": "typescript-best-practices",
+      "source": "/Users/francescooddo/.agents/skills/typescript-best-practices/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/typescript-best-practices/SKILL.md",
+      "sha256": "e3e4152bc155e32cc8f08dd56c02de176f0363aba28a916e387fd4844c59b7e7"
+    },
+    {
+      "name": "unslop",
+      "source": "/Users/francescooddo/.agents/skills/unslop/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/unslop/SKILL.md",
+      "sha256": "181883e539caec8258ec9129e3ba5f133409144a2cbf2aa361158ab94cfc3441"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "source": "/Users/francescooddo/.agents/skills/vercel-react-best-practices/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/vercel-react-best-practices/SKILL.md",
+      "sha256": "61860fd4249cf5e5ec917a08aceebed48ccf9b38d526e3cb73e0b18aaf261dac"
+    },
+    {
+      "name": "vgpu",
+      "source": "/Users/francescooddo/.agents/skills/vgpu/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/vgpu/SKILL.md",
+      "sha256": "b42669117d0a9a781f12e45280a66d2a6c9b51f3273fddf196c10171dd0ef1b3"
+    },
+    {
+      "name": "wayfinder",
+      "source": "/Users/francescooddo/.agents/skills/wayfinder/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/wayfinder/SKILL.md",
+      "sha256": "d33e2141f7c8bbfd137fef0213cbec465820e4680e67da5d0f0815d6742d26c2"
+    },
+    {
+      "name": "why",
+      "source": "/Users/francescooddo/.agents/skills/why/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/why/SKILL.md",
+      "sha256": "dc8f2d8a7dbef7d0467cca8e6d055a4dbde027db6e2cbbfb18aa9071d8f20b6c"
+    },
+    {
+      "name": "writing-great-skills",
+      "source": "/Users/francescooddo/.agents/skills/writing-great-skills/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/writing-great-skills/SKILL.md",
+      "sha256": "4d6ccbc3760b1bd4107c495a79872286ea69494003f3b0a719fc95b147457061"
+    },
+    {
+      "name": "agent-browser",
+      "source": "/Users/francescooddo/.codex/skills/agent-browser/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/agent-browser/SKILL.md",
+      "sha256": "9caba4d013daf731c9f78803c9a73178400c04e2c033541939d77d0f5bc9248c"
+    },
+    {
+      "name": "asc-app-create-ui",
+      "source": "/Users/francescooddo/.codex/skills/asc-app-create-ui/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-app-create-ui/SKILL.md",
+      "sha256": "49063ce4399d13bb51ac0b1038922ea07a1af7a4f520a0c1a2b3c688fd002dab"
+    },
+    {
+      "name": "asc-build-lifecycle",
+      "source": "/Users/francescooddo/.codex/skills/asc-build-lifecycle/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-build-lifecycle/SKILL.md",
+      "sha256": "e4b39daf094abc444a00395884130495dcaf0db1c2324835cd7b34ce255a0473"
+    },
+    {
+      "name": "asc-cli-usage",
+      "source": "/Users/francescooddo/.codex/skills/asc-cli-usage/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-cli-usage/SKILL.md",
+      "sha256": "ca3be072503b30ad68fe7de28e1ae35bffec8603dd069cc6940d4612d9be9191"
+    },
+    {
+      "name": "asc-id-resolver",
+      "source": "/Users/francescooddo/.codex/skills/asc-id-resolver/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-id-resolver/SKILL.md",
+      "sha256": "31926dc5fb5b43bf15a20e99766ca6011a731db6e33c23f07e1b90468e7072b2"
+    },
+    {
+      "name": "asc-metadata-sync",
+      "source": "/Users/francescooddo/.codex/skills/asc-metadata-sync/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-metadata-sync/SKILL.md",
+      "sha256": "fa335ad59b7700814de05df5fa585d7dc759abb814fb854c04d8cf69e30f4233"
+    },
+    {
+      "name": "asc-notarization",
+      "source": "/Users/francescooddo/.codex/skills/asc-notarization/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-notarization/SKILL.md",
+      "sha256": "e719161403467be2990421519ae7934b28458f5cd055443d3e0ef8f1bd83e043"
+    },
+    {
+      "name": "asc-ppp-pricing",
+      "source": "/Users/francescooddo/.codex/skills/asc-ppp-pricing/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-ppp-pricing/SKILL.md",
+      "sha256": "bba80a9e1b3a9aec352f9de8f01c2d1e7c45cb68fded41c4a45d852cf8ac4779"
+    },
+    {
+      "name": "asc-release-flow",
+      "source": "/Users/francescooddo/.codex/skills/asc-release-flow/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-release-flow/SKILL.md",
+      "sha256": "6cad07e404c8d1a5af285404ac5c6bfbaca3964fcfcb4ffc4e04970b715df990"
+    },
+    {
+      "name": "asc-shots-pipeline",
+      "source": "/Users/francescooddo/.codex/skills/asc-shots-pipeline/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-shots-pipeline/SKILL.md",
+      "sha256": "228927ab4c32cc7f13fdcf741d868f799429404f51de5a1ce56b90de52bf28e2"
+    },
+    {
+      "name": "asc-signing-setup",
+      "source": "/Users/francescooddo/.codex/skills/asc-signing-setup/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-signing-setup/SKILL.md",
+      "sha256": "f432f1577e127db3a48735b907e6a250e3cc9559326b2f7e9cd6c9812704212f"
+    },
+    {
+      "name": "asc-submission-health",
+      "source": "/Users/francescooddo/.codex/skills/asc-submission-health/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-submission-health/SKILL.md",
+      "sha256": "6fa13caeced63cae8d33f4766758e48937c363aa2a57f1603d11ac0c647710b4"
+    },
+    {
+      "name": "asc-subscription-localization",
+      "source": "/Users/francescooddo/.codex/skills/asc-subscription-localization/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-subscription-localization/SKILL.md",
+      "sha256": "7790c864a385f9ea20dac3279b718ddd6c05004805c55bdcc167cba34b455d7a"
+    },
+    {
+      "name": "asc-testflight-orchestration",
+      "source": "/Users/francescooddo/.codex/skills/asc-testflight-orchestration/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-testflight-orchestration/SKILL.md",
+      "sha256": "d386319ac07ebe76e3d312b3a71e5971bcf48b3706bb811e6defc89c381424ea"
+    },
+    {
+      "name": "asc-xcode-build",
+      "source": "/Users/francescooddo/.codex/skills/asc-xcode-build/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/asc-xcode-build/SKILL.md",
+      "sha256": "d8f2d257509bb7e9264bcbf400d7980662e36fe7774aeb584a600d9b17f85499"
+    },
+    {
+      "name": "buddydock-reapply",
+      "source": "/Users/francescooddo/.codex/skills/buddydock-reapply/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/buddydock-reapply/SKILL.md",
+      "sha256": "e5e2bed4abf1f11f8ac004860857c8132b474b2508a40b12a8a68f2698a7dd5b"
+    },
+    {
+      "name": "cloudflare-deploy",
+      "source": "/Users/francescooddo/.codex/skills/cloudflare-deploy/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/cloudflare-deploy/SKILL.md",
+      "sha256": "d7632537cf19be17cf33d2c696b9d9c2ea3ee51026030e9b203d5b9255e75b15"
+    },
+    {
+      "name": "code-review",
+      "source": "/Users/francescooddo/.codex/skills/code-review/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/code-review/SKILL.md",
+      "sha256": "9cf46653dd9c710ea1e6c22423caf31a794c88773bc94bdaa23140277f470442"
+    },
+    {
+      "name": "code-semplififer",
+      "source": "/Users/francescooddo/.codex/skills/code-semplififer/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/code-semplififer/SKILL.md",
+      "sha256": "00beff7cb29df895f115778ea46c2ff9e01a2ded981e6746fe72aa2d8b0df89d"
+    },
+    {
+      "name": "conventional-commits",
+      "source": "/Users/francescooddo/.codex/skills/conventional-commits/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/conventional-commits/SKILL.md",
+      "sha256": "a3d82f23727fd3f7d0153491ef46f24e2c6851f8b5ff49e8ffe7068f6f46a015"
+    },
+    {
+      "name": "frontend-design",
+      "source": "/Users/francescooddo/.codex/skills/frontend-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/frontend-design/SKILL.md",
+      "sha256": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0"
+    },
+    {
+      "name": "motion-design",
+      "source": "/Users/francescooddo/.codex/skills/motion-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/motion-design/SKILL.md",
+      "sha256": "8729ecbc7e5736c1295baaa8ba0384bb4b1aac9cf91b83fcdc64d9548a57bb19"
+    },
+    {
+      "name": "sandbox-agent",
+      "source": "/Users/francescooddo/.codex/skills/sandbox-agent/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/sandbox-agent/SKILL.md",
+      "sha256": "51237eabb472fcbda303852cfd9036b0c597b2923018e0c12b8ea45103a76a34"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "source": "/Users/francescooddo/.codex/skills/vercel-react-best-practices/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/vercel-react-best-practices/SKILL.md",
+      "sha256": "61860fd4249cf5e5ec917a08aceebed48ccf9b38d526e3cb73e0b18aaf261dac"
+    },
+    {
+      "name": "agent-browser",
+      "source": "/Users/francescooddo/.claude/skills/agent-browser/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/agent-browser/SKILL.md",
+      "sha256": "9caba4d013daf731c9f78803c9a73178400c04e2c033541939d77d0f5bc9248c"
+    },
+    {
+      "name": "animate",
+      "source": "/Users/francescooddo/.claude/skills/animate/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/animate/SKILL.md",
+      "sha256": "f6317335da2662e92270dc0a6128bea95d7216cd751f86628e3ac6b72804e805"
+    },
+    {
+      "name": "animate-expo",
+      "source": "/Users/francescooddo/.claude/skills/animate-expo/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/animate-expo/SKILL.md",
+      "sha256": "2121fc72ffa476492c1b91ccf96c7b26aade9d1a332dc5834ba3526e1102b00d"
+    },
+    {
+      "name": "animation-vocabulary",
+      "source": "/Users/francescooddo/.claude/skills/animation-vocabulary/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/animation-vocabulary/SKILL.md",
+      "sha256": "d718b48fe3c7898804d588f050a2e266d82c9f5ef51da256c8cb8b5951527757"
+    },
+    {
+      "name": "apple-design",
+      "source": "/Users/francescooddo/.claude/skills/apple-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/apple-design/SKILL.md",
+      "sha256": "11840b24a11d7f94f39c6aaab074750ae4e4de4ef54ee4b1dd97e16ebd485e61"
+    },
+    {
+      "name": "architect",
+      "source": "/Users/francescooddo/.claude/skills/architect/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/architect/SKILL.md",
+      "sha256": "585d7a9e03c0cced84c80d4b60c09c8dc76010bb36c579f92d9e4deafec53df7"
+    },
+    {
+      "name": "arena",
+      "source": "/Users/francescooddo/.claude/skills/arena/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/arena/SKILL.md",
+      "sha256": "a2241e8500a44d9c16bd3260c8c70e28c4bb8a857c33061d42b267057e6f7093"
+    },
+    {
+      "name": "ask-matt",
+      "source": "/Users/francescooddo/.claude/skills/ask-matt/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/ask-matt/SKILL.md",
+      "sha256": "3d38910535f5f01e15bc5fd7f6ca8880d628cd248741f08e6780dd7c1828e832"
+    },
+    {
+      "name": "ask-sonner",
+      "source": "/Users/francescooddo/.claude/skills/ask-sonner/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/ask-sonner/SKILL.md",
+      "sha256": "be1b04511aadb4d7d81aa8cd2b55c260a626aae534983bc8ae3fbe26bbf48632"
+    },
+    {
+      "name": "automate-me",
+      "source": "/Users/francescooddo/.claude/skills/automate-me/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/automate-me/SKILL.md",
+      "sha256": "34e7eab6f495093d474817bc4c13f26bcf5fafa439f2761b8c1ec72b07487764"
+    },
+    {
+      "name": "blast-radius",
+      "source": "/Users/francescooddo/.claude/skills/blast-radius/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/blast-radius/SKILL.md",
+      "sha256": "b060df3ca85803eabbce9fab53f5cc024ca8d784bdde5513c1c1a784947523f8"
+    },
+    {
+      "name": "bro",
+      "source": "/Users/francescooddo/.claude/skills/bro/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/bro/SKILL.md",
+      "sha256": "aa329d0ceeeecb6822a7174ad76bb07a7826a3c52ceb6a588dec4138815084bb"
+    },
+    {
+      "name": "code-review",
+      "source": "/Users/francescooddo/.claude/skills/code-review/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/code-review/SKILL.md",
+      "sha256": "9cf46653dd9c710ea1e6c22423caf31a794c88773bc94bdaa23140277f470442"
+    },
+    {
+      "name": "codebase-design",
+      "source": "/Users/francescooddo/.claude/skills/codebase-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/codebase-design/SKILL.md",
+      "sha256": "a8d50abac5a4018f60e1d911d4b6f4e36454ca14d6c390c0695a578c7de65dad"
+    },
+    {
+      "name": "conventional-commits",
+      "source": "/Users/francescooddo/.claude/skills/conventional-commits/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/conventional-commits/SKILL.md",
+      "sha256": "a3d82f23727fd3f7d0153491ef46f24e2c6851f8b5ff49e8ffe7068f6f46a015"
+    },
+    {
+      "name": "create-verification-skill",
+      "source": "/Users/francescooddo/.claude/skills/create-verification-skill/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/create-verification-skill/SKILL.md",
+      "sha256": "644f2551403c1bca01a2855b34611b6e7be0ce0dc5b204514c376c0f6a6e6ac4"
+    },
+    {
+      "name": "diagnosing-bugs",
+      "source": "/Users/francescooddo/.claude/skills/diagnosing-bugs/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/diagnosing-bugs/SKILL.md",
+      "sha256": "b9339b09ee3980808d8c5a35c7251b891b8b1e0036ec4ca37812b976ebddf6b6"
+    },
+    {
+      "name": "domain-modeling",
+      "source": "/Users/francescooddo/.claude/skills/domain-modeling/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/domain-modeling/SKILL.md",
+      "sha256": "152e2c97239affb12a60c5f4a7e74ab546a49ae169688c81f4e2ccc42dafa579"
+    },
+    {
+      "name": "emil-design-eng",
+      "source": "/Users/francescooddo/.claude/skills/emil-design-eng/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/emil-design-eng/SKILL.md",
+      "sha256": "e71de849347050c2c573c1cf24d742d5a13459557ecffa6e562f08006f46b5b7"
+    },
+    {
+      "name": "figure-it-out",
+      "source": "/Users/francescooddo/.claude/skills/figure-it-out/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/figure-it-out/SKILL.md",
+      "sha256": "548616d04909de854f36869af2af127ce321fc6aaf95ea5a626997709fd46a2a"
+    },
+    {
+      "name": "find-animation-opportunities",
+      "source": "/Users/francescooddo/.claude/skills/find-animation-opportunities/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/find-animation-opportunities/SKILL.md",
+      "sha256": "91c1243164057fbf824088d12faea937878a757a7ac653e8288b775e8b27b882"
+    },
+    {
+      "name": "frontend-design",
+      "source": "/Users/francescooddo/.claude/skills/frontend-design/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/frontend-design/SKILL.md",
+      "sha256": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0"
+    },
+    {
+      "name": "grill-me",
+      "source": "/Users/francescooddo/.claude/skills/grill-me/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/grill-me/SKILL.md",
+      "sha256": "6189dfceb7304a6e5558f75d87e68fa3bc7fcf7ba120e44f21f8a61fe01eba54"
+    },
+    {
+      "name": "grill-with-docs",
+      "source": "/Users/francescooddo/.claude/skills/grill-with-docs/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/grill-with-docs/SKILL.md",
+      "sha256": "610d091047bcfb9db0f75c057d15538481a721111579fc5ec7f83ad9131a2165"
+    },
+    {
+      "name": "grilling",
+      "source": "/Users/francescooddo/.claude/skills/grilling/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/grilling/SKILL.md",
+      "sha256": "fa5c1e5ee76b1c8f1ae56101f52c9e239de75d5c578adc61227b92d10b7e52ef"
+    },
+    {
+      "name": "handoff",
+      "source": "/Users/francescooddo/.claude/skills/handoff/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/handoff/SKILL.md",
+      "sha256": "57c9f1f392d7352cdc85b1e39ca49eddc70ce1dc278bd9653fb4f23dfc2560fc"
+    },
+    {
+      "name": "how",
+      "source": "/Users/francescooddo/.claude/skills/how/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/how/SKILL.md",
+      "sha256": "fe503e7a9b2a3a7ad2622a2de6124cb06c466922fb44bc61817b49b52042b885"
+    },
+    {
+      "name": "implement",
+      "source": "/Users/francescooddo/.claude/skills/implement/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/implement/SKILL.md",
+      "sha256": "6d3fd9e83b8f36e5213854779db49b256a457a7ebb4a503e53fa7dcff696adc3"
+    },
+    {
+      "name": "improve-animations",
+      "source": "/Users/francescooddo/.claude/skills/improve-animations/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/improve-animations/SKILL.md",
+      "sha256": "68f17bbc4671593d2f43dba26a679243e2153ba5f26965fb7d59df52842534ff"
+    },
+    {
+      "name": "improve-codebase-architecture",
+      "source": "/Users/francescooddo/.claude/skills/improve-codebase-architecture/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/improve-codebase-architecture/SKILL.md",
+      "sha256": "7b76f01b0eefe49a127754c9027a6235a036a21348df5dad988893d8b2f384d6"
+    },
+    {
+      "name": "install-anti-slop",
+      "source": "/Users/francescooddo/.claude/skills/install-anti-slop/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/install-anti-slop/SKILL.md",
+      "sha256": "4d769c56bcaa5217a39570196a246741c4f460f999676a76115baadc48146599"
+    },
+    {
+      "name": "interrogate",
+      "source": "/Users/francescooddo/.claude/skills/interrogate/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/interrogate/SKILL.md",
+      "sha256": "a009220dfe6869c8f7980a94fb1c9c7763a081a0b32fb6d0afb65b8ff1868146"
+    },
+    {
+      "name": "maintain-verification-skill",
+      "source": "/Users/francescooddo/.claude/skills/maintain-verification-skill/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/maintain-verification-skill/SKILL.md",
+      "sha256": "515c0eaa054b3f6be1b1fb06f2c2f173c80fddb58bbcac57576f89c479bc68e8"
+    },
+    {
+      "name": "no-comments",
+      "source": "/Users/francescooddo/.claude/skills/no-comments/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/no-comments/SKILL.md",
+      "sha256": "72d3b153712ab641875f1d7424de0f77375af1cec03707935f08fa7d8f17bbf3"
+    },
+    {
+      "name": "pick-ui-library",
+      "source": "/Users/francescooddo/.claude/skills/pick-ui-library/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/pick-ui-library/SKILL.md",
+      "sha256": "4b889bd6c08358499ac4a7202b8af71ffbd3485d2468f7b09d0613bbe7b24bf4"
+    },
+    {
+      "name": "poteto-mode",
+      "source": "/Users/francescooddo/.claude/skills/poteto-mode/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/poteto-mode/SKILL.md",
+      "sha256": "2bb72869dc864cc961be6d477a8bae1871b5031084964e9b35da07b6f6178464"
+    },
+    {
+      "name": "principle-boundary-discipline",
+      "source": "/Users/francescooddo/.claude/skills/principle-boundary-discipline/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-boundary-discipline/SKILL.md",
+      "sha256": "ab3c690ce361542ca00446b8406f5afd47776f544b8ce06a9ef2eaa2338bde6d"
+    },
+    {
+      "name": "principle-build-the-lever",
+      "source": "/Users/francescooddo/.claude/skills/principle-build-the-lever/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-build-the-lever/SKILL.md",
+      "sha256": "3a0b02b1b890538810f27d00c525b2e677bb5d931f602fd7a774d5cd13b61c93"
+    },
+    {
+      "name": "principle-encode-lessons-in-structure",
+      "source": "/Users/francescooddo/.claude/skills/principle-encode-lessons-in-structure/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-encode-lessons-in-structure/SKILL.md",
+      "sha256": "4acdb3f466efd0a433899aafce3e0f100566228b63ccff43f363a83e80624d81"
+    },
+    {
+      "name": "principle-exhaust-the-design-space",
+      "source": "/Users/francescooddo/.claude/skills/principle-exhaust-the-design-space/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-exhaust-the-design-space/SKILL.md",
+      "sha256": "8583310d7297b7823d75494faa57b003564d436807febecdecbd8321abe5cf6e"
+    },
+    {
+      "name": "principle-experience-first",
+      "source": "/Users/francescooddo/.claude/skills/principle-experience-first/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-experience-first/SKILL.md",
+      "sha256": "f8d643ddf2f6aa91d9607d1bb340fd2baf227d702e9738848b85312a312bb971"
+    },
+    {
+      "name": "principle-fix-root-causes",
+      "source": "/Users/francescooddo/.claude/skills/principle-fix-root-causes/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-fix-root-causes/SKILL.md",
+      "sha256": "cfae13b5a3e27bc88d069092cae97b3e95246879d5bf14f0e9a4db719c781952"
+    },
+    {
+      "name": "principle-foundational-thinking",
+      "source": "/Users/francescooddo/.claude/skills/principle-foundational-thinking/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-foundational-thinking/SKILL.md",
+      "sha256": "a522488c9d4481e8bfcbe35cbf3838169c8e3801ee0738ae2859067684144579"
+    },
+    {
+      "name": "principle-guard-the-context-window",
+      "source": "/Users/francescooddo/.claude/skills/principle-guard-the-context-window/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-guard-the-context-window/SKILL.md",
+      "sha256": "291d0125125eabbc2109c880b1c1083aa95826187119a648b26c1c8ea6367179"
+    },
+    {
+      "name": "principle-laziness-protocol",
+      "source": "/Users/francescooddo/.claude/skills/principle-laziness-protocol/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-laziness-protocol/SKILL.md",
+      "sha256": "8999fda9fde65fd905835c86e3bfc64190369a84bba30b1e93769f39ad6580fe"
+    },
+    {
+      "name": "principle-make-operations-idempotent",
+      "source": "/Users/francescooddo/.claude/skills/principle-make-operations-idempotent/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-make-operations-idempotent/SKILL.md",
+      "sha256": "540738217c3da7bf513b9886924ad6a2bc77e58be867f5bd2e1831c74bf2ce70"
+    },
+    {
+      "name": "principle-migrate-callers-then-delete-legacy-apis",
+      "source": "/Users/francescooddo/.claude/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-migrate-callers-then-delete-legacy-apis/SKILL.md",
+      "sha256": "e29b6b6534a23dcaf8c7e16fc25d6484000d7b6e289c48eb0a32a97280633c5d"
+    },
+    {
+      "name": "principle-minimize-reader-load",
+      "source": "/Users/francescooddo/.claude/skills/principle-minimize-reader-load/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-minimize-reader-load/SKILL.md",
+      "sha256": "480f4ddec29e7e3058a8f17eb97c0cec4a2c8b4b33ba6401e960167c1fc95a81"
+    },
+    {
+      "name": "principle-model-the-domain",
+      "source": "/Users/francescooddo/.claude/skills/principle-model-the-domain/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-model-the-domain/SKILL.md",
+      "sha256": "6b359783c5c9be87860d0999321e864940ff17729b9f9a27f38abae449640022"
+    },
+    {
+      "name": "principle-never-block-on-the-human",
+      "source": "/Users/francescooddo/.claude/skills/principle-never-block-on-the-human/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-never-block-on-the-human/SKILL.md",
+      "sha256": "f656f3b7581df55e79f53cc47df93905c3a940b822c25071ba95f40e530d102a"
+    },
+    {
+      "name": "principle-outcome-oriented-execution",
+      "source": "/Users/francescooddo/.claude/skills/principle-outcome-oriented-execution/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-outcome-oriented-execution/SKILL.md",
+      "sha256": "beedcaed75572a6a1662d47f16da203c2bd2c9dbffbbd678d4ba187d67b7e670"
+    },
+    {
+      "name": "principle-prove-it-works",
+      "source": "/Users/francescooddo/.claude/skills/principle-prove-it-works/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-prove-it-works/SKILL.md",
+      "sha256": "9bbe6138505be34d81e9395d95d3639b384f71d71d65cc1903075126e1da1508"
+    },
+    {
+      "name": "principle-redesign-from-first-principles",
+      "source": "/Users/francescooddo/.claude/skills/principle-redesign-from-first-principles/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-redesign-from-first-principles/SKILL.md",
+      "sha256": "9ae97b35d6338cc9e34c7023c995a39cb7afdaf4bfd41e1d3d665da04d7515d5"
+    },
+    {
+      "name": "principle-separate-before-serializing-shared-state",
+      "source": "/Users/francescooddo/.claude/skills/principle-separate-before-serializing-shared-state/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-separate-before-serializing-shared-state/SKILL.md",
+      "sha256": "5b14fd656441580061f760968c828f3f4ba034242d8fa06b544763efb25e89ee"
+    },
+    {
+      "name": "principle-sequence-verifiable-units",
+      "source": "/Users/francescooddo/.claude/skills/principle-sequence-verifiable-units/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-sequence-verifiable-units/SKILL.md",
+      "sha256": "7478f8160ba5701ca40c742a81e90aff12d45f53ac9191e80ad79b9763e4489f"
+    },
+    {
+      "name": "principle-subtract-before-you-add",
+      "source": "/Users/francescooddo/.claude/skills/principle-subtract-before-you-add/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-subtract-before-you-add/SKILL.md",
+      "sha256": "3999888dc21ced33b86054c2ffde1a3cb438e16bed1213f5dab2b5c000446292"
+    },
+    {
+      "name": "principle-type-system-discipline",
+      "source": "/Users/francescooddo/.claude/skills/principle-type-system-discipline/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/principle-type-system-discipline/SKILL.md",
+      "sha256": "662ed1ad53fb491e97b9c4eac7317fba8ec5ed722fec8d71beb94da0111619cf"
+    },
+    {
+      "name": "prototype",
+      "source": "/Users/francescooddo/.claude/skills/prototype/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/prototype/SKILL.md",
+      "sha256": "2ad8401c4deaddb54947fb65247f790e7b3d8784e35312bcbedbfb1d59cd89ce"
+    },
+    {
+      "name": "recall",
+      "source": "/Users/francescooddo/.claude/skills/recall/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/recall/SKILL.md",
+      "sha256": "90d290daec500f548a167bbd20d69a3a248e345c546ca847ca12967d1c99cbf3"
+    },
+    {
+      "name": "reflect",
+      "source": "/Users/francescooddo/.claude/skills/reflect/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/reflect/SKILL.md",
+      "sha256": "5485347991eb60ee226ca78c5972f9c694f6927cff3263b7f48b631ed7a9de56"
+    },
+    {
+      "name": "research",
+      "source": "/Users/francescooddo/.claude/skills/research/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/research/SKILL.md",
+      "sha256": "af378829f015775a3bcd65ff466826722e99359017ae6bae227ca4c9bd14049c"
+    },
+    {
+      "name": "resolving-merge-conflicts",
+      "source": "/Users/francescooddo/.claude/skills/resolving-merge-conflicts/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/resolving-merge-conflicts/SKILL.md",
+      "sha256": "c7c9ba81362a786aac05d2223123bf1bd2f8a99c3243a72882ede9c68bedfb24"
+    },
+    {
+      "name": "review-animations",
+      "source": "/Users/francescooddo/.claude/skills/review-animations/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/review-animations/SKILL.md",
+      "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d"
+    },
+    {
+      "name": "setup-matt-pocock-skills",
+      "source": "/Users/francescooddo/.claude/skills/setup-matt-pocock-skills/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/setup-matt-pocock-skills/SKILL.md",
+      "sha256": "310fb1a73c0467e617e17d7c41d4a2278b5405c4a27f36d7cd22bb4599aee6bb"
+    },
+    {
+      "name": "setup-pstack",
+      "source": "/Users/francescooddo/.claude/skills/setup-pstack/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/setup-pstack/SKILL.md",
+      "sha256": "3b62d9fd4cce8f450b36b2bc6b1df2f00d887e0a3abd55e7fc1ccbde5db96cea"
+    },
+    {
+      "name": "show-me-your-work",
+      "source": "/Users/francescooddo/.claude/skills/show-me-your-work/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/show-me-your-work/SKILL.md",
+      "sha256": "b99833c41a8781a6af191487f1af37711a3198b98f9373e3c02292b8a6e09aba"
+    },
+    {
+      "name": "swarm",
+      "source": "/Users/francescooddo/.claude/skills/swarm/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/swarm/SKILL.md",
+      "sha256": "8e6494e296af5496cacb0fb83f33f647c84286d2e1d1b85580bc0f0f577a81cd"
+    },
+    {
+      "name": "swiftui-expert-skill",
+      "source": "/Users/francescooddo/.claude/skills/swiftui-expert-skill/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/swiftui-expert-skill/SKILL.md",
+      "sha256": "e74c27b66f5ff5da524ede219348e7f9ddb7602ca9288cc5e3972e8e05e3ba29"
+    },
+    {
+      "name": "tdd",
+      "source": "/Users/francescooddo/.claude/skills/tdd/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/tdd/SKILL.md",
+      "sha256": "5e6b9c16b547113e90afbb946489d1c1384be5c2128f0159bd0bee57251ecf08"
+    },
+    {
+      "name": "teach",
+      "source": "/Users/francescooddo/.claude/skills/teach/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/teach/SKILL.md",
+      "sha256": "6d2dbe5e03084cf26fef66b535127b36cd1bcbe9478e26b0626029cd51dc2259"
+    },
+    {
+      "name": "technical-writing",
+      "source": "/Users/francescooddo/.claude/skills/technical-writing/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/technical-writing/SKILL.md",
+      "sha256": "bd0cb21034f4fe6695cfdf8cd3561026eec943f0bb6e9300bc78a2b3340865a7"
+    },
+    {
+      "name": "telegram-notify",
+      "source": "/Users/francescooddo/.claude/skills/telegram-notify/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/telegram-notify/SKILL.md",
+      "sha256": "35cfc9af6d4cf1d169864677278c5cf0377eba3073dd13fe4be905b0704ea837"
+    },
+    {
+      "name": "thermo-nuclear-code-quality-review",
+      "source": "/Users/francescooddo/.claude/skills/thermo-nuclear-code-quality-review/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/thermo-nuclear-code-quality-review/SKILL.md",
+      "sha256": "3fe9fb20c10a3aeffc059c4c9e0624e2cc5972b02811ded56334daedec4186b2"
+    },
+    {
+      "name": "to-spec",
+      "source": "/Users/francescooddo/.claude/skills/to-spec/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/to-spec/SKILL.md",
+      "sha256": "5d26479544b08048d3a8f79d937b39bc613a617f026b3fd083bafc1e99a7b811"
+    },
+    {
+      "name": "to-tickets",
+      "source": "/Users/francescooddo/.claude/skills/to-tickets/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/to-tickets/SKILL.md",
+      "sha256": "5ecdf1d4df8a360ed39df21a2347f97ba177afd449a577da4f6b6ea8e1ebb808"
+    },
+    {
+      "name": "triage",
+      "source": "/Users/francescooddo/.claude/skills/triage/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/triage/SKILL.md",
+      "sha256": "91e2817ecb688c4df4e2444eab472d1d79d2a0a57abf9f6726967664c460ff2e"
+    },
+    {
+      "name": "typescript-best-practices",
+      "source": "/Users/francescooddo/.claude/skills/typescript-best-practices/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/typescript-best-practices/SKILL.md",
+      "sha256": "e3e4152bc155e32cc8f08dd56c02de176f0363aba28a916e387fd4844c59b7e7"
+    },
+    {
+      "name": "unslop",
+      "source": "/Users/francescooddo/.claude/skills/unslop/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/unslop/SKILL.md",
+      "sha256": "181883e539caec8258ec9129e3ba5f133409144a2cbf2aa361158ab94cfc3441"
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "source": "/Users/francescooddo/.claude/skills/vercel-react-best-practices/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/vercel-react-best-practices/SKILL.md",
+      "sha256": "61860fd4249cf5e5ec917a08aceebed48ccf9b38d526e3cb73e0b18aaf261dac"
+    },
+    {
+      "name": "vgpu",
+      "source": "/Users/francescooddo/.claude/skills/vgpu/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/vgpu/SKILL.md",
+      "sha256": "b42669117d0a9a781f12e45280a66d2a6c9b51f3273fddf196c10171dd0ef1b3"
+    },
+    {
+      "name": "wayfinder",
+      "source": "/Users/francescooddo/.claude/skills/wayfinder/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/wayfinder/SKILL.md",
+      "sha256": "d33e2141f7c8bbfd137fef0213cbec465820e4680e67da5d0f0815d6742d26c2"
+    },
+    {
+      "name": "why",
+      "source": "/Users/francescooddo/.claude/skills/why/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/why/SKILL.md",
+      "sha256": "dc8f2d8a7dbef7d0467cca8e6d055a4dbde027db6e2cbbfb18aa9071d8f20b6c"
+    },
+    {
+      "name": "writing-great-skills",
+      "source": "/Users/francescooddo/.claude/skills/writing-great-skills/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.agents/skills/writing-great-skills/SKILL.md",
+      "sha256": "4d6ccbc3760b1bd4107c495a79872286ea69494003f3b0a719fc95b147457061"
+    },
+    {
+      "name": "imagegen",
+      "source": "/Users/francescooddo/.codex/skills/.system/imagegen/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/.system/imagegen/SKILL.md",
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "name": "openai-docs",
+      "source": "/Users/francescooddo/.codex/skills/.system/openai-docs/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/.system/openai-docs/SKILL.md",
+      "sha256": "7cb8fa1b2a0c635b5c61ffe1da7b8594a7ea0fce5b71e8d523e2025d88b2a05e"
+    },
+    {
+      "name": "plugin-creator",
+      "source": "/Users/francescooddo/.codex/skills/.system/plugin-creator/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/.system/plugin-creator/SKILL.md",
+      "sha256": "71b95b8219644f95d633721e7f7cd3c469edfc8fe50f8415d400dfb2d74bc7b9"
+    },
+    {
+      "name": "review-agent",
+      "source": "/Users/francescooddo/.codex/skills/.system/review-agent/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/.system/review-agent/SKILL.md",
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "name": "skill-creator",
+      "source": "/Users/francescooddo/.codex/skills/.system/skill-creator/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/.system/skill-creator/SKILL.md",
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "name": "skill-installer",
+      "source": "/Users/francescooddo/.codex/skills/.system/skill-installer/SKILL.md",
+      "resolved_source": "/Users/francescooddo/.codex/skills/.system/skill-installer/SKILL.md",
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    }
+  ],
+  "cli_directories": {
+    "/Users/francescooddo/.local/bin": [
+      "Bee",
+      "agent-sessions",
+      "buddytg",
+      "cap",
+      "clipboard-vault",
+      "coderabbit",
+      "cr",
+      "devin",
+      "herdr",
+      "slither",
+      "slither-check-erc",
+      "slither-check-kspec",
+      "slither-check-upgradeability",
+      "slither-doctor",
+      "slither-documentation",
+      "slither-find-paths",
+      "slither-flat",
+      "slither-format",
+      "slither-interface",
+      "slither-mutate",
+      "slither-prop",
+      "slither-read-storage",
+      "slither-simil",
+      "tail-trigger",
+      "z3"
+    ],
+    "/Users/francescooddo/.bun/bin": [
+      "ArmY",
+      "aero",
+      "bee",
+      "btca",
+      "buddydock",
+      "buddymal",
+      "claude",
+      "clawdhub",
+      "clawhub",
+      "cli",
+      "cline",
+      "cline-host",
+      "codeview",
+      "codex",
+      "companion",
+      "compinion",
+      "eas",
+      "expo",
+      "expo-cli",
+      "gws",
+      "mal-season",
+      "mcporter",
+      "moonpay",
+      "mp",
+      "ngrok",
+      "ocu",
+      "open-codex-computer-use-mcp",
+      "open-computer-use",
+      "open-computer-use-mcp",
+      "openclaw",
+      "opencode",
+      "opencode2",
+      "pi",
+      "pi-ai",
+      "squoosh-cli",
+      "sugar-ts",
+      "ts-node",
+      "ts-node-cwd",
+      "ts-node-esm",
+      "ts-node-script",
+      "ts-node-transpile-only",
+      "ts-script",
+      "tsc",
+      "tsserver",
+      "w3f",
+      "xurl",
+      "zcode"
+    ]
+  },
+  "cli_path_checks": {
+    "bun": "/opt/homebrew/bin/bun",
+    "bunx": "/opt/homebrew/bin/bunx",
+    "opencode": "/Users/francescooddo/.bun/bin/opencode",
+    "opencode2": "/Users/francescooddo/.bun/bin/opencode2",
+    "codex": "/Users/francescooddo/.bun/bin/codex",
+    "claude": "/Users/francescooddo/.bun/bin/claude",
+    "gh": "/opt/homebrew/bin/gh",
+    "git": "/usr/bin/git",
+    "wrangler": null,
+    "codeview": "/Users/francescooddo/.bun/bin/codeview",
+    "buddytg": "/Users/francescooddo/.local/bin/buddytg",
+    "gog": "/opt/homebrew/bin/gog",
+    "gws": "/Users/francescooddo/.bun/bin/gws",
+    "xurl": "/Users/francescooddo/.bun/bin/xurl",
+    "asc": "/opt/homebrew/bin/asc",
+    "eas": "/Users/francescooddo/.bun/bin/eas",
+    "adb": "/Users/francescooddo/Library/Android/sdk/platform-tools/adb",
+    "cap": "/Users/francescooddo/.local/bin/cap",
+    "agent-browser": null,
+    "ffmpeg": "/opt/homebrew/bin/ffmpeg",
+    "rg": "/Users/francescooddo/.bun/install/global/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path/rg",
+    "jq": "/opt/anaconda3/bin/jq",
+    "python3": "/opt/anaconda3/bin/python3",
+    "uv": "/opt/anaconda3/bin/uv",
+    "docker": "/usr/local/bin/docker",
+    "tailscale": "/usr/local/bin/tailscale",
+    "openclaw": "/Users/francescooddo/.bun/bin/openclaw",
+    "portless": null,
+    "atuin": "/opt/homebrew/bin/atuin",
+    "mcporter": "/Users/francescooddo/.bun/bin/mcporter"
+  }
+}

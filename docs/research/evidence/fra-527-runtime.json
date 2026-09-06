@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-05",
+  "workerVersion": "8d19b3dd-fd30-45e3-b434-8370cbbd521d",
+  "sdk": "0.0.0-dev-19146",
+  "validation": { "workerTests": 72, "runnerTests": 6, "typechecks": "passed" },
+  "report": "https://reports.buddytools.org/talkt-personal-agent/",
+  "account": "157a8b025a13404b16f11ad7078e53f1",
+  "bot": {
+    "username": "TalktFrancescoBot",
+    "id": 8827400310,
+    "webhookPending": 0
+  },
+  "telegramTest": {
+    "inboundMessage": 212893,
+    "outboundMessage": 212894,
+    "result": "TALKT_TELEGRAM_OK"
+  },
+  "githubTest": {
+    "approvalNotice": 212896,
+    "replyMessage": 212899,
+    "login": "OxFrancesco",
+    "transport": "OpenCode tool -> durable approval -> Mac runner -> gh -> durable result -> Telegram"
+  },
+  "ownerEmail": "oddofrancesco000@gmail.com",
+  "ownerClerkSubject": "user_3Itj3XXUVdtx5jIXM6dIl0BVD7d",
+  "counts": {
+    "skills": 208,
+    "mcpConfigurations": 25,
+    "clis": 105,
+    "plugins": 28
+  },
+  "auth": {
+    "unauthenticatedCapabilitiesHTTP": 401
+  },
+  "android": {
+    "test": "PersonalAgentInstrumentedTest.ownerAppSeesTelegramConversation",
+    "result": "OK 1 test",
+    "device": "Samsung Fold connected via ADB",
+    "account": "oddofrancesco000@gmail.com",
+    "assertions": [
+      "personal capability access",
+      "skills loaded",
+      "same conversation contains TALKT_TELEGRAM_OK"
+    ],
+    "applicationReinstalled": false
+  },
+  "googleTest": {
+    "initialError": "invalid_grant",
+    "renewal": "existing gog OAuth client, same scopes",
+    "approvalNotice": 212916,
+    "replyMessage": 212927,
+    "result": "Success; 1 file returned.",
+    "transport": "native_google -> Mac gog -> Google Drive -> Telegram"
+  },
+  "runnerService": {
+    "label": "org.buddytools.talkt.runner",
+    "installed": true,
+    "tokenStored": "private local file, path omitted",
+    "startAtLogin": true
+  }
+}

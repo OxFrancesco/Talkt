@@ -12,5 +12,13 @@ node_modules/
 worker/worker-configuration.d.ts
 *.apk
 
-# on-device ASR models (too large for git; see AGENTS.md)
-app/src/main/assets/models/
+# Large transcription models stay local; the small wake-word model ships with the app.
+app/src/main/assets/models/*
+!app/src/main/assets/models/wake-word/
+!app/src/main/assets/models/wake-word/**
+
+# Imported personal instructions and local runner state
+worker/src/generated/personal-profile.json
+runner/.state/
+runner/.env
+.personal/

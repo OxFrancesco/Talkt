@@ -1,0 +1,6 @@
+ts	phase	decision	why	evidence	result
+2026-09-05T06:09:16Z	frame	Keep OpenCodeWorkerd and use direct provider connectors	User approved the architecture and explicitly excluded Composio	User message: I want to add those tools nativey, not via composio. about the rest, it is good to go for me	approved
+2026-09-05T06:30:47Z	telegram	Create dedicated TalktFrancescoBot	User requested a new dedicated bot	BotFather confirmed creation; getMe confirmed bot id 8827400310	created, token private
+2026-09-05T06:37:00Z	auth	Preserve deployed Clerk isolation and SDK19146	Production changed in separate Clerk worktree at06:22	wrangler deployments list version747f93f2; Clerk source and dashboard verified	integrating
+2026-09-05T06:42:00Z	permissions	Persist exact custom tool approvals	SDK declaration does not enforce execution permission	Independent reviewer source audit in docs/research/evidence/fra-527-review.md	implemented, testing
+2026-09-05T06:55:00Z	verify	Live Telegram model and GitHub tool path pass	Prove deployment with actual provider and tool execution	docs/research/evidence/fra-527-runtime.json	passed

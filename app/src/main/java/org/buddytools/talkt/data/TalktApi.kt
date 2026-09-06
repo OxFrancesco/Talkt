@@ -48,21 +48,22 @@ class TalktApi(private val settings: TalktSettings) {
         )
     }
 
-    private fun request(
+    private suspend fun request(
         method: String,
         path: String,
         body: ByteArray? = null,
         contentType: String? = null,
     ): JSONObject {
         val endpoint = settings.apiUrl
-        val token = settings.appToken
+        val identity = org.buddytools.talkt.auth.TalktAuth.requireUserId()
+        val token = org.buddytools.talkt.auth.TalktAuth.token(identity)
         if (!endpoint.startsWith("https://") && !endpoint.startsWith("http://127.0.0.1")) {
             throw TalktApiException("Set a valid HTTPS Talkt API URL")
         }
-        if (token.isBlank()) throw TalktApiException("Set the Talkt app token")
 
         val connection = URL(endpoint.trimEnd('/') + path).openConnection() as HttpURLConnection
         return try {
+            connection.instanceFollowRedirects = false
             connection.requestMethod = method
             connection.connectTimeout = 15_000
             connection.readTimeout = 180_000
@@ -74,13 +75,16 @@ class TalktApi(private val settings: TalktSettings) {
                 connection.setRequestProperty("Content-Type", contentType ?: "application/octet-stream")
                 connection.outputStream.use { it.write(body) }
             }
+            org.buddytools.talkt.auth.TalktAuth.ensureUser(identity)
             val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
             val raw = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
             val json = runCatching { JSONObject(raw) }.getOrElse { JSONObject() }
             if (connection.responseCode !in 200..299) {
+                if (connection.responseCode == 401) throw TalktApiException("Your session expired. Open Talkt and sign in again.")
                 val message = json.optString("error", "Talkt API failed (${connection.responseCode})")
                 throw TalktApiException(userFacingError(message))
             }
+            org.buddytools.talkt.auth.TalktAuth.ensureUser(identity)
             json
         } finally {
             connection.disconnect()
@@ -90,7 +94,7 @@ class TalktApi(private val settings: TalktSettings) {
     private fun userFacingError(message: String): String {
         val normalized = message.lowercase()
         return if ("provider.auth" in normalized) {
-            "OpenRouter rejected the request. Check the API key connected to your Talkt agent."
+            "The cloud agent is unavailable. Please try again later."
         } else {
             message.replace(Regex("Gemini", RegexOption.IGNORE_CASE), "Cloud")
         }

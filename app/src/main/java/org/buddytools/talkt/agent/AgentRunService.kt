@@ -44,6 +44,8 @@ class AgentRunService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val text = intent?.getStringExtra(EXTRA_TEXT)?.takeIf(String::isNotBlank)
         val source = intent?.getStringExtra(EXTRA_SOURCE).orEmpty()
+        val accountId = intent?.getStringExtra(EXTRA_USER_ID)
+        if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return START_NOT_STICKY
         if (text == null) {
             if (inFlight.get() == 0) stopSelf(startId)
             return START_NOT_STICKY
@@ -60,10 +62,15 @@ class AgentRunService : Service() {
         scope.launch {
             val startedAt = SystemClock.elapsedRealtime()
             val settings = TalktSettings(this@AgentRunService)
-            val store = TranscriptStore(this@AgentRunService)
+            val store = TranscriptStore(this@AgentRunService, accountId)
             Log.i(TAG, "agent run $runId started (${text.length} chars)")
-            runCatching { TalktApi(settings).prompt(text) }
+            runCatching {
+                if (accountId == null) throw org.buddytools.talkt.data.TalktApiException("Open Talkt and sign in to use your agent")
+                org.buddytools.talkt.auth.TalktAuth.ensureUser(accountId)
+                TalktApi(settings).prompt(text)
+            }
                 .onSuccess { reply ->
+                    if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@onSuccess
                     val elapsed = SystemClock.elapsedRealtime() - startedAt
                     Log.i(TAG, "agent run $runId answered by ${if (reply.fallback) "fallback" else "primary"} in ${elapsed}ms")
                     runCatching { store.append(text, kind = "agent", source = source, reply = reply.text) }
@@ -78,6 +85,7 @@ class AgentRunService : Service() {
                     )
                 }
                 .onFailure { error ->
+                    if (error is kotlinx.coroutines.CancellationException || accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@onFailure
                     val elapsed = SystemClock.elapsedRealtime() - startedAt
                     Log.w(TAG, "agent run $runId failed after ${elapsed}ms: ${error.message}")
                     runCatching { store.append(text, kind = "agent", source = source, reply = null) }
@@ -161,6 +169,7 @@ class AgentRunService : Service() {
         private const val TAG = "Talkt"
         private const val EXTRA_TEXT = "text"
         private const val EXTRA_SOURCE = "source"
+        private const val EXTRA_USER_ID = "user_id"
         private const val PROGRESS_CHANNEL = "talkt.agent.progress"
         private const val ANSWER_CHANNEL = "talkt.agent.answer"
         private const val ONGOING_ID = 41
@@ -170,6 +179,7 @@ class AgentRunService : Service() {
             val intent = Intent(context, AgentRunService::class.java)
                 .putExtra(EXTRA_TEXT, text)
                 .putExtra(EXTRA_SOURCE, source)
+                .putExtra(EXTRA_USER_ID, org.buddytools.talkt.auth.TalktAuth.userId)
             ContextCompat.startForegroundService(context, intent)
         }
 

@@ -204,6 +204,7 @@ class CaptureActivity : ComponentActivity() {
                 state = CaptureState.Error(it.message ?: "Could not prepare the recording")
                 return
             }
+        val accountId = org.buddytools.talkt.auth.TalktAuth.userId
         state = CaptureState.Processing(label = "Transcribing")
         lifecycleScope.launch {
             val startedAt = SystemClock.elapsedRealtime()
@@ -214,6 +215,10 @@ class CaptureActivity : ComponentActivity() {
                     clip.close()
                 }
             }.onSuccess { transcript ->
+                if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) {
+                    state = CaptureState.Error("Your Talkt account changed. Record again.")
+                    return@onSuccess
+                }
                 val elapsed = SystemClock.elapsedRealtime() - startedAt
                 val source = when (transcript.source) {
                     TranscriptSource.OnDevice -> "On device"

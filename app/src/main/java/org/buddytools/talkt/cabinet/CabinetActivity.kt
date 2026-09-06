@@ -3,6 +3,7 @@ package org.buddytools.talkt.cabinet
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -56,10 +57,12 @@ import java.util.Date
 class CabinetActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val store = TranscriptStore(this)
         setContent {
             TalktTheme {
-                CabinetScreen(store = store)
+                val user by com.clerk.api.Clerk.userFlow.collectAsStateWithLifecycle()
+                androidx.compose.runtime.key(user?.id) {
+                    CabinetScreen(store = remember(user?.id) { TranscriptStore(this, user?.id) })
+                }
             }
         }
     }

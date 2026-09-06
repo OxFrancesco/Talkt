@@ -214,13 +214,19 @@ private fun TalktHome(
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         item {
-            Text(
-                "Talkt",
-                color = Cloud,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 20.dp),
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, top = 20.dp, bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    "Talkt",
+                    color = Cloud,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                org.buddytools.talkt.auth.ProfileButton()
+            }
         }
 
         if (!localState.microphone) {

@@ -10,3 +10,4 @@ TELEGRAM_OWNER_ID=replace-with-the-verified-numeric-telegram-user-id
 # NATIVE_GITHUB_TOKEN=
 # NATIVE_CLOUDFLARE_TOKEN=
 # Model connections are stored in the authenticated agent's provider connection store.
+GEMINI_API_KEY=replace-with-a-gemini-api-key

@@ -1,0 +1,408 @@
+[
+  {
+    "file": "en_us-1003119935936341070.wav",
+    "language": "en",
+    "fleurs_id": "1904",
+    "reference": "However, due to the slow communication channels, styles in the west could lag behind by 25 to 30 year.",
+    "normalized_reference": "however due to the slow communication channels styles in the west could lag behind by 25 to 30 year",
+    "gender": "MALE",
+    "sha256": "e45697b74e0b51fe84acd6aad3622a0dafc1da9b06d27dda81aac5d30c83fc8f",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10052240106321793346.wav",
+    "language": "en",
+    "fleurs_id": "1675",
+    "reference": "All nouns, alongside the word Sie for you, always begin with a capital letter, even in the middle of a sentence.",
+    "normalized_reference": "all nouns alongside the word sie for you always begin with a capital letter even in the middle of a sentence",
+    "gender": "MALE",
+    "sha256": "c27ea23fbb5f4fcf3b49b3533db877c32135576461a33f4fb6713d74e874b3a0",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10167324587744183095.wav",
+    "language": "en",
+    "fleurs_id": "1950",
+    "reference": "To the north and within easy reach is the romantic and fascinating town of Sintra and which was made famous to foreigners after a glowing account of its splendours recorded by Lord Byron.",
+    "normalized_reference": "to the north and within easy reach is the romantic and fascinating town of sintra and which was made famous to foreigners after a glowing account of its splendours recorded by lord byron",
+    "gender": "FEMALE",
+    "sha256": "a11933cec9f9e826307b14557b8bcf4be4d8da202d0459affda9a926d2135d04",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10197164397713068203.wav",
+    "language": "en",
+    "fleurs_id": "1728",
+    "reference": "The cabbage juice changes color depending on how acidic or basic (alkaline) the chemical is.",
+    "normalized_reference": "the cabbage juice changes color depending on how acidic or basic alkaline the chemical is",
+    "gender": "FEMALE",
+    "sha256": "af4e4718a83a1a56c5427e17675b25eb6830f5e240545cc2a3bc42e487b3fa76",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10233995782544396174.wav",
+    "language": "en",
+    "fleurs_id": "1972",
+    "reference": "Many people don't think about them as dinosaurs because they have feathers and can fly.",
+    "normalized_reference": "many people don't think about them as dinosaurs because they have feathers and can fly",
+    "gender": "FEMALE",
+    "sha256": "9f9557bf2b81ed4f91c1bd4d964b89cc6048d128f127728f0f86525948bc2d71",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10235738076911595987.wav",
+    "language": "en",
+    "fleurs_id": "1938",
+    "reference": "The hospital has followed protocol for infection control, including separating the patient from others to prevent possible infection of others.",
+    "normalized_reference": "the hospital has followed protocol for infection control including separating the patient from others to prevent possible infection of others",
+    "gender": "MALE",
+    "sha256": "b4c76c88e258a2d78ad2870095da41bdf5dac1c185cd3da0c6b132cf8d74a1bb",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10323357556845456822.wav",
+    "language": "en",
+    "fleurs_id": "1876",
+    "reference": "The Northern Marianas emergency management office said that there were no damages reported in the nation.",
+    "normalized_reference": "the northern marianas emergency management office said that there were no damages reported in the nation",
+    "gender": "FEMALE",
+    "sha256": "31524dc8d21bfa1b3d91b7b0d5e8686f482a3879b80581d53dc68339ea602100",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10335587906469246566.wav",
+    "language": "en",
+    "fleurs_id": "1914",
+    "reference": "Twentieth century research has shown that there are two pools of genetic variation: hidden and expressed.",
+    "normalized_reference": "twentieth century research has shown that there are two pools of genetic variation hidden and expressed",
+    "gender": "FEMALE",
+    "sha256": "e93df746bbdcd121e9903d24a90904520293f0256379adf8e4ec40573fb7c1b4",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10344335557154974057.wav",
+    "language": "en",
+    "fleurs_id": "1846",
+    "reference": "The aspect ratio of this format (dividing by twelve to obtain the simplest whole-number ratio) is therefore said to be 3:2.",
+    "normalized_reference": "the aspect ratio of this format dividing by twelve to obtain the simplest whole-number ratio is therefore said to be 3:2",
+    "gender": "MALE",
+    "sha256": "fb8010ef0fb5a38c51b791c3ef3fa8b05e0ebe6c8269aec552015eed4873d8be",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-1036771894648013441.wav",
+    "language": "en",
+    "fleurs_id": "1806",
+    "reference": "As light pollution in their heyday was not the kind of problem it is today, they are usually located in cities or at campuses, easier to reach than those built in modern times.",
+    "normalized_reference": "as light pollution in their heyday was not the kind of problem it is today they are usually located in cities or at campuses easier to reach than those built in modern times",
+    "gender": "FEMALE",
+    "sha256": "2a55eaa77bd958b6122dd553f6370bb51f8b7341b2825baede8896783624bd60",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-1038214857203833067.wav",
+    "language": "en",
+    "fleurs_id": "1776",
+    "reference": "Through the night between 150 and 200 copies were made, now known as \"Dunlap broadsides\".",
+    "normalized_reference": "through the night between 150 and 200 copies were made now known as dunlap broadsides",
+    "gender": "FEMALE",
+    "sha256": "90f29255c5bf6fe28b25284cf11950857ba92d7f13cc2ac53dcb65de3793b1f4",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10383288285905292158.wav",
+    "language": "en",
+    "fleurs_id": "1729",
+    "reference": "For example, each year students from Bennet School in North Carolina design a website about their trip to the State Capital, each year the website gets remodeled, but old versions are kept online to serve as a scrapbook.",
+    "normalized_reference": "for example each year students from bennet school in north carolina design a website about their trip to the state capital each year the website gets remodeled but old versions are kept online to serve as a scrapbook",
+    "gender": "FEMALE",
+    "sha256": "cdb121097e35c7c71be6834f5d80c815d585adc976657d45ee89f21fd5437665",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10405958125670257178.wav",
+    "language": "en",
+    "fleurs_id": "1855",
+    "reference": "Lion prides act much like packs of wolves or dogs, animals surprisingly similar to lions (but not other big cats) in behavior, and also very deadly to their prey.",
+    "normalized_reference": "lion prides act much like packs of wolves or dogs animals surprisingly similar to lions but not other big cats in behavior and also very deadly to their prey",
+    "gender": "FEMALE",
+    "sha256": "ff931c906ddd6ef6975590348a9b6322a40cb0b9c638f51092e6df6ebf348702",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10411016628242228511.wav",
+    "language": "en",
+    "fleurs_id": "1919",
+    "reference": "The city is also the base to climb the Nyiragongo volcano along with some of the cheapest Mountain Gorilla tracking in Africa.",
+    "normalized_reference": "the city is also the base to climb the nyiragongo volcano along with some of the cheapest mountain gorilla tracking in africa",
+    "gender": "FEMALE",
+    "sha256": "3f8f475aa88278e567630dcc8556ebdf80a9aa29500a6fab66ee37d6a10c2aa7",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-1042003289011443756.wav",
+    "language": "en",
+    "fleurs_id": "1802",
+    "reference": "The Internet combines elements of both mass and interpersonal communication.",
+    "normalized_reference": "the internet combines elements of both mass and interpersonal communication",
+    "gender": "MALE",
+    "sha256": "d4c83c6a02cbb98fe9577fed2de0d913586a419a8d84b5ffb668a835928011e7",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-1043394666292127188.wav",
+    "language": "en",
+    "fleurs_id": "1711",
+    "reference": "These theories look at what it is about certain people that make them want the things that they do and what things in their environment will make them do or not do certain things.",
+    "normalized_reference": "these theories look at what it is about certain people that make them want the things that they do and what things in their environment will make them do or not do certain things",
+    "gender": "MALE",
+    "sha256": "fe518ed29b3bef1e4260b2f780e41f582bf15057f3fd0fb8c1d4e1d9d1ef6353",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-1045619486290403122.wav",
+    "language": "en",
+    "fleurs_id": "1685",
+    "reference": "For example, the most common still image photography format in the world is 35mm, which was the dominant film size at the close of the analog film era.",
+    "normalized_reference": "for example the most common still image photography format in the world is 35mm which was the dominant film size at the close of the analog film era",
+    "gender": "FEMALE",
+    "sha256": "c9d8b46ee7010810140ea7027a346e914c628bf853929b8a0b6e6c6004601914",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-1046653381869710616.wav",
+    "language": "en",
+    "fleurs_id": "1992",
+    "reference": "The term safari in popular use refers to overland travel to view the stunning African wildlife, particularly on savanna.",
+    "normalized_reference": "the term safari in popular use refers to overland travel to view the stunning african wildlife particularly on savanna",
+    "gender": "FEMALE",
+    "sha256": "1b6e095886ff64d280c9cf8b992c929f83bdb47a734aac04c4e3d3afa6f4fd30",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10471564175308895403.wav",
+    "language": "en",
+    "fleurs_id": "2005",
+    "reference": "But there are a lot of things about birds that still look like a dinosaur.",
+    "normalized_reference": "but there are a lot of things about birds that still look like a dinosaur",
+    "gender": "MALE",
+    "sha256": "edf1c07fdecd2b8f7cda75766c88e3ee5cdb86f5b5cd6c679b7f3185172dd35c",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "en_us-10481451226514948764.wav",
+    "language": "en",
+    "fleurs_id": "1982",
+    "reference": "Women: It is recommended that any women travellers say that they are married, regardless of actual marital status.",
+    "normalized_reference": "women it is recommended that any women travellers say that they are married regardless of actual marital status",
+    "gender": "MALE",
+    "sha256": "2a6b4bc1545d262859ed47d0986ffe9044efd45e9874fe69a1f95d1bd0f96774",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/en_us/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10000151032537989529.wav",
+    "language": "it",
+    "fleurs_id": "1787",
+    "reference": "Il blog è uno strumento che si prefigge di incoraggiare la collaborazione e sviluppare l'apprendimento degli studenti ben oltre la giornata scolastica normale.",
+    "normalized_reference": "il blog è uno strumento che si prefigge di incoraggiare la collaborazione e sviluppare l'apprendimento degli studenti ben oltre la giornata scolastica normale",
+    "gender": "MALE",
+    "sha256": "f4cbb8ecfb727b07984ed55b1ce2b2f6845752d814b8ef0190529b1e083b790f",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10011138801715101183.wav",
+    "language": "it",
+    "fleurs_id": "1883",
+    "reference": "Sotto il ponte lo spazio in verticale libero è di 15 metri. La costruzione è terminata nell'agosto del 2011, ma l'apertura al traffico è avvenuta solo nel marzo 2017.",
+    "normalized_reference": "sotto il ponte lo spazio in verticale libero è di 15 metri la costruzione è terminata nell'agosto del 2011 ma l'apertura al traffico è avvenuta solo nel marzo 2017",
+    "gender": "FEMALE",
+    "sha256": "f533818ba9e5531e483c82c8ea0ce5a23a3bd90c7717936effe6146cea123b46",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10017896147709177739.wav",
+    "language": "it",
+    "fleurs_id": "1849",
+    "reference": "Se avete visto il film \"Il mistero dei Templari\", potreste pensare che sul retro della Dichiarazione d'Indipendenza sia disegnata una mappa del tesoro.",
+    "normalized_reference": "se avete visto il film il mistero dei templari potreste pensare che sul retro della dichiarazione d'indipendenza sia disegnata una mappa del tesoro",
+    "gender": "FEMALE",
+    "sha256": "1f9c421d4512c1a4ec9956930919d666ce69fb2d956a93917ac107ae88b4359d",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10037759924455051213.wav",
+    "language": "it",
+    "fleurs_id": "1814",
+    "reference": "Con ioni idrogeno si intendono dei protoni cui sono stati strappati via gli elettroni (dato che gli atomi di idrogeno sono formati da un protone e da un elettrone).",
+    "normalized_reference": "con ioni idrogeno si intendono dei protoni cui sono stati strappati via gli elettroni dato che gli atomi di idrogeno sono formati da un protone e da un elettrone",
+    "gender": "FEMALE",
+    "sha256": "cb3944c74d21d2394fa01bcc2cf49fb77c97dc5280b4244e1ea1d617558c7cb2",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-1006729518827641482.wav",
+    "language": "it",
+    "fleurs_id": "1987",
+    "reference": "L'incidente è avvenuto in alta montagna e si ritiene sia stato causato da fuoco nemico.",
+    "normalized_reference": "l'incidente è avvenuto in alta montagna e si ritiene sia stato causato da fuoco nemico",
+    "gender": "FEMALE",
+    "sha256": "81240fdfcea43457e88a223570f37ff50cdc2be6aec1fead2da9ecb505dd9e80",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10127750728509182272.wav",
+    "language": "it",
+    "fleurs_id": "1974",
+    "reference": "In maniera analoga, agli uomini è richiesto di indossare pantaloni lunghi fin sotto le ginocchia.",
+    "normalized_reference": "in maniera analoga agli uomini è richiesto di indossare pantaloni lunghi fin sotto le ginocchia",
+    "gender": "FEMALE",
+    "sha256": "31065e9ee6f317ea8dfc363ef5de608ef507ccdbff004c0e47f9f2cfa03a0385",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10163392299961827450.wav",
+    "language": "it",
+    "fleurs_id": "1671",
+    "reference": "L'iniziativa contro le oscenità è stata finanziata dal Congresso a partire dall'anno fiscale 2005, con la specifica richiesta all'FBI di assegnare 10 agenti alla pornografia per adulti.",
+    "normalized_reference": "l'iniziativa contro le oscenità è stata finanziata dal congresso a partire dall'anno fiscale 2005 con la specifica richiesta all'fbi di assegnare 10 agenti alla pornografia per adulti",
+    "gender": "FEMALE",
+    "sha256": "a3a0b056987d1d813d3b773b5b19442ef849a488e52801ddaad2a00ce5fe364c",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10166843301601278560.wav",
+    "language": "it",
+    "fleurs_id": "1830",
+    "reference": "Anche nelle elezioni parlamentari la maggioranza resta in mano al partito di governo, l'Organizzazione del Popolo dell'Africa del Sud-Ovest (SWAPO).",
+    "normalized_reference": "anche nelle elezioni parlamentari la maggioranza resta in mano al partito di governo l'organizzazione del popolo dell'africa del sud-ovest swapo",
+    "gender": "FEMALE",
+    "sha256": "6466b30ccb574262072057e9ce4aeefabfcf6e8c0f0e427ded579758bc07aff5",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10168148107941542925.wav",
+    "language": "it",
+    "fleurs_id": "1739",
+    "reference": "La grotta poggia sulla sommità di una delle montagne a nord della Mecca, completamente distaccata dal resto del mondo.",
+    "normalized_reference": "la grotta poggia sulla sommità di una delle montagne a nord della mecca completamente distaccata dal resto del mondo",
+    "gender": "FEMALE",
+    "sha256": "347e3298aa8aeed3057c6bac8591aa03c5691a23bb5ec8d0caaaf01feb22f743",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10173541521390065753.wav",
+    "language": "it",
+    "fleurs_id": "1669",
+    "reference": "Secondo il sovrintendente della polizia Chandra Shekhar Solanki, gli imputati sono apparsi in tribunale con il volto coperto.",
+    "normalized_reference": "secondo il sovrintendente della polizia chandra shekhar solanki gli imputati sono apparsi in tribunale con il volto coperto",
+    "gender": "FEMALE",
+    "sha256": "e05784d1d55d7dc6dcccb2b32d92c9d07f8ff0d7b19c8d880542c1d49a0a437a",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10210638754804006465.wav",
+    "language": "it",
+    "fleurs_id": "2005",
+    "reference": "Eppure gli uccelli hanno molte caratteristiche che li accomunano ai dinosauri.",
+    "normalized_reference": "eppure gli uccelli hanno molte caratteristiche che li accomunano ai dinosauri",
+    "gender": "FEMALE",
+    "sha256": "bec662670fdfd13453b8ac1fa5eedf16f53ebdcaef33831a29a5851cffc89c86",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-1021451608744266497.wav",
+    "language": "it",
+    "fleurs_id": "1960",
+    "reference": "Stando a quanto riferito aveva circa 20 anni. Bieber ha dichiarato \"Anche se non ero presente né direttamente coinvolto in questo terribile incidente, i miei pensieri e le mie preghiere vanno ai familiari della vittima\".",
+    "normalized_reference": "stando a quanto riferito aveva circa 20 anni bieber ha dichiarato anche se non ero presente né direttamente coinvolto in questo terribile incidente i miei pensieri e le mie preghiere vanno ai familiari della vittima",
+    "gender": "FEMALE",
+    "sha256": "09a138c4135bd1dd23d0365285288a483f18f0b08830024b11421d75e6ff33e9",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10225734229056439938.wav",
+    "language": "it",
+    "fleurs_id": "1782",
+    "reference": "Anche gli intervalli tra le singole dinastie furono caratterizzati da periodi di instabilità e divisione tra le province. Il più noto fu il cosiddetto periodo dei Tre Regni, tra la dinastia Han e la dinastia Jin, che durò per 60 anni.",
+    "normalized_reference": "anche gli intervalli tra le singole dinastie furono caratterizzati da periodi di instabilità e divisione tra le province il più noto fu il cosiddetto periodo dei tre regni tra la dinastia han e la dinastia jin che durò per 60 anni",
+    "gender": "FEMALE",
+    "sha256": "6a9499f776da5d56898ea882955c0a6c70660b757a575e827d6034b8b4befca2",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-1024005671072986451.wav",
+    "language": "it",
+    "fleurs_id": "1773",
+    "reference": "L'interruzione del sonno è il processo di risveglio intenzionale che avviene durante il periodo di sonno normale, a cui fa seguito una ripresa del sonno (10–60 minuti più tardi).",
+    "normalized_reference": "l'interruzione del sonno è il processo di risveglio intenzionale che avviene durante il periodo di sonno normale a cui fa seguito una ripresa del sonno 10–60 minuti più tardi",
+    "gender": "FEMALE",
+    "sha256": "49e89b3d4eb033b3cbe0ed56d56172ea6dbff1a754ea13d9f1be750e28ebd24d",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10275928643200034491.wav",
+    "language": "it",
+    "fleurs_id": "1944",
+    "reference": "Si tratta di spiagge adatte alle famiglie a volte un po' affollate, circondate da un'ampia scelta di negozi. Si può fare il bagno in modo sicuro.",
+    "normalized_reference": "si tratta di spiagge adatte alle famiglie a volte un po' affollate circondate da un'ampia scelta di negozi si può fare il bagno in modo sicuro",
+    "gender": "FEMALE",
+    "sha256": "ae063a70d115767288f8a6748753edc441ac22c8e5f2a528aee7b5cf2e55bd06",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10324513969638088871.wav",
+    "language": "it",
+    "fleurs_id": "1789",
+    "reference": "Le altre nomination includono miglior film, miglior regia, miglior fotografia, migliori costumi, miglior montaggio, migliore colonna sonora originale, migliore scenografia, miglior montaggio sonoro, miglior sonoro e migliore sceneggiatura originale.",
+    "normalized_reference": "le altre nomination includono miglior film miglior regia miglior fotografia migliori costumi miglior montaggio migliore colonna sonora originale migliore scenografia miglior montaggio sonoro miglior sonoro e migliore sceneggiatura originale",
+    "gender": "FEMALE",
+    "sha256": "4e5d8565570ef24be750fb15a76a145e2402d26814e37b7af025ead79ed27749",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10331901392264121024.wav",
+    "language": "it",
+    "fleurs_id": "1715",
+    "reference": "In metropolitana, gli annunci ordinari sono solo in catalano. Eventuali interruzioni del servizio non programmate vengono comunicate in un'ampia varietà di lingue tra cui spagnolo, inglese, francese, arabo e giapponese, grazie a un sistema automatico.",
+    "normalized_reference": "in metropolitana gli annunci ordinari sono solo in catalano eventuali interruzioni del servizio non programmate vengono comunicate in un'ampia varietà di lingue tra cui spagnolo inglese francese arabo e giapponese grazie a un sistema automatico",
+    "gender": "MALE",
+    "sha256": "c08d7c858f493ac1321a40227ff5eb964d955b3bcb1d6767d7c98b517cfb1bf4",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10363722267618555781.wav",
+    "language": "it",
+    "fleurs_id": "1871",
+    "reference": "Grazie al clima mite che caratterizza il Medio Oriente, la casa non era di fondamentale importanza.",
+    "normalized_reference": "grazie al clima mite che caratterizza il medio oriente la casa non era di fondamentale importanza",
+    "gender": "FEMALE",
+    "sha256": "3aa5d6eaf0b1608d0f8abe61e7a72e316a8717c19ef7b27721104d09d3892d43",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-1040642958705021773.wav",
+    "language": "it",
+    "fleurs_id": "1881",
+    "reference": "Condividere una gita scolastica virtuale è inoltre un ottimo pretesto per condividere esperienze e riflessioni di viaggio con le classi future.",
+    "normalized_reference": "condividere una gita scolastica virtuale è inoltre un ottimo pretesto per condividere esperienze e riflessioni di viaggio con le classi future",
+    "gender": "FEMALE",
+    "sha256": "6d111a1913ed7a58a9f809940fee0ebc0df6781f00e5d60d2d3bc135bfdbbe0d",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "it_it-10421376619578532077.wav",
+    "language": "it",
+    "fleurs_id": "1910",
+    "reference": "I parigini hanno fama di essere egocentrici, scortesi e presuntuosi.",
+    "normalized_reference": "i parigini hanno fama di essere egocentrici scortesi e presuntuosi",
+    "gender": "FEMALE",
+    "sha256": "202f3c0963cf1c2040361406c2c7071ec1046fe25082a9b21b0dd0e597573979",
+    "source": "https://huggingface.co/datasets/google/fleurs/resolve/main/data/it_it/audio/test.tar.gz"
+  },
+  {
+    "file": "silence.wav",
+    "language": "none",
+    "reference": "",
+    "source": "generated digital silence, 5 seconds"
+  }
+]

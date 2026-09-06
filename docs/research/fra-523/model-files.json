@@ -1,0 +1,80 @@
+[
+  {
+    "model": "tiny",
+    "file": "tiny-decoder.int8.onnx",
+    "bytes": 89855401,
+    "sha256": "d2fece8dd42771f1df975c6c0445770d0c292bf7547c2cae04a6c0cc57540925"
+  },
+  {
+    "model": "tiny",
+    "file": "tiny-encoder.int8.onnx",
+    "bytes": 12937772,
+    "sha256": "d24fb083ae3b1041fc24e97971d60e280c9342201fbb67b0ab428a8b4a51a434"
+  },
+  {
+    "model": "tiny",
+    "file": "tiny-tokens.txt",
+    "bytes": 816730,
+    "sha256": "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+  },
+  {
+    "model": "base",
+    "file": "base-decoder.int8.onnx",
+    "bytes": 130672026,
+    "sha256": "9759d217388a01b3a4c7c15533201067b48ae819c4daafc8624e64b9409dc02d"
+  },
+  {
+    "model": "base",
+    "file": "base-encoder.int8.onnx",
+    "bytes": 29120534,
+    "sha256": "0b8fb1304b6109976038efff5ace81720e00386f3ff6b54ee8c75291ca0a1e11"
+  },
+  {
+    "model": "base",
+    "file": "base-tokens.txt",
+    "bytes": 816730,
+    "sha256": "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+  },
+  {
+    "model": "small",
+    "file": "small-decoder.int8.onnx",
+    "bytes": 262226114,
+    "sha256": "acad50b5c782696e91b55914cc5ab4f756f1532f76e22aa6fc615f39fb69a8ee"
+  },
+  {
+    "model": "small",
+    "file": "small-tokens.txt",
+    "bytes": 816730,
+    "sha256": "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+  },
+  {
+    "model": "small",
+    "file": "small-encoder.int8.onnx",
+    "bytes": 112442483,
+    "sha256": "4cbe7b22fa9026b843b60a68640c747de05bafb1a11b57edc0e66c232d9f33a9"
+  },
+  {
+    "model": "parakeet",
+    "file": "encoder.int8.onnx",
+    "bytes": 652184281,
+    "sha256": "acfc2b4456377e15d04f0243af540b7fe7c992f8d898d751cf134c3a55fd2247"
+  },
+  {
+    "model": "parakeet",
+    "file": "decoder.int8.onnx",
+    "bytes": 11845275,
+    "sha256": "179e50c43d1a9de79c8a24149a2f9bac6eb5981823f2a2ed88d655b24248db4e"
+  },
+  {
+    "model": "parakeet",
+    "file": "joiner.int8.onnx",
+    "bytes": 6355277,
+    "sha256": "3164c13fc2821009440d20fcb5fdc78bff28b4db2f8d0f0b329101719c0948b3"
+  },
+  {
+    "model": "parakeet",
+    "file": "tokens.txt",
+    "bytes": 93939,
+    "sha256": "d58544679ea4bc6ac563d1f545eb7d474bd6cfa467f0a6e2c1dc1c7d37e3c35d"
+  }
+]

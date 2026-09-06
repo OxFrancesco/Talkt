@@ -103,6 +103,8 @@ class CaptureActivity : ComponentActivity() {
         transcriber = TranscriptionGraph.create(this, settings)
         if (settings.transcriptionMode != TranscriptionMode.GeminiOnly) {
             LocalAsrWarmer.prewarm(this, settings.languageCodes.singleOrNull().orEmpty())
+        } else {
+            LocalAsrWarmer.release()
         }
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
         wakeDetectedAt = intent.getLongExtra(EXTRA_WAKE_DETECTED_AT, 0L)

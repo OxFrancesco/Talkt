@@ -5,6 +5,8 @@
     "worker"
   ],
   "scripts": {
+    "models:download": "bun scripts/download-local-model.ts",
+    "models:check": "bun scripts/download-local-model.ts --check",
     "check": "bun run --cwd worker check",
     "test": "bun run --cwd worker test",
     "dev": "bun run --cwd worker dev",

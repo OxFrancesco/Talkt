@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-05",
+  "device": "Samsung Galaxy Z Fold8",
+  "model": "SM-F971B",
+  "soc": "SM8850",
+  "android": "17",
+  "build": "F971BXXS2AZH7",
+  "memTotalKiB": 11351460,
+  "runtime": "sherpa-onnx 1.13.6 Android arm64-v8a",
+  "provider": "cpu",
+  "threads": 2,
+  "languageHint": "auto",
+  "whisperTailPaddings": 300,
+  "passes": 2,
+  "corpus": "google/fleurs test",
+  "datasetRevision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+  "baseRevision": "bb53ee204431c90d314c1cc08d28d23e5b7927cc",
+  "smallRevision": "8f3c18b358db4d1f2fc1eae49d75cd20989e4309",
+  "runOrder": [
+    "tiny",
+    "base",
+    "small",
+    "parakeet"
+  ],
+  "network": "USB ADB; all inference local; radios unchanged",
+  "nativeLibrarySha256": {
+    "libsherpa-onnx-c-api.so": "09adcb8f64b55b1a0d029e3acd3ade0ff41e0b887978253254e832bec7c5bd0f",
+    "libonnxruntime.so": "dc5e4c172b1be9e530c6a62ad8f1be3e0a911cabdee6195abf28dab72477e194"
+  },
+  "nativeLibrariesMatchBundledAar": true,
+  "speechAudioSeconds": 448.94
+}

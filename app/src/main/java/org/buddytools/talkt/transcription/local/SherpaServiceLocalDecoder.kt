@@ -32,8 +32,8 @@ internal class SherpaServiceLocalDecoder(
         context.getSystemService(ActivityManager::class.java).getMemoryInfo(memory)
         if (memory.lowMemory) return LocalFailure.InsufficientMemory
 
-        val models = context.assets.list(MODEL_DIRECTORY).orEmpty().toSet()
-        if (!models.containsAll(REQUIRED_MODEL_FILES)) return LocalFailure.ModelUnavailable
+        val models = context.assets.list(ParakeetModel.DIRECTORY).orEmpty().toSet()
+        if (!models.containsAll(ParakeetModel.requiredFiles)) return LocalFailure.ModelUnavailable
         return null
     }
 
@@ -112,11 +112,5 @@ internal class SherpaServiceLocalDecoder(
 
     private companion object {
         const val MAX_LOCAL_DURATION_MILLIS = 60_000L
-        const val MODEL_DIRECTORY = "models/whisper-tiny"
-        val REQUIRED_MODEL_FILES = setOf(
-            "tiny-encoder.int8.onnx",
-            "tiny-decoder.int8.onnx",
-            "tiny-tokens.txt",
-        )
     }
 }

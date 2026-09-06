@@ -9,17 +9,16 @@ import android.os.IBinder
 import android.os.Looper
 
 /**
- * Keeps the `:local_asr` process and its Whisper model warm.
+ * Keeps the `:local_asr` process and its Parakeet model warm.
  *
- * Loading the model costs ~10s of cold start (process fork + ~150 MB of ONNX assets),
- * so [prewarm] is called as soon as a capture begins: the model loads while the user
+ * [prewarm] is called as soon as a capture begins: the model loads while the user
  * is still speaking. The binding is held for [IDLE_TTL_MILLIS] after the last prewarm
  * so consecutive dictations reuse the loaded recognizer, then released to give the
  * memory back. Main thread only.
  */
 object LocalAsrWarmer {
     private val handler = Handler(Looper.getMainLooper())
-    private val release = Runnable { unbind() }
+    private val releaseTask = Runnable { unbind() }
     private var appContext: Context? = null
     private var connection: ServiceConnection? = null
     private var service: ILocalAsrService? = null
@@ -28,8 +27,8 @@ object LocalAsrWarmer {
     fun prewarm(context: Context, languageHint: String) {
         appContext = context.applicationContext
         pendingHint = languageHint
-        handler.removeCallbacks(release)
-        handler.postDelayed(release, IDLE_TTL_MILLIS)
+        handler.removeCallbacks(releaseTask)
+        handler.postDelayed(releaseTask, IDLE_TTL_MILLIS)
 
         val bound = service
         if (bound != null) {
@@ -66,12 +65,12 @@ object LocalAsrWarmer {
 
     private fun rebind() {
         unbind()
-        handler.postDelayed(release, IDLE_TTL_MILLIS)
+        handler.postDelayed(releaseTask, IDLE_TTL_MILLIS)
         bind()
     }
 
     private fun unbind() {
-        handler.removeCallbacks(release)
+        handler.removeCallbacks(releaseTask)
         val context = appContext
         connection?.let { conn -> context?.let { runCatching { it.unbindService(conn) } } }
         connection = null
@@ -79,4 +78,6 @@ object LocalAsrWarmer {
     }
 
     private const val IDLE_TTL_MILLIS = 5 * 60 * 1_000L
+
+    fun release() = unbind()
 }

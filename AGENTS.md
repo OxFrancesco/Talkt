@@ -17,11 +17,15 @@ Screenshots on the Fold need the physical display id: `adb shell screencap -d 46
 
 ## On-device ASR models (not in git)
 
-`app/src/main/assets/models/whisper-tiny/` is gitignored (the ONNX files are ~100 MB).
-A fresh clone needs these files before building:
+Run `bun run models:download` before building a fresh clone. This downloads the pinned
+Parakeet TDT 0.6B v3 INT8 files to `app/src/main/assets/models/parakeet-tdt-v3/` and
+verifies their SHA-256 hashes. `bun run models:check` verifies existing files offline.
+The Android asset-merge tasks also reject missing or invalid model files.
 
-- `tiny-encoder.int8.onnx`, `tiny-decoder.int8.onnx`, `tiny-tokens.txt`
-- Source: sherpa-onnx Whisper tiny int8 export — https://huggingface.co/csukuangfj/sherpa-onnx-whisper-tiny
+The model files total 670.5 MB and remain gitignored. Remove any obsolete local
+`models/whisper-tiny/` assets before building to avoid shipping both models.
+The APK bundles Parakeet, so a fresh install can transcribe without a model download.
+The pinned source and file hashes are in `models/parakeet-tdt-v3.json`.
 
 <!-- codeview:start -->
 

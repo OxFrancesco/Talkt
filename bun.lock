@@ -4,18 +4,20 @@
   "workspaces": {
     "": {
       "name": "talkt",
+      "dependencies": {
+        "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450",
+      },
     },
     "worker": {
       "name": "@talkt/worker",
       "dependencies": {
         "@clerk/backend": "3.17.1",
-        "@opencode-ai/plugin": "0.0.0-dev-19146",
-        "@opencode-ai/schema": "0.0.0-dev-19146",
-        "@opencode-ai/sdk": "0.0.0-dev-19146",
+        "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450",
         "zod": "^4.1.11",
       },
       "devDependencies": {
         "@cloudflare/vitest-plugin": "^1.1.2",
+        "@opencode-ai/sdk": "0.0.0-dev-19146",
         "@types/node": "^26.4.0",
         "typescript": "^5.9.2",
         "vitest": "^4.1.0",
@@ -1099,6 +1101,8 @@
     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
 
     "picomatch": ["picomatch@4.0.7", "", {}, "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="],
+
+    "pigent": ["pigent@git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450", { "dependencies": { "@opencode-ai/plugin": "0.0.0-dev-19146", "@opencode-ai/schema": "0.0.0-dev-19146", "@opencode-ai/sdk": "0.0.0-dev-19146", "zod": "^4.1.11" } }, "e613d3728fab7a33910750a7734c7b60ee2d5450"],
 
     "pkce-challenge": ["pkce-challenge@5.0.1", "", {}, "sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ=="],
 

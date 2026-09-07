@@ -4,7 +4,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { record, RUNNER_RESULT_LIMIT, type RunnerResult } from "../../shared/runner-protocol";
+import { record, RUNNER_RESULT_LIMIT, type RunnerResult } from "pigent/runner";
 import { childEnvironment } from "./executor";
 
 type ServerBase = { name: string; source: string; disabled: boolean };

@@ -5,7 +5,7 @@ import { MAX_AUDIO_BYTES, MAX_PROMPT_BYTES, parseLanguageCodes, secureEqual } fr
 import { transcribeWav } from "./gemini"
 import { TelegramChannel } from "./telegram-channel"
 import { telegramUpdateSchema } from "./telegram"
-import { record, nonempty, validateRunnerResult } from "../../shared/runner-protocol"
+import { record, nonempty, validateRunnerResult } from "pigent/runner"
 
 export { TalktAgent, TelegramChannel }
 

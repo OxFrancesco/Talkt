@@ -1,7 +1,7 @@
 import { chmod, mkdir, open, readFile, stat, unlink } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { record, validateRunnerJob, type RunnerSubmission } from "../../shared/runner-protocol";
+import { record, validateRunnerJob, type RunnerSubmission } from "pigent/runner";
 import { executeRequest } from "./executor";
 import { Journal } from "./journal";
 import { McpRegistry } from "./mcp";

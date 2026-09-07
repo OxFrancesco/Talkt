@@ -1,7 +1,7 @@
 import { Database } from "bun:sqlite";
 import { chmod, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-import { validateRunnerResult, type RunnerJob, type RunnerResult } from "../../shared/runner-protocol";
+import { validateRunnerResult, type RunnerJob, type RunnerResult } from "pigent/runner";
 
 export class Journal {
   private constructor(private readonly db: Database) {}

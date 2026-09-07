@@ -3,7 +3,7 @@ import { Database } from "bun:sqlite";
 import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { RUNNER_OUTPUT_LIMIT, RUNNER_RESULT_LIMIT, validateRunnerRequest, validateRunnerResult, type RunnerJob } from "../../shared/runner-protocol";
+import { RUNNER_OUTPUT_LIMIT, RUNNER_RESULT_LIMIT, validateRunnerRequest, validateRunnerResult, type RunnerJob } from "pigent/runner";
 import { allowedPath, executeCommand, executeRequest } from "../src/executor";
 import { Journal } from "../src/journal";
 import { McpRegistry } from "../src/mcp";

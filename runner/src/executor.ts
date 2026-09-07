@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { constants } from "node:fs";
 import { open, realpath } from "node:fs/promises";
 import { isAbsolute, relative, sep } from "node:path";
-import { RUNNER_OUTPUT_LIMIT, type RunnerRequest, type RunnerResult } from "../../shared/runner-protocol";
+import { RUNNER_OUTPUT_LIMIT, type RunnerRequest, type RunnerResult } from "pigent/runner";
 import type { McpRegistry } from "./mcp";
 
 export async function allowedPath(path: string, roots: string[]) {

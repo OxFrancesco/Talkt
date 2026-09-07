@@ -6,6 +6,7 @@
       "name": "@talkt/runner",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.30.0",
+        "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450",
         "zod": "4.1.11",
       },
       "devDependencies": {
@@ -150,6 +151,8 @@
     "path-key": ["path-key@3.1.1", "", {}, "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q=="],
 
     "path-to-regexp": ["path-to-regexp@8.4.2", "", {}, "sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA=="],
+
+    "pigent": ["Pigent.git@git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450", {}, "e613d3728fab7a33910750a7734c7b60ee2d5450"],
 
     "pkce-challenge": ["pkce-challenge@5.0.1", "", {}, "sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ=="],
 

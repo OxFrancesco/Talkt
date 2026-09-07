@@ -9,6 +9,7 @@ describe("personal agent runtime", () => {
     expect(health.healthy).toBe(true)
     const capabilities = await agent.capabilities()
     expect(capabilities.personal).toBe(true)
+    expect(capabilities.conversationID).toBe("ses_talkt_default")
     expect(capabilities.profile?.skills).toBeGreaterThan(0)
     expect(capabilities.profile?.instructions).toBe(true)
     const created = await agent.createConversation("Runtime verification")

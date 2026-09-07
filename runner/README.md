@@ -39,7 +39,7 @@ Run `bun run --cwd runner src/main.ts --inventory` to list configured MCP names 
 
 ## Supported jobs
 
-The protocol is in `../shared/runner-protocol.ts`.
+The protocol is in the `pigent/runner` package export.
 
 - `exec` launches a binary with a literal `argv` array and an approved working directory. It inherits the Mac process environment except `TALKT_*` variables. Commands must finish without interactive terminal input. The default timeout is 60 seconds and the maximum is 120 seconds. A timeout kills the process group. Output reports the exit code, signal, timeout and truncation flags.
 - `read_file` reads an approved regular file. Both operations resolve symlinks before checking roots and require absolute paths.

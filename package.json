@@ -11,5 +11,8 @@
     "test": "bun run --cwd worker test",
     "dev": "bun run --cwd worker dev",
     "deploy": "bun run --cwd worker deploy"
+  },
+  "dependencies": {
+    "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450"
   }
 }

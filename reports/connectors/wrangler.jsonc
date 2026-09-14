@@ -1,0 +1,7 @@
+{
+  "name": "talkt-connectors-report",
+  "account_id": "157a8b025a13404b16f11ad7078e53f1",
+  "compatibility_date": "2026-09-06",
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "reports.buddytools.org/talkt-connectors/*", "zone_name": "buddytools.org" }]
+}

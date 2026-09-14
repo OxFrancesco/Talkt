@@ -5,14 +5,14 @@
     "": {
       "name": "talkt",
       "dependencies": {
-        "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450",
+        "pigent": "file:../Pigent",
       },
     },
     "worker": {
       "name": "@talkt/worker",
       "dependencies": {
         "@clerk/backend": "3.17.1",
-        "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450",
+        "pigent": "file:../../Pigent",
         "zod": "^4.1.11",
       },
       "devDependencies": {
@@ -610,6 +610,8 @@
 
     "@tufjs/models": ["@tufjs/models@4.1.0", "", { "dependencies": { "@tufjs/canonical-json": "2.0.0", "minimatch": "^10.1.1" } }, "sha512-Y8cK9aggNRsqJVaKUlEYs4s7CvQ1b1ta2DVPyAimb0I2qhzjNk+A+mxvll/klL0RlfuIUei8BF7YWiua4kQqww=="],
 
+    "@types/bun": ["@types/bun@1.3.10", "", { "dependencies": { "bun-types": "1.3.10" } }, "sha512-0+rlrUrOrTSskibryHbvQkDOWRJwJZqZlxrUs1u4oOoTln8+WIXBPmAuCF35SWB2z4Zl3E84Nl/D0P7803nigQ=="],
+
     "@types/chai": ["@types/chai@5.2.3", "", { "dependencies": { "@types/deep-eql": "*", "assertion-error": "^2.0.1" } }, "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA=="],
 
     "@types/deep-eql": ["@types/deep-eql@4.0.2", "", {}, "sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw=="],
@@ -707,6 +709,8 @@
     "bun-ffi-structs": ["bun-ffi-structs@0.3.1", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-3gM7PpVWLyrwxWjcilSiGuhWanhZivvo6l0u573NziPH6f/gwk6McbaYgn7oJWov6pKGRTDbrg94W5DcJsKTtQ=="],
 
     "bun-pty": ["bun-pty@0.4.8", "", {}, "sha512-rO70Mrbr13+jxHHHu2YBkk2pNqrJE5cJn29WE++PUr+GFA0hq/VgtQPZANJ8dJo6d7XImvBk37Innt8GM7O28w=="],
+
+    "bun-types": ["bun-types@1.3.10", "", { "dependencies": { "@types/node": "*" } }, "sha512-tcpfCCl6XWo6nCVnpcVrxQ+9AYN1iqMIzgrSKYMB/fjLtV2eyAVEg7AxQJuCq/26R6HpKWykQXuSOq/21RYcbg=="],
 
     "bytes": ["bytes@3.1.2", "", {}, "sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg=="],
 
@@ -1102,7 +1106,7 @@
 
     "picomatch": ["picomatch@4.0.7", "", {}, "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="],
 
-    "pigent": ["pigent@git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450", { "dependencies": { "@opencode-ai/plugin": "0.0.0-dev-19146", "@opencode-ai/schema": "0.0.0-dev-19146", "@opencode-ai/sdk": "0.0.0-dev-19146", "zod": "^4.1.11" } }, "e613d3728fab7a33910750a7734c7b60ee2d5450"],
+    "pigent": ["pigent@file:../Pigent", { "dependencies": { "@opencode-ai/plugin": "0.0.0-dev-19146", "@opencode-ai/schema": "0.0.0-dev-19146", "@opencode-ai/sdk": "0.0.0-dev-19146", "zod": "^4.1.11" }, "devDependencies": { "@cloudflare/vitest-plugin": "^1.1.2", "@types/bun": "1.3.10", "@types/node": "^26.4.0", "typescript": "^5.9.2", "vitest": "^4.1.0", "wrangler": "^4.127.1" } }],
 
     "pkce-challenge": ["pkce-challenge@5.0.1", "", {}, "sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ=="],
 
@@ -1415,6 +1419,8 @@
     "@opentui/core/diff": ["diff@9.0.0", "", {}, "sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw=="],
 
     "@parcel/watcher/detect-libc": ["detect-libc@1.0.3", "", { "bin": { "detect-libc": "./bin/detect-libc.js" } }, "sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg=="],
+
+    "@talkt/worker/pigent": ["pigent@file:../Pigent", { "dependencies": { "@opencode-ai/plugin": "0.0.0-dev-19146", "@opencode-ai/schema": "0.0.0-dev-19146", "@opencode-ai/sdk": "0.0.0-dev-19146", "zod": "^4.1.11" }, "devDependencies": { "@cloudflare/vitest-plugin": "^1.1.2", "@types/bun": "1.3.10", "@types/node": "^26.4.0", "typescript": "^5.9.2", "vitest": "^4.1.0", "wrangler": "^4.127.1" } }],
 
     "ai/@ai-sdk/gateway": ["@ai-sdk/gateway@3.0.185", "", { "dependencies": { "@ai-sdk/provider": "3.0.15", "@ai-sdk/provider-utils": "4.0.50", "@vercel/oidc": "3.2.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-fWY6Gggn9pr9tLWzxsqrfJSoeC9drWKzBckk6Erq9cwiJN3md5ACpskFSYxniYU1wRhNnjbViQVMOoWLqF75MQ=="],
 

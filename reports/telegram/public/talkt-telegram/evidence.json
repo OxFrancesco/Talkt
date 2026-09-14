@@ -1,0 +1,29 @@
+{
+  "workerVersion": "9ce7377a-bd68-4802-9e1f-e64f532a412e",
+  "runs": [
+    {
+      "message": "agent_run_finished",
+      "runID": "tg_408110728",
+      "state": "completed",
+      "model": {
+        "id": "gpt-5.5",
+        "providerID": "openai",
+        "variant": "default"
+      },
+      "fallback": false,
+      "time": 1788765480123
+    },
+    {
+      "message": "agent_run_finished",
+      "runID": "tg_408110734",
+      "state": "completed",
+      "model": {
+        "id": "gpt-5.5",
+        "providerID": "openai",
+        "variant": "default"
+      },
+      "fallback": false,
+      "time": 1788765940557
+    }
+  ]
+}

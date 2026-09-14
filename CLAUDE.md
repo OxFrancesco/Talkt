@@ -13,7 +13,6 @@ folder to gather information, feedback, patterns, and templates before writing c
 - `resources/aosp-latinime` — AOSP LatinIME reference for pointer tracking, key detection, layout state, editor integration, and compatibility
 - `resources/sherpa-onnx` — Official Sherpa-ONNX source — Android offline ASR JNI/AAR integration, models, and streaming/offline examples
 - `resources/thinking-orbs-kotlin` — Native Jetpack Compose Thinking Orbs band animation reference
-
-- `resources/clerk-android` — Official Clerk Android SDK and authentication UI reference
+- `resources/mcp-remote` — Native OAuth MCP proxy for Talkt connectors
 
 <!-- codeview:end -->

@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
+    "mcp-remote": "0.8.3",
     "zod": "4.1.11",
-    "pigent": "git+https://@github.com/OxFrancesco/Pigent.git#e613d3728fab7a33910750a7734c7b60ee2d5450"
+    "pigent": "file:../../Pigent"
   },
   "devDependencies": {
     "@types/bun": "1.3.10",

@@ -16,6 +16,10 @@
       {
         "name": "TALKT_TELEGRAM",
         "class_name": "TelegramChannel"
+      },
+      {
+        "name": "TRANSCRIPT_ARCHIVE",
+        "class_name": "TranscriptArchive"
       }
     ]
   },
@@ -30,6 +34,12 @@
       "tag": "v2",
       "new_sqlite_classes": [
         "TelegramChannel"
+      ]
+    },
+    {
+      "tag": "v3",
+      "new_sqlite_classes": [
+        "TranscriptArchive"
       ]
     }
   ],
@@ -48,5 +58,11 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "TRANSCRIPTS",
+      "bucket_name": "talkt-transcripts"
+    }
+  ]
 }

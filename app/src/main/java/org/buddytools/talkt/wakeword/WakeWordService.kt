@@ -121,14 +121,14 @@ class WakeWordService : Service() {
                 throw MicrophoneBusyException()
             }
 
-            WakeWordModel.create(this).use { engine ->
+            WakeWordModel.create(this).use { model ->
                 if (!listeningRequested) return
                 val readyIn = SystemClock.elapsedRealtime() - initializedAt
                 Log.i(TAG, "wake word listening phrase=\"${WakeWordModel.phrase}\" modelReadyMs=$readyIn")
                 mainHandler.post { promote("Listening for \"${WakeWordModel.phrase}\"") }
 
                 val samples = ShortArray(WakeWordModel.frameSamples)
-                val audioGate = WakeWordAudioGate()
+                val pipeline = WakeWordPipeline(model.engines(WakeWordPipeline.DEFAULT_ENGINES))
                 while (listeningRequested) {
                     val count = recorder.read(samples, 0, samples.size, AudioRecord.READ_BLOCKING)
                     if (count == AudioRecord.ERROR_DEAD_OBJECT) error("Wake-word microphone disconnected")
@@ -136,9 +136,7 @@ class WakeWordService : Service() {
                     if (Build.VERSION.SDK_INT >= 29 && recorder.activeRecordingConfiguration?.isClientSilenced == true) {
                         throw MicrophoneBusyException()
                     }
-                    val gate = audioGate.accept(samples, count)
-                    if (gate.resetEngine) engine.reset()
-                    val keyword = if (gate.shouldProcess) engine.accept(samples, count) else null
+                    val keyword = pipeline.accept(samples, count)
                     if (keyword != null) {
                         val detectedAt = SystemClock.elapsedRealtime()
                         Log.i(TAG, "wake word detected keyword=\"$keyword\" elapsedRealtime=$detectedAt")

@@ -14,7 +14,8 @@ data class TranscriptEntry(
 )
 
 /** Append-only local archive of every transcript, stored as JSON lines in app-private storage. */
-class TranscriptStore(context: Context, userId: String? = org.buddytools.talkt.auth.TalktAuth.userId) {
+class TranscriptStore(context: Context, private val userId: String? = org.buddytools.talkt.auth.TalktAuth.userId) {
+    private val appContext = context.applicationContext
     private val suffix = accountStorageSuffix(userId)
     private val file = File(context.filesDir, if (suffix.isEmpty()) FILE_NAME else "transcripts-$suffix.jsonl")
 
@@ -30,6 +31,7 @@ class TranscriptStore(context: Context, userId: String? = org.buddytools.talkt.a
         synchronized(LOCK) {
             file.appendText(entry.toString() + "\n")
         }
+        runCatching { org.buddytools.talkt.cloud.CloudBackupWorker.enqueue(appContext, userId) }
     }
 
     /** Newest first. */

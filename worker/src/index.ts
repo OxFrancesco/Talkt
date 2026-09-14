@@ -7,7 +7,9 @@ import { TelegramChannel } from "./telegram-channel"
 import { telegramUpdateSchema } from "./telegram"
 import { record, nonempty, validateRunnerResult } from "pigent/runner"
 
-export { TalktAgent, TelegramChannel }
+import { TranscriptArchive, transcriptID, transcriptSchema } from "./transcripts"
+
+export { TalktAgent, TelegramChannel, TranscriptArchive }
 
 const promptSchema = z.object({ text: z.string().trim().min(1).max(32_000), sessionID: z.string().min(1).max(200).optional(), id: z.string().min(1).max(200).optional() })
 const keySchema = z.object({ key: z.string().trim().min(1).max(512) })
@@ -49,11 +51,49 @@ export default {
 
       const identity = await authenticate(request, env)
       if (!identity) return json({ error: "Sign in to Talkt to continue", requestID }, 401)
+      if (url.pathname === "/v1/transcripts" || url.pathname.startsWith("/v1/transcripts/")) {
+        const archive = env.TRANSCRIPT_ARCHIVE.getByName(identity)
+        if (url.pathname === "/v1/transcripts" && request.method === "GET") {
+          const query = z.string().max(500).parse(url.searchParams.get("q") ?? "")
+          const offset = z.coerce.number().int().min(0).max(100_000).parse(url.searchParams.get("offset") ?? 0)
+          return json(await archive.search(query, offset))
+        }
+        const id = transcriptID.parse(url.pathname.slice("/v1/transcripts/".length))
+        if (request.method === "PUT") {
+          const entry = transcriptSchema.parse(await readJson(request, 1_600_000))
+          if (entry.id !== id) return json({ error: "Transcript ID does not match" }, 400)
+          const result = await archive.put(entry)
+          return json(result.status === 410 ? { error: "Transcript was deleted" } : result.status === 409
+            ? { error: "Transcript ID already exists with different content" } : { saved: result.saved }, result.status)
+        }
+        if (request.method === "GET") {
+          const entry = await archive.get(id)
+          return entry ? json(entry) : json({ error: "Transcript unavailable" }, 404)
+        }
+        if (request.method === "DELETE") {
+          const result = await archive.remove(id)
+          return json(result, result.pending ? 202 : 200)
+        }
+        return json({ error: "Not found" }, 404)
+      }
       const [, subject] = JSON.parse(identity) as [string, string]
       const personal = Boolean(env.PERSONAL_OWNER_SUB) && subject === env.PERSONAL_OWNER_SUB
       const agent = env.TALKT_AGENT.getByName(personal ? "owner" : `clerk:${identity}`)
 
       if (request.method === "GET" && url.pathname === "/v1/agent/capabilities") return json(await agent.capabilities())
+      if (request.method === "GET" && url.pathname === "/v1/agent/permissions") return json(await agent.permissionMode())
+      if (request.method === "POST" && url.pathname === "/v1/agent/permissions") {
+        if (!personal) return json({ error: "Personal owner required" }, 403)
+        const input = z.object({ yolo: z.boolean() }).strict().parse(await readJson(request, 1024))
+        return json(await agent.setYolo(input.yolo))
+      }
+      if (request.method === "GET" && url.pathname === "/v1/connections") return json(await agent.providerStatus())
+      if (request.method === "POST" && url.pathname === "/v1/connections/chatgpt") return json(await agent.beginChatGPT())
+      if (request.method === "GET" && url.pathname === "/v1/connections/chatgpt") return json(await agent.chatGPTStatus())
+      if (request.method === "POST" && url.pathname === "/v1/connections/select") {
+        const input = z.object({ provider: z.enum(["chatgpt", "openrouter"]) }).strict().parse(await readJson(request, 1024))
+        return json(await agent.useProvider(input.provider))
+      }
       if (request.method === "GET" && url.pathname === "/v1/conversations") return json(await agent.conversations())
       if (request.method === "POST" && url.pathname === "/v1/conversations") {
         const input = z.object({ title: z.string().max(200).optional() }).parse(await readJson(request, 4096))

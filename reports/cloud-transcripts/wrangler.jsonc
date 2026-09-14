@@ -1,0 +1,9 @@
+{
+  "name": "talkt-cloud-transcripts-report",
+  "account_id": "157a8b025a13404b16f11ad7078e53f1",
+  "compatibility_date": "2026-09-13",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "reports.buddytools.org/talkt-cloud-transcripts/*", "zone_name": "buddytools.org" }]
+}

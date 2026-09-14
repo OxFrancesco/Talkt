@@ -5,8 +5,10 @@ import android.app.role.RoleManager
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
@@ -49,6 +51,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.cabinet.CabinetActivity
+import org.buddytools.talkt.capture.PendingTranscriptionService
+import org.buddytools.talkt.capture.RecordingStore
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptionMode
 import org.buddytools.talkt.trigger.TalktAccessibilityService
@@ -92,6 +96,7 @@ class MainActivity : ComponentActivity() {
                     onRequestMicrophone = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
                     onOpenAccessibility = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
                     onRequestAssistant = ::requestAssistantRole,
+                    onRequestUnrestrictedBattery = ::requestUnrestrictedBattery,
                     onWakeWordEnabled = ::setWakeWordEnabled,
                     onAgentEnabled = ::requestAgentNotifications,
                 )
@@ -104,6 +109,17 @@ class MainActivity : ComponentActivity() {
         refreshLocalState()
         if (settings.wakeWordEnabled && localState.wakeWordAvailability == WakeWordAvailability.Ready) {
             WakeWordService.start(this)
+        }
+        // Recordings left behind by a killed bubble get their automatic attempt while we are in front.
+        if (RecordingStore(filesDir).pending().isNotEmpty()) PendingTranscriptionService.start(this)
+    }
+
+    private fun requestUnrestrictedBattery() {
+        val request = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
+        if (request.resolveActivity(packageManager) != null) {
+            startActivity(request)
+        } else {
+            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
         }
     }
 
@@ -123,6 +139,7 @@ class MainActivity : ComponentActivity() {
             microphone = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED,
             accessibility = accessibilityEnabled,
             assistant = assistantEnabled,
+            unrestrictedBattery = getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName),
             wakeWordPrerequisites = WakeWordService.prerequisites(this),
         )
     }
@@ -183,6 +200,7 @@ private data class LocalState(
     val microphone: Boolean = false,
     val accessibility: Boolean = false,
     val assistant: Boolean = false,
+    val unrestrictedBattery: Boolean = true,
     val wakeWordPrerequisites: WakeWordPrerequisites = WakeWordPrerequisites(),
 ) {
     val wakeWordAvailability: WakeWordAvailability
@@ -196,6 +214,7 @@ private fun TalktHome(
     onRequestMicrophone: () -> Unit,
     onOpenAccessibility: () -> Unit,
     onRequestAssistant: () -> Unit,
+    onRequestUnrestrictedBattery: () -> Unit,
     onWakeWordEnabled: (Boolean) -> Unit,
     onAgentEnabled: (Boolean) -> Unit,
 ) {
@@ -229,6 +248,8 @@ private fun TalktHome(
             }
         }
 
+        item { org.buddytools.talkt.cloud.CloudBackupSection() }
+
         if (!localState.microphone) {
             item {
                 GroupRow(shape = GroupShape.Single, onClick = onRequestMicrophone) {
@@ -236,6 +257,38 @@ private fun TalktHome(
                         Text("Microphone access needed", color = Warning, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
                     Text("Allow", color = Mint, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+            item { GroupGap() }
+        }
+        if (!localState.accessibility) {
+            item {
+                GroupRow(shape = GroupShape.Single, onClick = onOpenAccessibility) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Text insertion is off", color = Warning, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(
+                            "Transcripts are only copied. Turn on the Talkt accessibility service to type them into the field you were in. Android switches it off whenever Talkt is force-stopped.",
+                            color = Muted,
+                            fontSize = 12.sp,
+                        )
+                    }
+                    Text("Enable", color = Mint, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+            item { GroupGap() }
+        }
+        if (!localState.unrestrictedBattery) {
+            item {
+                GroupRow(shape = GroupShape.Single, onClick = onRequestUnrestrictedBattery) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Battery may stop Talkt", color = Warning, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text(
+                            "Samsung puts unused apps to sleep, which also turns off text insertion and the wake word. Set Talkt to unrestricted.",
+                            color = Muted,
+                            fontSize = 12.sp,
+                        )
+                    }
+                    Text("Fix", color = Mint, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                 }
             }
             item { GroupGap() }

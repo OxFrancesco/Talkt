@@ -18,7 +18,7 @@ data class AgentReply(
     val fallback: Boolean,
 )
 
-class TalktApi(private val settings: TalktSettings) {
+class TalktApi(private val settings: TalktSettings, private val fixedEndpoint: String? = null) {
     suspend fun status(): AgentStatus = withContext(Dispatchers.IO) {
         val json = request("GET", "/v1/agent/status")
         AgentStatus(
@@ -48,14 +48,36 @@ class TalktApi(private val settings: TalktSettings) {
         )
     }
 
+    suspend fun saveTranscript(owner: String, entry: TranscriptEntry): Boolean = withContext(Dispatchers.IO) {
+        request("PUT", "/v1/transcripts/${entry.id}", TranscriptCloudJson.encode(entry).toString().toByteArray(Charsets.UTF_8), "application/json", owner).getBoolean("saved")
+    }
+
+    suspend fun searchTranscripts(owner: String, query: String, offset: Int = 0): CloudTranscriptPage = withContext(Dispatchers.IO) {
+        val encoded = java.net.URLEncoder.encode(query, Charsets.UTF_8.name())
+        val json = request("GET", "/v1/transcripts?q=$encoded&offset=$offset", expectedOwner = owner)
+        val rows = json.getJSONArray("entries")
+        CloudTranscriptPage(List(rows.length()) { TranscriptCloudJson.decode(rows.getJSONObject(it)) },
+            if (json.isNull("nextOffset")) null else json.getInt("nextOffset"))
+    }
+
+    suspend fun cloudTranscript(owner: String, id: String): TranscriptEntry = withContext(Dispatchers.IO) {
+        TranscriptCloudJson.decode(request("GET", "/v1/transcripts/$id", expectedOwner = owner))
+    }
+
+    suspend fun deleteCloudTranscript(owner: String, id: String): Unit = withContext(Dispatchers.IO) {
+        request("DELETE", "/v1/transcripts/$id", expectedOwner = owner)
+        Unit
+    }
+
     private suspend fun request(
         method: String,
         path: String,
         body: ByteArray? = null,
         contentType: String? = null,
+        expectedOwner: String? = null,
     ): JSONObject {
-        val endpoint = settings.apiUrl
-        val identity = org.buddytools.talkt.auth.TalktAuth.requireUserId()
+        val endpoint = fixedEndpoint ?: settings.apiUrl
+        val identity = expectedOwner ?: org.buddytools.talkt.auth.TalktAuth.requireUserId()
         val token = org.buddytools.talkt.auth.TalktAuth.token(identity)
         if (!endpoint.startsWith("https://") && !endpoint.startsWith("http://127.0.0.1")) {
             throw TalktApiException("Set a valid HTTPS Talkt API URL")
@@ -69,6 +91,7 @@ class TalktApi(private val settings: TalktSettings) {
             connection.readTimeout = 180_000
             connection.setRequestProperty("Authorization", "Bearer $token")
             connection.setRequestProperty("Accept", "application/json")
+            org.buddytools.talkt.auth.TalktAuth.ensureUser(identity)
             if (body != null) {
                 connection.doOutput = true
                 connection.setFixedLengthStreamingMode(body.size)
@@ -80,9 +103,9 @@ class TalktApi(private val settings: TalktSettings) {
             val raw = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
             val json = runCatching { JSONObject(raw) }.getOrElse { JSONObject() }
             if (connection.responseCode !in 200..299) {
-                if (connection.responseCode == 401) throw TalktApiException("Your session expired. Open Talkt and sign in again.")
+                if (connection.responseCode == 401) throw TalktApiException("Your session expired. Open Talkt and sign in again.", 401)
                 val message = json.optString("error", "Talkt API failed (${connection.responseCode})")
-                throw TalktApiException(userFacingError(message))
+                throw TalktApiException(userFacingError(message), connection.responseCode)
             }
             org.buddytools.talkt.auth.TalktAuth.ensureUser(identity)
             json
@@ -101,4 +124,4 @@ class TalktApi(private val settings: TalktSettings) {
     }
 }
 
-class TalktApiException(message: String) : Exception(message)
+class TalktApiException(message: String, val statusCode: Int? = null) : Exception(message)

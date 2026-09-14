@@ -90,6 +90,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("com.clerk:clerk-android-api:1.1.5")
     implementation("com.clerk:clerk-android-ui:1.1.5")
     implementation("io.coil-kt.coil3:coil-compose:3.5.0")
@@ -107,6 +108,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation(kotlin("test"))
+    testImplementation("org.json:json:20240303")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
 }

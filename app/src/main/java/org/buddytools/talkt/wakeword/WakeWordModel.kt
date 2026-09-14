@@ -29,7 +29,7 @@ object WakeWordModel {
     internal fun create(
         context: Context,
         additionalKeywords: String = "",
-    ): SherpaWakeWordEngine {
+    ): SherpaWakeWordModel {
         val model = OnlineModelConfig(
             transducer = OnlineTransducerModelConfig(
                 encoder = "$directory/encoder.int8.onnx",
@@ -47,25 +47,47 @@ object WakeWordModel {
             modelConfig = model,
             maxActivePaths = 4,
             keywordsFile = "$directory/keywords.txt",
-            keywordsScore = 1.5f,
-            keywordsThreshold = 0.20f,
-            numTrailingBlanks = 2,
+            // keywords.txt carries the per-phrase boost (:2.0) and threshold (#0.15); these are
+            // fallbacks for phrases without them. Tuned on the Fold with WakeWordModelInstrumentedTest.
+            keywordsScore = 2.0f,
+            keywordsThreshold = 0.15f,
+            numTrailingBlanks = 1,
         )
-        return SherpaWakeWordEngine(
+        return SherpaWakeWordModel(
             spotter = KeywordSpotter(context.assets, config),
             additionalKeywords = additionalKeywords,
         )
     }
 }
 
+/** One loaded spotter; every [engine] is an independent decoding stream over the same weights. */
+internal class SherpaWakeWordModel(
+    private val spotter: KeywordSpotter,
+    private val additionalKeywords: String,
+) : AutoCloseable {
+    private val streams = mutableListOf<OnlineStream>()
+
+    fun engine(): SherpaWakeWordEngine {
+        val stream = spotter.createStream(additionalKeywords).also { streams += it }
+        return SherpaWakeWordEngine(spotter, stream)
+    }
+
+    fun engines(count: Int): List<SherpaWakeWordEngine> = List(count) { engine() }
+
+    override fun close() {
+        streams.forEach { it.release() }
+        streams.clear()
+        spotter.release()
+    }
+}
+
 internal class SherpaWakeWordEngine(
     private val spotter: KeywordSpotter,
-    additionalKeywords: String,
-) : AutoCloseable {
-    private val stream: OnlineStream = spotter.createStream(additionalKeywords)
+    private val stream: OnlineStream,
+) : KeywordEngine {
     private val floatFrame = FloatArray(WakeWordModel.frameSamples)
 
-    fun accept(samples: ShortArray, count: Int): String? {
+    override fun accept(samples: ShortArray, count: Int): String? {
         if (count <= 0) return null
         require(count <= floatFrame.size)
         for (index in 0 until count) {
@@ -84,12 +106,7 @@ internal class SherpaWakeWordEngine(
         return null
     }
 
-    fun reset() {
+    override fun reset() {
         spotter.reset(stream)
-    }
-
-    override fun close() {
-        stream.release()
-        spotter.release()
     }
 }

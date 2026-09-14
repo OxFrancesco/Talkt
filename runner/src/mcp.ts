@@ -89,6 +89,7 @@ export class McpRegistry {
       { path: join(home, ".codex/config.toml"), key: "mcp_servers", format: "toml" },
       { path: join(home, ".claude.json"), key: "mcpServers", format: "json" },
       { path: join(home, ".config/opencode/opencode.json"), key: "mcp", format: "json" },
+      { path: join(home, ".config/talkt/mcp.json"), key: "mcp", format: "json" },
     ];
     for (const source of sources) {
       const file = Bun.file(source.path);
@@ -112,16 +113,24 @@ export class McpRegistry {
     return JSON.parse(serialized) as RunnerResult;
   }
 
-  async list(name?: string): Promise<RunnerResult> {
+  async list(name?: string, toolName?: string): Promise<RunnerResult> {
     if (!name) return { kind: "success", data: { servers: [...this.servers.values()].map(server => ({ name: server.name, kind: server.kind, source: server.source, disabled: server.disabled, ...(server.kind === "unavailable" ? { reason: server.reason } : {}) })), warnings: this.warnings } };
     return this.withClient(name, async client => {
-      const tools: unknown[] = [];
+      const tools: Awaited<ReturnType<Client["listTools"]>>["tools"] = [];
       let cursor: string | undefined;
       for (let page = 0; page < 20; page++) {
         const result = await client.listTools(cursor ? { cursor } : {}, { timeout: 30_000 });
+        if (toolName) {
+          const tool = result.tools.find(tool => tool.name === toolName);
+          if (tool) return { tools: [tool] };
+        }
         tools.push(...result.tools);
         cursor = result.nextCursor;
-        if (!cursor) return { tools };
+        if (!cursor) {
+          if (toolName) return { tools: [], error: "Tool not found" };
+          if (new TextEncoder().encode(JSON.stringify({ tools })).length < RUNNER_RESULT_LIMIT - 4096) return { tools };
+          return { tools: tools.map(tool => ({ name: tool.name, description: tool.description?.slice(0, 240) })), schemasOmitted: true, nextStep: "Pass server and tool to personal_mcp_list for a complete input schema." };
+        }
       }
       return { tools, truncated: true, reason: "Tool listing exceeded 20 pages" };
     });

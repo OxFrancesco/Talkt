@@ -75,7 +75,7 @@ export async function executeRequest(request: RunnerRequest, roots: string[], mc
         return { kind: "success", data: { text: buffer.subarray(0, Math.min(bytesRead, RUNNER_OUTPUT_LIMIT)).toString("utf8"), truncated: bytesRead > RUNNER_OUTPUT_LIMIT } };
       } finally { await file.close(); }
     }
-    case "mcp_list": return mcp.list(request.server);
+    case "mcp_list": return mcp.list(request.server, request.tool);
     case "mcp_call": return mcp.call(request.server, request.tool, request.arguments);
   }
 }

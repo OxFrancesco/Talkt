@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Talkt</string>
-    <string name="accessibility_description">Hold Volume Down to transcribe speech, then choose whether to use the transcription directly or send it to your agent.</string>
+    <string name="accessibility_description">Types your transcript into the text field you were in, for every trigger (wake word, power button, Volume Down). Also lets you hold Volume Down to start a recording.</string>
 </resources>

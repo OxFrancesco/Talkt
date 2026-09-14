@@ -2,6 +2,8 @@ import { Pigent } from "pigent"
 import { parsePersonalProfile } from "pigent/profile"
 import { nativeRemoteServersSchema } from "pigent/connectors"
 import rawProfile from "./generated/personal-profile.json"
+import { chatGPTRelayPlugin } from "./chatgpt-relay-plugin"
+import { publicKey } from "./chatgpt-relay-public.json"
 
 const profile = parsePersonalProfile(rawProfile)
 
@@ -13,6 +15,11 @@ export class TalktAgent extends Pigent<Env> {
       fallbackModel: env.OPENROUTER_FALLBACK_MODEL,
       identity: { title: "Talkt", source: "talkt", defaultSessionID: "ses_talkt_default", chatGPTLabel: "Talkt ChatGPT" },
       ...(personal ? { personal: {
+        plugins: [chatGPTRelayPlugin({
+          publicKey,
+          online: async () => { const status = await this.capabilities(); return status.personal && status.runner.online },
+          execute: (id, tool, arguments_) => this.runnerExecute(id, { kind: "mcp_call", server: "talkt_chatgpt_relay", tool, arguments: arguments_ }),
+        })],
         profile,
         secrets: { NATIVE_LINEAR_TOKEN: env.NATIVE_LINEAR_TOKEN, NATIVE_GITHUB_TOKEN: env.NATIVE_GITHUB_TOKEN, NATIVE_NOTION_TOKEN: env.NATIVE_NOTION_TOKEN, NATIVE_CLOUDFLARE_TOKEN: env.NATIVE_CLOUDFLARE_TOKEN },
         remoteServers: nativeRemoteServersSchema.parse(JSON.parse(env.NATIVE_MCP_SERVERS || "[]")),

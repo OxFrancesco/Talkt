@@ -10,15 +10,15 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 
 enum class StopReason { TrailingSilence, NoSpeech, MaxDuration, Manual }
 
 class Recording(
-    val wav: ByteArray,
+    /** Finished WAV on disk, or null when nothing usable was captured. */
+    val file: File?,
     val durationMillis: Long,
     val heardSpeech: Boolean,
     val peakRms: Double,
@@ -28,24 +28,31 @@ class Recording(
     val silenced: Boolean,
     val reason: StopReason,
 ) {
-    val hasAudio: Boolean get() = wav.size > WavRecorder.HEADER_BYTES
+    val hasAudio: Boolean get() = file != null
 }
 
-class WavRecorder {
+/**
+ * Records 16 kHz mono PCM straight into a `.part` file in the [RecordingStore]. The WAV header is
+ * written up front with zero sizes and patched when the recording stops, so a process that dies
+ * mid-recording still leaves recoverable audio behind.
+ */
+class WavRecorder(private val store: RecordingStore) {
     private val recording = AtomicBoolean(false)
     private var audioRecord: AudioRecord? = null
     private var worker: Thread? = null
     private var detector: VoiceActivityDetector? = null
     private var silenced = false
     private var autoStopReason: StopReason? = null
-    private val pcm = ByteArrayOutputStream()
+    private var part: File? = null
+    private var output: FileOutputStream? = null
 
     @SuppressLint("MissingPermission")
     fun start(silenceTimeoutMillis: Long, onAutoStop: (StopReason) -> Unit) {
         if (!recording.compareAndSet(false, true)) return
-        pcm.reset()
         silenced = false
         autoStopReason = null
+        val target = store.newRecordingFile().also { part = it }
+        output = FileOutputStream(target).also { it.write(WavFormat.header(0)) }
         val voiceActivityDetector = VoiceActivityDetector(silenceTimeoutMillis).also { detector = it }
         val minBuffer = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING)
         val bufferSize = maxOf(minBuffer, SAMPLE_RATE / 2)
@@ -81,10 +88,21 @@ class WavRecorder {
         audioRecord?.release()
         audioRecord = null
         worker = null
+        runCatching { output?.close() }
+        output = null
         val vad = detector
         detector = null
+        val file = part?.let { part ->
+            this.part = null
+            if (active && part.length() > WavFormat.HEADER_BYTES) {
+                runCatching { store.finalize(part) }.getOrElse { part.delete(); null }
+            } else {
+                part.delete()
+                null
+            }
+        }
         return Recording(
-            wav = if (active) wav(pcm.toByteArray()) else ByteArray(0),
+            file = file,
             durationMillis = vad?.processedMillis ?: 0L,
             heardSpeech = vad?.heardSpeech == true,
             peakRms = vad?.peakRms ?: 0.0,
@@ -93,11 +111,6 @@ class WavRecorder {
             silenced = silenced,
             reason = autoStopReason ?: StopReason.Manual,
         )
-    }
-
-    fun cancel() {
-        stop()
-        pcm.reset()
     }
 
     private val silenceWatcher = object : AudioManager.AudioRecordingCallback() {
@@ -121,7 +134,8 @@ class WavRecorder {
         while (recording.get()) {
             val count = audioRecord?.read(buffer, 0, buffer.size) ?: break
             if (count > 0) {
-                pcm.write(buffer, 0, count)
+                runCatching { output?.write(buffer, 0, count) }
+                    .onFailure { Log.w(TAG, "recording write failed: ${it.message}") }
                 if (voiceActivityDetector.acceptPcm16Le(buffer, count)) {
                     val reason = voiceActivityDetector.stopReason ?: StopReason.TrailingSilence
                     autoStopReason = reason
@@ -132,29 +146,9 @@ class WavRecorder {
         }
     }
 
-    private fun wav(data: ByteArray): ByteArray {
-        val header = ByteBuffer.allocate(HEADER_BYTES).order(ByteOrder.LITTLE_ENDIAN)
-        val byteRate = SAMPLE_RATE * 2
-        header.put("RIFF".toByteArray())
-        header.putInt(36 + data.size)
-        header.put("WAVE".toByteArray())
-        header.put("fmt ".toByteArray())
-        header.putInt(16)
-        header.putShort(1)
-        header.putShort(1)
-        header.putInt(SAMPLE_RATE)
-        header.putInt(byteRate)
-        header.putShort(2)
-        header.putShort(16)
-        header.put("data".toByteArray())
-        header.putInt(data.size)
-        return header.array() + data
-    }
-
     companion object {
-        const val HEADER_BYTES = 44
         private const val TAG = "Talkt"
-        private const val SAMPLE_RATE = 16_000
+        private const val SAMPLE_RATE = WavFormat.SAMPLE_RATE
         private const val CHANNEL = AudioFormat.CHANNEL_IN_MONO
         private const val ENCODING = AudioFormat.ENCODING_PCM_16BIT
     }

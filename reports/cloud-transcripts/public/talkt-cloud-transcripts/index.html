@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Talkt cloud transcripts</title>
+<style>
+:root{color-scheme:light;color:#172d24;background:#f7f6ef;font-family:Georgia,serif}body{max-width:760px;margin:auto;padding:48px 24px;line-height:1.65}h1{font-size:2.3rem;line-height:1.15}h2{font-size:1.35rem;margin-top:2rem}a{color:#17634a}code{font-size:.85em;overflow-wrap:anywhere}li{margin:.5rem 0}img{display:block;max-width:100%;height:auto}table{border-collapse:collapse;width:100%}td{border-bottom:1px solid #d7ded6;padding:12px 0;vertical-align:top}td:first-child{width:35%;padding-right:16px}
+</style>
+<main>
+<h1>Talkt cloud transcripts</h1>
+<p>Google Drive backup is replaced by private R2 storage and per-account SQLite full-text search. Local transcripts stay available offline. Cloud backup is opt-in, with a choice to include existing notes.</p>
+<p>Search covers transcript text and agent replies, with word prefixes and accent-insensitive matching. Users can copy notes and delete cloud copies. This is keyword search, without AI-generated answers.</p>
+<h2>Verification</h2>
+<table>
+<tr><td>Worker tests</td><td>45 passed. Account isolation, upload retries, R2 outage recovery, deletion and pagination.</td></tr>
+<tr><td>Android</td><td>45 unit tests passed. App and device-test APKs compiled.</td></tr>
+<tr><td>R2</td><td><code>talkt-transcripts</code> in the personal Cloudflare account. Public URL disabled and no custom domains.</td></tr>
+<tr><td>Deployment</td><td><code>9c1eb410-b5cf-4769-946d-88823d88490f</code><br>Live health returned 200. Unauthenticated transcript access returned 401.</td></tr>
+<tr><td>Fold</td><td>Device verification pending. Wireless debugging reconnected, but APK transfer and screenshot capture stalled.</td></tr>
+</table>
+<h2>Storage behavior</h2>
+<p>The verified Clerk account selects its own Durable Object and R2 prefix. Repeated uploads reuse the transcript UUID. Pending R2 operations retry through durable alarms. Cloud deletion removes search results and prevents later retries from recreating that UUID.</p>
+<p>Deleting local notes keeps their cloud copies. Turning backup off retains existing cloud copies. Cloud deletion keeps the phone's local copy. Historical SQLite snapshots remain subject to provider recovery retention.</p>
+<p><a href="report.md">Markdown report</a> · <a href="https://developers.cloudflare.com/r2/api/workers/workers-api-usage/">R2 documentation</a> · <a href="https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/">SQLite and FTS5 documentation</a></p>
+</main>
+</html>

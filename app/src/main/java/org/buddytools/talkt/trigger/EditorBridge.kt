@@ -14,6 +14,9 @@ object EditorBridge {
         service = WeakReference(value)
     }
 
+    /** False when the accessibility service is off: Android also turns it off whenever Talkt is force-stopped. */
+    val isConnected: Boolean get() = service.get() != null
+
     fun captureTarget(preserveExisting: Boolean = false): EditorSnapshot? =
         service.get()?.captureEditorTarget(preserveExisting)
 

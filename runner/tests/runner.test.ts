@@ -15,7 +15,25 @@ afterEach(async () => { await Promise.all(temporary.splice(0).map(path => rm(pat
 test("protocol rejects missing fields, null bytes, invalid timeout and oversized UTF-8 output", () => {
   for (const input of [null, {}, { kind: "exec", argv: [], cwd: "/tmp" }, { kind: "exec", argv: ["x\0"], cwd: "/tmp" }, { kind: "exec", argv: ["x"], cwd: "/tmp", timeoutMs: 120001 }, { kind: "mcp_call", server: "x", tool: "y", arguments: [] }]) expect(() => validateRunnerRequest(input)).toThrow();
   expect(validateRunnerRequest({ kind: "exec", argv: ["echo", ""], cwd: "/tmp", timeoutMs: 100 })).toEqual({ kind: "exec", argv: ["echo", ""], cwd: "/tmp", timeoutMs: 100 });
+  expect(() => validateRunnerRequest({ kind: "mcp_list", tool: "echo" })).toThrow();
+  expect(validateRunnerRequest({ kind: "mcp_list", server: "test", tool: "echo" })).toEqual({ kind: "mcp_list", server: "test", tool: "echo" });
   expect(() => validateRunnerResult({ kind: "success", data: "€".repeat(RUNNER_RESULT_LIMIT / 2) })).toThrow();
+});
+
+test("Talkt-specific configuration overrides inherited servers and large catalogs retain individual schemas", async () => {
+  const home = await temp();
+  await mkdir(join(home, ".config/talkt"), { recursive: true });
+  await writeFile(join(home, ".claude.json"), JSON.stringify({ mcpServers: { large: { command: "missing" } } }));
+  await writeFile(join(home, ".config/talkt/mcp.json"), JSON.stringify({ mcp: { large: { command: [process.execPath, resolve(import.meta.dir, "mcp-fixture.ts")], environment: { FIXTURE_LARGE_CATALOG: "1" } } } }));
+  const mcp = await McpRegistry.load(home);
+  const catalog = await mcp.list("large");
+  expect(catalog).toMatchObject({ kind: "success", data: { schemasOmitted: true } });
+  expect(JSON.stringify(catalog)).toContain('"name":"large_39"');
+  expect(new TextEncoder().encode(JSON.stringify(catalog)).length).toBeLessThan(RUNNER_RESULT_LIMIT);
+  const schema = await mcp.list("large", "large_39");
+  expect(JSON.stringify(schema)).toContain("Full input schema");
+  expect(JSON.stringify(schema)).not.toContain('"name":"large_38"');
+  expect(JSON.stringify(await mcp.call("large", "large_39", { value: "connected" }))).toContain("connected");
 });
 
 test("exec passes argv literally and removes runner credentials from the child", async () => {

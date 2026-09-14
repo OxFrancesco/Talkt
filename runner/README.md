@@ -43,7 +43,7 @@ The protocol is in the `pigent/runner` package export.
 
 - `exec` launches a binary with a literal `argv` array and an approved working directory. It inherits the Mac process environment except `TALKT_*` variables. Commands must finish without interactive terminal input. The default timeout is 60 seconds and the maximum is 120 seconds. A timeout kills the process group. Output reports the exit code, signal, timeout and truncation flags.
 - `read_file` reads an approved regular file. Both operations resolve symlinks before checking roots and require absolute paths.
-- `mcp_list` with no server lists configured servers. With a server name it initializes that server and returns its tool schemas.
+- `mcp_list` with no server lists configured servers. With a server name it initializes that server and returns its tool schemas. Large catalogs return names and descriptions. Pass both `server` and `tool` to retrieve one complete input schema.
 - `mcp_call` initializes the named server and calls one tool using its native MCP interface.
 
 `exec` and `read_file` retain up to 24 KiB of raw output. The complete serialized result is limited to 64 KiB of UTF-8 JSON. Larger results return `output_limit`; narrow the command or provider query. MCP tool calls use a 90-second request deadline and a 110-second overall deadline.
@@ -57,6 +57,13 @@ The runner reads these files in ascending precedence. A later server with the sa
 1. `~/.codex/config.toml`, `mcp_servers`
 2. `~/.claude.json`, global `mcpServers`
 3. `~/.config/opencode/opencode.json`, `mcp`
+4. `~/.config/talkt/mcp.json`, `mcp`
+
+Talkt-specific OAuth connections use the pinned `mcp-remote` dependency as a stdio bridge. Complete the provider's browser authorization before running unattended jobs. Store its OAuth files in `~/.config/talkt/mcp-auth` with directory mode `700` and the configuration file with mode `600`. These files stay outside the repository. Restart the runner with `SIGTERM` after changing configuration so it finishes its current job first.
+
+The installed entries are `talkt_linear`, `talkt_notion`, `talkt_sentry`, `talkt_granola`, `talkt_expo` and `talkt_cloudflare`. GitHub and Google use `gh` and `gog`; Convex uses the existing local MCP configuration. Cloudflare authorization is limited to the personal account. Figma is not connected while its desktop login handoff is failing.
+
+The Worker's native connector status describes direct Worker adapters. Discover these Mac connections with `personal_mcp_list`; a configured name alone is not proof that its authorization still works.
 
 Supported configuration includes command and argument arrays, local environment values, working directories, remote URLs, static headers, `http_headers`, `env_http_headers`, `bearer_token_env_var`, `${ENV_NAME}` and OpenCode `{env:ENV_NAME}` references. Disabled entries remain visible and cannot execute. Missing environment variables and unsupported entries remain visible as unavailable. JSON files must contain JSON, not JSONC.
 
@@ -100,3 +107,10 @@ launchctl bootstrap gui/501 ~/Library/LaunchAgents/org.buddytools.talkt.runner.p
 ```
 
 The configured executable is `/opt/homebrew/bin/bun`. The SSD containing Talkt must be mounted. The Mac must be awake. A Cloudflare-only agent conversation still works when the runner is offline; local CLI and MCP calls wait for it and eventually return an explicit timeout.
+# ChatGPT subscription relay
+
+Telegram Settings connects the ChatGPT subscription through OpenCode V2 device login. Cloudflare currently receives HTTP 403 from the ChatGPT model endpoint, so Talkt retries that specific HTML rejection through the Mac runner. The model and provider remain OpenAI.
+
+Run `bun runner/src/setup-chatgpt-relay.ts` from Talkt to create or reuse the private relay key and register the local MCP. Deploy the Worker after generating its public key, then restart the runner. The private key stays in `~/.config/talkt/chatgpt-relay.pk8` with mode 600. Only the public key belongs in the repository.
+
+The relay accepts only POST requests to the ChatGPT responses endpoint, refuses redirects, and encrypts credentials and response segments before journal storage. Requests time out after 80 seconds. Uncompressed responses are limited to 4 MB and encrypted packets to 1 MB. Segments remain readable for ten minutes and stale files are removed on the next relay startup. The Mac must stay awake and online for subscription requests.

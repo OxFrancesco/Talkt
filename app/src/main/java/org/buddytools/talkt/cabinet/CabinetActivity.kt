@@ -43,6 +43,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import org.buddytools.talkt.capture.PendingRecording
+import org.buddytools.talkt.capture.PendingTranscriptionService
+import org.buddytools.talkt.capture.RecordingStore
 import org.buddytools.talkt.data.TranscriptEntry
 import org.buddytools.talkt.data.TranscriptStore
 import org.buddytools.talkt.ui.Cloud
@@ -61,7 +65,10 @@ class CabinetActivity : ComponentActivity() {
             TalktTheme {
                 val user by com.clerk.api.Clerk.userFlow.collectAsStateWithLifecycle()
                 androidx.compose.runtime.key(user?.id) {
-                    CabinetScreen(store = remember(user?.id) { TranscriptStore(this, user?.id) })
+                    CabinetScreen(
+                        store = remember(user?.id) { TranscriptStore(this, user?.id) },
+                        recordings = remember { RecordingStore(filesDir) },
+                    )
                 }
             }
         }
@@ -69,14 +76,22 @@ class CabinetActivity : ComponentActivity() {
 }
 
 @Composable
-private fun CabinetScreen(store: TranscriptStore) {
+private fun CabinetScreen(store: TranscriptStore, recordings: RecordingStore) {
     val context = LocalContext.current
     var entries by remember { mutableStateOf(store.list()) }
+    var pending by remember { mutableStateOf(recordings.pending()) }
     var copiedID by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
     var deleteRequest by remember { mutableStateOf<DeleteRequest?>(null) }
     var informationEntry by remember { mutableStateOf<TranscriptEntry?>(null) }
     val visibleEntries = remember(entries, query) { fuzzySearchEntries(entries, query) }
+
+    // The background transcriber removes recordings and adds notes while we are away.
+    LifecycleResumeEffect(Unit) {
+        entries = store.list()
+        pending = recordings.pending()
+        onPauseOrDispose { }
+    }
 
     Box(Modifier.fillMaxSize().background(Ink)) {
         LazyColumn(
@@ -93,6 +108,7 @@ private fun CabinetScreen(store: TranscriptStore) {
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f).padding(start = 4.dp),
                     )
+                    TextButton(onClick = { context.startActivity(android.content.Intent(context, CloudCabinetActivity::class.java)) }) { Text("Cloud", color = Mint) }
                     if (entries.isNotEmpty()) {
                         TextButton(onClick = { deleteRequest = DeleteRequest.All }) {
                             Text("Clear all", color = Muted, fontSize = 13.sp)
@@ -120,6 +136,27 @@ private fun CabinetScreen(store: TranscriptStore) {
                     },
                     placeholder = { Text("Search notes") },
                 )
+            }
+
+            if (pending.isNotEmpty() && query.isEmpty()) {
+                item {
+                    Text(
+                        "Saved recordings",
+                        color = Muted,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(start = 4.dp, top = 6.dp),
+                    )
+                }
+                items(pending, key = { it.file.path }) { recording ->
+                    PendingRecordingCard(
+                        recording = recording,
+                        onTranscribe = { PendingTranscriptionService.start(context, recording.file, source = "cabinet") },
+                        onRemove = {
+                            recording.file.delete()
+                            pending = pending.filterNot { it.file == recording.file }
+                        },
+                    )
+                }
             }
 
             if (visibleEntries.isEmpty()) {
@@ -181,7 +218,7 @@ private fun CabinetScreen(store: TranscriptStore) {
 }
 
 @Composable
-private fun TranscriptCard(
+internal fun TranscriptCard(
     entry: TranscriptEntry,
     copied: Boolean,
     onCopy: () -> Unit,
@@ -220,7 +257,35 @@ private fun TranscriptCard(
 }
 
 @Composable
-private fun NoteInformationDialog(entry: TranscriptEntry, onDismiss: () -> Unit) {
+private fun PendingRecordingCard(
+    recording: PendingRecording,
+    onTranscribe: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(SurfaceRaised)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text("Recording · ${formatDuration(recording.durationMillis)}", color = Cloud, fontSize = 15.sp)
+        Text(formatTime(recording.recordedAt), color = Muted, fontSize = 12.sp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Not transcribed yet", color = Muted, fontSize = 11.sp, modifier = Modifier.weight(1f))
+            TextButton(onClick = onRemove) {
+                Text("Delete", color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            }
+            TextButton(onClick = onTranscribe) {
+                Text("Transcribe", color = Mint, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun NoteInformationDialog(entry: TranscriptEntry, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Note information") },
@@ -273,3 +338,8 @@ private fun DeleteConfirmationDialog(
 
 private fun formatTime(timeMillis: Long): String =
     DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(timeMillis))
+
+private fun formatDuration(millis: Long): String {
+    val seconds = (millis + 500) / 1_000
+    return if (seconds < 60) "${seconds}s" else "${seconds / 60}m ${seconds % 60}s"
+}

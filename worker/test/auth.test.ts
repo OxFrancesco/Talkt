@@ -73,6 +73,8 @@ describe("authenticated Worker routing", () => {
     ["/v1/agent/openrouter/key", "POST"], ["/v1/transcribe", "POST"],
     ["/v1/runs", "POST"], ["/v1/conversations", "GET"], ["/v1/agent/capabilities", "GET"],
     ["/v1/permissions/reply", "POST"],
+    ["/v1/agent/permissions", "POST"], ["/v1/connections/chatgpt", "POST"],
+    ["/v1/connections/chatgpt", "GET"], ["/v1/connections/select", "POST"],
   ])("protects %s before accessing agent or cloud providers", async (path, method) => {
     expect((await worker.fetch(request(undefined, path, method), env)).status).toBe(401)
     expect((await worker.fetch(request("old-shared-token", path, method), env)).status).toBe(401)
@@ -80,6 +82,17 @@ describe("authenticated Worker routing", () => {
 
   it("keeps health public", async () => {
     expect((await worker.fetch(request(undefined, "/health"), env)).status).toBe(200)
+  })
+
+  it("rejects YOLO changes from other signed-in accounts", async () => {
+    const response = await worker.fetch(new Request("https://talkt.test/v1/agent/permissions", {
+      method: "POST", headers: { authorization: `Bearer ${token()}`, "content-type": "application/json" }, body: JSON.stringify({ yolo: true }),
+    }), env)
+    expect(response.status).toBe(403)
+    expect(await env.TALKT_AGENT.getByName(`clerk:other`).permissionMode()).toEqual({ yolo: false })
+    await runInDurableObject(env.TALKT_AGENT.getByName(`clerk:other`), async (instance) => {
+      await expect(instance.setYolo(true)).rejects.toThrow("personal owner")
+    })
   })
 
   it("routes signed users to separate persistent agents and ignores supplied user IDs", async () => {

@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -63,6 +64,7 @@ import org.buddytools.talkt.data.VoiceAction
 import org.buddytools.talkt.data.defaultVoiceAction
 import org.buddytools.talkt.data.withAgentEnabled
 import org.buddytools.talkt.trigger.EditorBridge
+import org.buddytools.talkt.transcription.NoSpeechException
 import org.buddytools.talkt.transcription.RecordedClip
 import org.buddytools.talkt.transcription.local.LocalAsrWarmer
 import org.buddytools.talkt.transcription.Transcriber
@@ -77,9 +79,10 @@ import org.buddytools.talkt.wakeword.WakeWordService
 import org.buddytools.thinkingorbs.ThinkingOrb
 import org.buddytools.thinkingorbs.ThinkingOrbColors
 import org.buddytools.thinkingorbs.ThinkingOrbParameters
+import java.io.File
 
 class CaptureActivity : ComponentActivity() {
-    private val recorder = WavRecorder()
+    private val recorder by lazy { WavRecorder(RecordingStore(filesDir)) }
     private lateinit var settings: TalktSettings
     private lateinit var transcriber: Transcriber
     private var state by mutableStateOf<CaptureState>(CaptureState.Preparing)
@@ -89,6 +92,8 @@ class CaptureActivity : ComponentActivity() {
     private var claimedActive = false
     private var wakeDetectedAt = 0L
     private var microphoneHandoffMillis = 0L
+    /** Recording currently being transcribed by this bubble; still on disk until archived. */
+    private var transcribing: File? = null
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) beginRecording() else state = CaptureState.Error("Microphone permission is required")
@@ -116,6 +121,7 @@ class CaptureActivity : ComponentActivity() {
         // window would steal focus from the editor beneath and hide its keyboard.
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         editorMode = EditorBridge.captureTarget(preserveExisting = true) != null || EditorBridge.hasFreshTarget()
+        Log.i(TAG, "capture opened source=$source editorMode=$editorMode accessibility=${EditorBridge.isConnected}")
         selectedAction = defaultVoiceAction(settings.agentEnabled, editorMode)
         setContent {
             TalktTheme {
@@ -126,6 +132,7 @@ class CaptureActivity : ComponentActivity() {
                     onActionSelected = { selectedAction = it },
                     onStop = ::finishRecording,
                     onClose = ::finish,
+                    onEnableAccessibility = ::openAccessibilitySettings,
                 )
             }
         }
@@ -136,11 +143,33 @@ class CaptureActivity : ComponentActivity() {
         if (claimedActive) {
             val wasCurrent = current?.get() === this
             if (wasCurrent) current = null
-            if (state is CaptureState.Listening) recorder.cancel()
+            if (state is CaptureState.Listening) keepInterruptedRecording()
+            transcribing?.takeIf { it.exists() }?.let { file ->
+                // lifecycleScope cancels the in-flight transcription; finish it in the background.
+                Log.i(TAG, "capture closed while transcribing; handing ${file.name} to the background transcriber")
+                PendingTranscriptionService.start(this, file, source)
+            }
             if (source == "power") CaptureBus.finishPowerSession()
             if (wasCurrent) WakeWordService.resume(this)
         }
         super.onDestroy()
+    }
+
+    /** The bubble is going away mid-recording; hand whatever was heard to the background transcriber. */
+    private fun keepInterruptedRecording() {
+        val recording = recorder.stop()
+        val kept = recording.file?.takeIf { recording.heardSpeech && !recording.silenced }
+        Log.i(TAG, "capture interrupted while listening: duration=${recording.durationMillis}ms heardSpeech=${recording.heardSpeech} kept=${kept != null}")
+        if (kept == null) {
+            recording.file?.delete()
+            return
+        }
+        PendingTranscriptionService.start(this, kept, source)
+    }
+
+    private fun openAccessibilitySettings() {
+        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        finish()
     }
 
     private fun ensureRecordingPermission() {
@@ -192,29 +221,29 @@ class CaptureActivity : ComponentActivity() {
                 "silenced=${recording.silenced}",
         )
         if (recording.silenced && !recording.heardSpeech) {
+            recording.file?.delete()
             state = CaptureState.Error("Another app is using the microphone")
             return
         }
-        if (!recording.hasAudio || recording.reason == StopReason.NoSpeech) {
+        val file = recording.file
+        if (file == null || recording.reason == StopReason.NoSpeech) {
+            file?.delete()
             state = CaptureState.Error("I didn't hear anything")
             return
         }
-        val clip = runCatching { RecordedClip.create(cacheDir, recording.wav) }
+        val clip = runCatching { RecordedClip.open(file) }
             .getOrElse {
+                file.delete()
                 state = CaptureState.Error(it.message ?: "Could not prepare the recording")
                 return
             }
         val accountId = org.buddytools.talkt.auth.TalktAuth.userId
         state = CaptureState.Processing(label = "Transcribing")
+        transcribing = file
         lifecycleScope.launch {
             val startedAt = SystemClock.elapsedRealtime()
-            runCatching {
-                try {
-                    transcriber.transcribe(clip)
-                } finally {
-                    clip.close()
-                }
-            }.onSuccess { transcript ->
+            runCatching { transcriber.transcribe(clip) }.onSuccess { transcript ->
+                transcribing = null
                 if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) {
                     state = CaptureState.Error("Your Talkt account changed. Record again.")
                     return@onSuccess
@@ -230,20 +259,43 @@ class CaptureActivity : ComponentActivity() {
                 state = when (action) {
                     VoiceAction.Transcribe -> {
                         val inserted = editorMode && EditorBridge.commit(transcript.text)
+                        val outcome = when {
+                            inserted -> TranscriptOutcome.Inserted
+                            EditorBridge.isConnected -> TranscriptOutcome.Copied
+                            else -> TranscriptOutcome.CopiedAccessibilityOff
+                        }
+                        Log.i(TAG, "transcript delivered: $outcome")
                         archive(transcript.text, kind = if (inserted) "insert" else "copy", source = source)
-                        CaptureState.Complete(transcript.text)
+                        CaptureState.Complete(transcript.text, outcome)
                     }
                     VoiceAction.AskAgent -> {
                         AgentRunService.start(this@CaptureActivity, transcript.text, source)
-                        CaptureState.Complete(transcript.text)
+                        CaptureState.Complete(transcript.text, TranscriptOutcome.SentToAgent)
                     }
                 }
                 settings.latestResult = transcript.text
-                delay(if (action == VoiceAction.AskAgent) 1_800 else 1_100)
+                // The transcript is archived; the audio has done its job.
+                clip.close()
+                delay(
+                    when ((state as? CaptureState.Complete)?.outcome) {
+                        TranscriptOutcome.CopiedAccessibilityOff -> 4_000L
+                        TranscriptOutcome.SentToAgent -> 1_800L
+                        else -> 1_100L
+                    },
+                )
                 finish()
             }.onFailure { error ->
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                transcribing = null
                 Log.w(TAG, "transcription failed after ${SystemClock.elapsedRealtime() - startedAt}ms: ${error.message}")
-                state = CaptureState.Error(error.message ?: "Talkt could not finish")
+                if (error is NoSpeechException) {
+                    clip.close()
+                    state = CaptureState.Error(error.message ?: "I didn't hear anything")
+                } else {
+                    // Keep the audio; the Cabinet can retry it later.
+                    Log.i(TAG, "recording kept for retry: ${file.name}")
+                    state = CaptureState.Error("${error.message ?: "Talkt could not finish"}. The recording is saved in the Cabinet.")
+                }
             }
         }
     }
@@ -286,11 +338,13 @@ class CaptureActivity : ComponentActivity() {
     }
 }
 
+private enum class TranscriptOutcome { Inserted, Copied, CopiedAccessibilityOff, SentToAgent }
+
 private sealed interface CaptureState {
     data object Preparing : CaptureState
     data object Listening : CaptureState
     data class Processing(val label: String) : CaptureState
-    data class Complete(val detail: String) : CaptureState
+    data class Complete(val detail: String, val outcome: TranscriptOutcome) : CaptureState
     data class Error(val message: String) : CaptureState
 }
 
@@ -302,6 +356,7 @@ private fun CaptureScreen(
     onActionSelected: (VoiceAction) -> Unit,
     onStop: () -> Unit,
     onClose: () -> Unit,
+    onEnableAccessibility: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -328,7 +383,7 @@ private fun CaptureScreen(
                     CaptureState.Preparing -> ThinkingContent(label = "Getting ready")
                     CaptureState.Listening -> ListeningContent(onStop)
                     is CaptureState.Processing -> ThinkingContent(label = state.label)
-                    is CaptureState.Complete -> CompleteContent(state)
+                    is CaptureState.Complete -> CompleteContent(state, onEnableAccessibility)
                     is CaptureState.Error -> ErrorContent(state.message, onClose)
                 }
             }
@@ -428,7 +483,7 @@ private fun ListeningContent(onStop: () -> Unit) {
 }
 
 @Composable
-private fun CompleteContent(state: CaptureState.Complete) {
+private fun CompleteContent(state: CaptureState.Complete, onEnableAccessibility: () -> Unit) {
     Box(Modifier.size(44.dp).clip(CircleShape).background(Mint), contentAlignment = Alignment.Center) {
         Icon(Icons.Rounded.Check, null, tint = Ink)
     }
@@ -441,6 +496,22 @@ private fun CompleteContent(state: CaptureState.Complete) {
         textAlign = TextAlign.Center,
         maxLines = 4,
     )
+    Spacer(Modifier.height(6.dp))
+    when (state.outcome) {
+        TranscriptOutcome.Inserted -> Text("Inserted", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+        TranscriptOutcome.Copied -> Text("Copied to clipboard", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+        TranscriptOutcome.SentToAgent -> Text("Copied · asking your agent", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+        TranscriptOutcome.CopiedAccessibilityOff -> {
+            Text(
+                "Copied. Talkt's accessibility service is off, so the text was not typed into the field.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                textAlign = TextAlign.Center,
+            )
+            TextButton(onClick = onEnableAccessibility) { Text("Turn on in Settings", color = Mint) }
+        }
+    }
 }
 
 @Composable

@@ -1,43 +1,7 @@
-import groovy.json.JsonSlurper
-import java.security.MessageDigest
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-}
-
-val verifyLocalAsrModel by tasks.registering {
-    val manifestFile = rootProject.file("models/parakeet-tdt-v3.json")
-    inputs.file(manifestFile)
-    doLast {
-        val manifest = JsonSlurper().parse(manifestFile) as Map<*, *>
-        val directory = file("src/main/assets/models/${manifest["directory"]}")
-        for (entry in manifest["files"] as List<*>) {
-            val model = entry as Map<*, *>
-            val path = directory.resolve(model["file"].toString())
-            check(path.isFile && path.length() == (model["bytes"] as Number).toLong()) {
-                "Missing or invalid local ASR model: ${path.name}. Run bun run models:download."
-            }
-            val digest = MessageDigest.getInstance("SHA-256")
-            path.inputStream().buffered().use { stream ->
-                val buffer = ByteArray(1024 * 1024)
-                while (true) {
-                    val size = stream.read(buffer)
-                    if (size < 0) break
-                    digest.update(buffer, 0, size)
-                }
-            }
-            val actual = digest.digest().joinToString("") { "%02x".format(it) }
-            check(actual == model["sha256"]) {
-                "Local ASR checksum mismatch: ${path.name}. Run bun run models:download."
-            }
-        }
-    }
-}
-
-tasks.matching { it.name.matches(Regex("merge(Debug|Release)Assets")) }.configureEach {
-    dependsOn(verifyLocalAsrModel)
 }
 
 val clerkPublishableKey = providers.environmentVariable("CLERK_PUBLISHABLE_KEY")
@@ -55,8 +19,8 @@ android {
         applicationId = "org.buddytools.talkt"
         minSdk = 28
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -79,12 +43,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        aidl = true
         compose = true
         buildConfig = true
     }
     androidResources {
         noCompress += "onnx"
+        ignoreAssetsPattern = "parakeet-tdt-v3:whisper-tiny"
     }
     packaging.resources.excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
 }

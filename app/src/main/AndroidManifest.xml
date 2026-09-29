@@ -101,16 +101,6 @@
         </service>
 
         <service
-            android:name=".transcription.local.SherpaRecognitionService"
-            android:exported="false"
-            android:process=":local_asr" />
-
-        <service
-            android:name=".agent.AgentRunService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-        <service
             android:name=".capture.PendingTranscriptionService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />

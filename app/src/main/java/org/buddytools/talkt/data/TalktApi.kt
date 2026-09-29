@@ -6,46 +6,15 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-data class AgentStatus(
-    val hostHealthy: Boolean,
-    val connected: Boolean,
-    val label: String?,
-)
-
-data class AgentReply(
-    val text: String,
-    val provider: String,
-    val fallback: Boolean,
-)
-
 class TalktApi(private val settings: TalktSettings, private val fixedEndpoint: String? = null) {
-    suspend fun status(): AgentStatus = withContext(Dispatchers.IO) {
-        val json = request("GET", "/v1/agent/status")
-        AgentStatus(
-            hostHealthy = json.getJSONObject("host").optBoolean("healthy"),
-            connected = json.getJSONObject("connection").optBoolean("connected"),
-            label = json.getJSONObject("connection").optString("label").ifBlank { null },
-        )
-    }
-
-    suspend fun transcribe(wav: ByteArray, languageCodes: Set<String> = emptySet()): String = withContext(Dispatchers.IO) {
+    suspend fun transcribe(wav: ByteArray, languageCodes: Set<String> = emptySet(), owner: String): String = withContext(Dispatchers.IO) {
         val languageQuery = languageCodes
             .sorted()
             .joinToString(",")
             .takeIf(String::isNotEmpty)
             ?.let { "?languages=${java.net.URLEncoder.encode(it, Charsets.UTF_8.name())}" }
             .orEmpty()
-        request("POST", "/v1/transcribe$languageQuery", wav, "audio/wav").getString("transcript")
-    }
-
-    suspend fun prompt(text: String): AgentReply = withContext(Dispatchers.IO) {
-        val body = JSONObject().put("text", text).toString().toByteArray()
-        val json = request("POST", "/v1/agent/prompt", body, "application/json")
-        AgentReply(
-            text = json.getString("text"),
-            provider = json.getString("provider"),
-            fallback = json.optBoolean("fallback"),
-        )
+        request("POST", "/v1/transcribe$languageQuery", wav, "audio/wav", owner).getString("transcript")
     }
 
     suspend fun saveTranscript(owner: String, entry: TranscriptEntry): Boolean = withContext(Dispatchers.IO) {
@@ -117,9 +86,9 @@ class TalktApi(private val settings: TalktSettings, private val fixedEndpoint: S
     private fun userFacingError(message: String): String {
         val normalized = message.lowercase()
         return if ("provider.auth" in normalized) {
-            "The cloud agent is unavailable. Please try again later."
+            "Cloud transcription is unavailable. Please try again later."
         } else {
-            message.replace(Regex("Gemini", RegexOption.IGNORE_CASE), "Cloud")
+            message
         }
     }
 }

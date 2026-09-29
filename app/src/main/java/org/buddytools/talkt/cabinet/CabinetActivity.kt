@@ -67,7 +67,7 @@ class CabinetActivity : ComponentActivity() {
                 androidx.compose.runtime.key(user?.id) {
                     CabinetScreen(
                         store = remember(user?.id) { TranscriptStore(this, user?.id) },
-                        recordings = remember { RecordingStore(filesDir) },
+                        recordings = remember(user?.id) { RecordingStore(filesDir, user?.id) },
                     )
                 }
             }
@@ -102,7 +102,7 @@ private fun CabinetScreen(store: TranscriptStore, recordings: RecordingStore) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)) {
                     Text(
-                        "Cabinet",
+                        "History",
                         color = Cloud,
                         fontSize = 32.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -134,7 +134,7 @@ private fun CabinetScreen(store: TranscriptStore, recordings: RecordingStore) {
                     } else {
                         null
                     },
-                    placeholder = { Text("Search notes") },
+                    placeholder = { Text("Search transcripts") },
                 )
             }
 

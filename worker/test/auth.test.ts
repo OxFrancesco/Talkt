@@ -1,23 +1,8 @@
-import { beforeAll, describe, expect, it, vi } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 import { env } from "cloudflare:workers"
-import { runInDurableObject } from "cloudflare:test"
 import { generateKeyPairSync, sign } from "node:crypto"
 import worker from "../src/index"
 import { authenticate } from "../src/auth"
-
-// Keep provider setup offline while exercising real Durable Object storage and RPC.
-vi.mock("@opencode-ai/sdk/workerd", () => ({
-  create: async ({ storage }: { storage: DurableObjectStorage }) => ({
-    close: async () => {},
-    health: { get: async () => ({ healthy: true, version: "test" }) },
-    integration: {
-      get: async () => ({ data: { connections: await storage.get("test-credentials") ?? [] } }),
-      connect: { key: async ({ key, label }: { key: string; label: string }) => {
-        await storage.put("test-credentials", [{ type: "credential", label, key }])
-      } },
-    },
-  }),
-}))
 
 const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 })
 const config = {
@@ -35,7 +20,7 @@ const token = (claims: Record<string, unknown> = {}) => {
     .map(value => Buffer.from(value).toString("base64url")).join(".")
   return `${message}.${sign("RSA-SHA256", Buffer.from(message), privateKey).toString("base64url")}`
 }
-const request = (jwt?: string, path = "/v1/agent/status", method = "GET") => new Request(`https://talkt.test${path}`, {
+const request = (jwt?: string, path = "/v1/transcripts", method = "GET") => new Request(`https://talkt.test${path}`, {
   method, headers: jwt ? { authorization: `Bearer ${jwt}` } : {},
 })
 
@@ -67,69 +52,16 @@ describe("Clerk session verification", () => {
   })
 })
 
-describe("authenticated Worker routing", () => {
-  it.each([
-    ["/v1/agent/status", "GET"], ["/v1/agent/prompt", "POST"],
-    ["/v1/agent/openrouter/key", "POST"], ["/v1/transcribe", "POST"],
-    ["/v1/runs", "POST"], ["/v1/conversations", "GET"], ["/v1/agent/capabilities", "GET"],
-    ["/v1/permissions/reply", "POST"],
-    ["/v1/agent/permissions", "POST"], ["/v1/connections/chatgpt", "POST"],
-    ["/v1/connections/chatgpt", "GET"], ["/v1/connections/select", "POST"],
-  ])("protects %s before accessing agent or cloud providers", async (path, method) => {
-    expect((await worker.fetch(request(undefined, path, method), env)).status).toBe(401)
-    expect((await worker.fetch(request("old-shared-token", path, method), env)).status).toBe(401)
+describe("transcription access", () => {
+  it("requires Clerk for transcription and rejects removed endpoints", async () => {
+    expect((await worker.fetch(request(undefined, "/v1/transcribe", "POST"), env)).status).toBe(401)
+    for (const path of ["/v1/agent/prompt", "/v1/runner/poll", "/v1/runner/events", "/v1/telegram/webhook", "/v1/conversations", "/v1/connections"]) {
+      expect((await worker.fetch(request(token(), path, "POST"), env)).status).toBe(404)
+    }
   })
-
-  it("keeps health public", async () => {
-    expect((await worker.fetch(request(undefined, "/health"), env)).status).toBe(200)
+  it("allows ordinary accounts without an owner allowlist", async () => {
+    for (const sub of ["user_alice", "user_bob"]) {
+      expect((await worker.fetch(request(token({ sub })), env)).status).toBe(200)
+    }
   })
-
-  it("rejects YOLO changes from other signed-in accounts", async () => {
-    const response = await worker.fetch(new Request("https://talkt.test/v1/agent/permissions", {
-      method: "POST", headers: { authorization: `Bearer ${token()}`, "content-type": "application/json" }, body: JSON.stringify({ yolo: true }),
-    }), env)
-    expect(response.status).toBe(403)
-    expect(await env.TALKT_AGENT.getByName(`clerk:other`).permissionMode()).toEqual({ yolo: false })
-    await runInDurableObject(env.TALKT_AGENT.getByName(`clerk:other`), async (instance) => {
-      await expect(instance.setYolo(true)).rejects.toThrow("personal owner")
-    })
-  })
-
-  it("routes signed users to separate persistent agents and ignores supplied user IDs", async () => {
-    const aliceName = `clerk:${JSON.stringify([config.CLERK_ISSUER, "user_alice"])}`
-    const bobName = `clerk:${JSON.stringify([config.CLERK_ISSUER, "user_bob"])}`
-    const alice = env.TALKT_AGENT.getByName(aliceName)
-    const bob = env.TALKT_AGENT.getByName(bobName)
-    expect(alice.id.toString()).not.toBe(bob.id.toString())
-    await runInDurableObject(alice, async (_instance, state) => { await state.storage.put("isolation-proof", "alice-private") })
-    await runInDurableObject(bob, async (_instance, state) => {
-      expect(await state.storage.get("isolation-proof")).toBeUndefined()
-    })
-    const connect = new Request("https://talkt.test/v1/agent/openrouter/key?userId=user_bob", {
-      method: "POST",
-      headers: { authorization: `Bearer ${token()}`, "content-type": "application/json", "content-length": "26", "x-user-id": "user_bob" },
-      body: JSON.stringify({ key: "alice-test-key" }),
-    })
-    expect((await worker.fetch(connect, env)).status).toBe(200)
-    const response = await worker.fetch(request(token(), "/v1/agent/status?userId=user_bob"), env)
-    expect(response.status).toBe(200)
-    expect(await response.json()).toMatchObject({ connection: { connected: true }, host: { healthy: true } })
-    const bobResponse = await worker.fetch(request(token({ sub: "user_bob", sid: "sess_bob" })), env)
-    expect(bobResponse.status).toBe(200)
-    expect(await bobResponse.json()).toMatchObject({ connection: { connected: false } })
-    await runInDurableObject(alice, async (_instance, state) => {
-      expect(await state.storage.get("isolation-proof")).toBe("alice-private")
-    })
-  }, 30_000)
-  it("routes only the configured owner subject to the personal agent", async () => {
-    const owner = env.TALKT_AGENT.getByName("owner")
-    await runInDurableObject(owner, async (_instance, state) => {
-      await state.storage.put("test-credentials", [{ type: "credential", label: "owner-private" }])
-    })
-    const response = await worker.fetch(request(token({ sub: env.PERSONAL_OWNER_SUB })), env)
-    expect(await response.json()).toMatchObject({ connection: { connected: true, label: "owner-private" } })
-    const other = await worker.fetch(request(token({ sub: "user_unrelated", email: env.PERSONAL_OWNER_EMAIL })), env)
-    expect(await other.json()).toMatchObject({ connection: { connected: false } })
-  }, 30_000)
-
 })

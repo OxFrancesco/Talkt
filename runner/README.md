@@ -1,3 +1,5 @@
+> Retired: the Talkt API no longer exposes runner or agent endpoints. This directory is retained to preserve pending local work; do not start it for transcription.
+
 # Personal Mac runner
 
 This Bun process lets the Cloudflare OpenCode v2 agent use local CLI tools, files and configured MCP servers. It polls the Worker over authenticated HTTPS. It does not open a listening port or require a tunnel.

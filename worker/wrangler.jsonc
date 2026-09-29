@@ -45,15 +45,9 @@
   ],
   "vars": {
     "ENVIRONMENT": "production",
-    "PRIMARY_MODEL": "openrouter/openai/gpt-5.6-luna@xhigh",
-    "OPENROUTER_FALLBACK_MODEL": "openrouter/anthropic/claude-sonnet-4.6",
-    "PERSONAL_WORKSPACE": "/Volumes/T6-7/Coding/Personal/Talkt",
-    "NATIVE_MCP_SERVERS": "[]",
     "CLERK_ISSUER": "https://unique-aardvark-9804.clerk.accounts.dev",
     "CLERK_AUTHORIZED_PARTIES": "https://talkt-api.oddofrancesco000.workers.dev",
-    "CLERK_JWT_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA353tsVu654Di89eTqoes\n/LvjmI6bf2DF9tZnj+Kc5ojIpEuqws1V2aiDQ1U8fXZyzed+0ShbE4xvSoUdVJnR\njkSdLePGARkDsTAzeAjq73MvXiOjX2Lew4QjdmWSpxVrovTacTq4V7DjHKW9oZm0\nYTHCO9q0WKoCJmu2cZVtbMlX3TgNM2kesKG1wuN5zdmZSA33TBzDAuqaPo8nlcpx\npmOvousH76cFF3g/sSDDX9t7PVUxb++7sduGZAWW1LQ1Yd64CVY5JN9AmsrWJTd1\n/0XqmKWIDKglwxA3o1lQXOe/gvxsg8/lIt3V31fHZDUpw4h3tYN3/BLvK0rbUty+\nQQIDAQAB\n-----END PUBLIC KEY-----\n",
-    "PERSONAL_OWNER_EMAIL": "oddofrancesco000@gmail.com",
-    "PERSONAL_OWNER_SUB": "user_3Itj3XXUVdtx5jIXM6dIl0BVD7d"
+    "CLERK_JWT_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA353tsVu654Di89eTqoes\n/LvjmI6bf2DF9tZnj+Kc5ojIpEuqws1V2aiDQ1U8fXZyzed+0ShbE4xvSoUdVJnR\njkSdLePGARkDsTAzeAjq73MvXiOjX2Lew4QjdmWSpxVrovTacTq4V7DjHKW9oZm0\nYTHCO9q0WKoCJmu2cZVtbMlX3TgNM2kesKG1wuN5zdmZSA33TBzDAuqaPo8nlcpx\npmOvousH76cFF3g/sSDDX9t7PVUxb++7sduGZAWW1LQ1Yd64CVY5JN9AmsrWJTd1\n/0XqmKWIDKglwxA3o1lQXOe/gvxsg8/lIt3V31fHZDUpw4h3tYN3/BLvK0rbUty+\nQQIDAQAB\n-----END PUBLIC KEY-----\n"
   },
   "observability": {
     "enabled": true,

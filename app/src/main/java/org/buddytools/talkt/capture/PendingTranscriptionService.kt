@@ -21,10 +21,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.buddytools.talkt.R
-import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.cabinet.CabinetActivity
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptStore
@@ -36,8 +36,8 @@ import java.io.File
 /**
  * Transcribes recordings the capture bubble could not finish itself: the bubble was destroyed
  * mid-recording, the process died, or the transcription failed. Successful transcripts are
- * copied, archived in the Cabinet and announced with a notification. Anything that still fails
- * stays on disk so the Cabinet can retry it by hand.
+ * copied, archived in History and announced with a notification. Anything that still fails
+ * stays on disk so History can retry it by hand.
  */
 class PendingTranscriptionService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -47,8 +47,13 @@ class PendingTranscriptionService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val store = RecordingStore(filesDir)
-        val files = intent?.getStringExtra(EXTRA_FILE)?.let { listOf(File(it)) }
+        val owner = intent?.getStringExtra(EXTRA_OWNER)
+        if (owner == null || owner != org.buddytools.talkt.auth.TalktAuth.userId) {
+            if (inFlight == 0) stopSelf(startId)
+            return START_NOT_STICKY
+        }
+        val store = RecordingStore(filesDir, owner)
+        val files = intent?.getStringExtra(EXTRA_FILE)?.let { listOf(File(it)).filter { file -> file.canonicalFile.parentFile == store.directory.canonicalFile } }
             ?: store.pending().map { it.file }
         if (files.isEmpty()) {
             if (inFlight == 0) stopSelf(startId)
@@ -61,7 +66,7 @@ class PendingTranscriptionService : Service() {
 
         scope.launch {
             queue.withLock {
-                files.forEach { file -> transcribe(file, source) }
+                files.forEach { file -> transcribe(file, source, owner) }
             }
             if (--inFlight == 0) {
                 stopForeground(STOP_FOREGROUND_REMOVE)
@@ -77,10 +82,9 @@ class PendingTranscriptionService : Service() {
         super.onDestroy()
     }
 
-    private suspend fun transcribe(file: File, source: String) {
+    private suspend fun transcribe(file: File, source: String, accountId: String) {
         if (!file.exists()) return
         val settings = TalktSettings(this)
-        val accountId = org.buddytools.talkt.auth.TalktAuth.userId
         val startedAt = SystemClock.elapsedRealtime()
         val clip = runCatching { RecordedClip.open(file) }.getOrElse {
             Log.w(TAG, "pending recording ${file.name} is unreadable, dropping it: ${it.message}")
@@ -88,18 +92,26 @@ class PendingTranscriptionService : Service() {
             return
         }
         Log.i(TAG, "pending transcription started for ${file.name} (${clip.durationMillis}ms)")
-        runCatching { TranscriptionGraph.create(this, settings).transcribe(clip) }
+        runCatching { TranscriptionGraph.create(settings, accountId).transcribe(clip) }
             .onSuccess { transcript ->
+                if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@onSuccess
+                val saved = runCatching { TranscriptStore(this, accountId).append(transcript.text, kind = "transcript", source = "Cloud") }
+                if (saved.isFailure) {
+                    notify(RESULT_ID_BASE + file.hashCode(), resultNotification("Recording kept", "Could not save the transcript. Retry from History."))
+                    return@onSuccess
+                }
                 val elapsed = SystemClock.elapsedRealtime() - startedAt
                 Log.i(TAG, "pending transcription of ${file.name} done in ${elapsed}ms (${transcript.text.length} chars)")
-                runCatching {
-                    getSystemService(ClipboardManager::class.java)
-                        .setPrimaryClip(ClipData.newPlainText("Talkt transcript", transcript.text))
+                withContext(Dispatchers.Main) {
+                    if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@withContext
+                    runCatching {
+                        getSystemService(ClipboardManager::class.java)
+                            .setPrimaryClip(ClipData.newPlainText("Talkt transcript", transcript.text))
+                    }
+                    settings.latestResult = transcript.text
+                    clip.close()
+                    notify(RESULT_ID_BASE + file.hashCode(), resultNotification("Recording transcribed", transcript.text))
                 }
-                runCatching { TranscriptStore(this, accountId).append(transcript.text, kind = "copy", source = source.ifBlank { "recovered" }) }
-                settings.latestResult = transcript.text
-                clip.close()
-                notify(RESULT_ID_BASE + file.hashCode(), resultNotification("Recording transcribed", transcript.text))
             }
             .onFailure { error ->
                 if (error is kotlinx.coroutines.CancellationException) return@onFailure
@@ -113,7 +125,7 @@ class PendingTranscriptionService : Service() {
                     RESULT_ID_BASE + file.hashCode(),
                     resultNotification(
                         "Recording kept",
-                        "${error.message ?: "Talkt could not transcribe it"}. Open the Cabinet to retry.",
+                        "${error.message ?: "Talkt could not transcribe it"}. Open History to retry.",
                     ),
                 )
             }
@@ -147,7 +159,7 @@ class PendingTranscriptionService : Service() {
     )
 
     private fun notify(id: Int, notification: Notification) {
-        if (!AgentRunService.canNotify(this)) return
+        if (!androidx.core.app.NotificationManagerCompat.from(this).areNotificationsEnabled()) return
         getSystemService(NotificationManager::class.java).notify(id, notification)
     }
 
@@ -167,6 +179,7 @@ class PendingTranscriptionService : Service() {
 
     companion object {
         private const val TAG = "Talkt"
+        private const val EXTRA_OWNER = "owner"
         private const val EXTRA_FILE = "file"
         private const val EXTRA_SOURCE = "source"
         private const val CHANNEL = "talkt.recordings"
@@ -176,11 +189,13 @@ class PendingTranscriptionService : Service() {
         /**
          * Transcribes one kept recording, or every pending one when [file] is null. Returns false
          * when Android refused the foreground start (app in background too long); the recording
-         * stays in the Cabinet either way.
+         * stays in History either way.
          */
-        fun start(context: Context, file: File? = null, source: String = ""): Boolean {
+        fun start(context: Context, file: File? = null, source: String = "", owner: String? = org.buddytools.talkt.auth.TalktAuth.userId): Boolean {
+            if (owner == null || owner != org.buddytools.talkt.auth.TalktAuth.userId) return false
             val intent = Intent(context, PendingTranscriptionService::class.java)
                 .putExtra(EXTRA_SOURCE, source)
+                .putExtra(EXTRA_OWNER, owner)
             file?.let { intent.putExtra(EXTRA_FILE, it.absolutePath) }
             return runCatching { ContextCompat.startForegroundService(context, intent) }
                 .onFailure { Log.w(TAG, "could not start the background transcriber: ${it.message}") }

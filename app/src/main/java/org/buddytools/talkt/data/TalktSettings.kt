@@ -3,17 +3,6 @@ package org.buddytools.talkt.data
 import android.content.Context
 import org.buddytools.talkt.BuildConfig
 
-enum class TranscriptionMode(val storedValue: String) {
-    LocalFirst("local_first"),
-    OnDeviceOnly("on_device_only"),
-    GeminiOnly("gemini_only");
-
-    companion object {
-        fun fromStored(value: String?): TranscriptionMode =
-            entries.firstOrNull { it.storedValue == value } ?: LocalFirst
-    }
-}
-
 class TalktSettings(context: Context) {
     private val preferences = context.getSharedPreferences("talkt", Context.MODE_PRIVATE)
 
@@ -49,14 +38,6 @@ class TalktSettings(context: Context) {
         get() = preferences.getBoolean(WAKE_WORD_ENABLED, false)
         set(value) = preferences.edit().putBoolean(WAKE_WORD_ENABLED, value).apply()
 
-    var agentEnabled: Boolean
-        get() = preferences.getBoolean(AGENT_ENABLED, true)
-        set(value) = preferences.edit().putBoolean(AGENT_ENABLED, value).apply()
-
-    var transcriptionMode: TranscriptionMode
-        get() = TranscriptionMode.fromStored(preferences.getString(TRANSCRIPTION_MODE, null))
-        set(value) = preferences.edit().putString(TRANSCRIPTION_MODE, value.storedValue).apply()
-
     /** Empty means automatic language detection. */
     var languageCodes: Set<String>
         get() = preferences.getString(LANGUAGE_CODES, "")
@@ -80,8 +61,6 @@ class TalktSettings(context: Context) {
         const val VOLUME_TRIGGER_ENABLED = "volume_trigger_enabled"
         const val POWER_TRIGGER_ENABLED = "power_trigger_enabled"
         const val WAKE_WORD_ENABLED = "wake_word_enabled"
-        const val AGENT_ENABLED = "agent_enabled"
-        const val TRANSCRIPTION_MODE = "transcription_mode"
         const val LANGUAGE_CODES = "language_codes"
     }
 }

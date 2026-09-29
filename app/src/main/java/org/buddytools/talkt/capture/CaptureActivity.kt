@@ -32,9 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,19 +53,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptStore
-import org.buddytools.talkt.data.TranscriptionMode
-import org.buddytools.talkt.data.VoiceAction
-import org.buddytools.talkt.data.defaultVoiceAction
-import org.buddytools.talkt.data.withAgentEnabled
 import org.buddytools.talkt.trigger.EditorBridge
 import org.buddytools.talkt.transcription.NoSpeechException
 import org.buddytools.talkt.transcription.RecordedClip
-import org.buddytools.talkt.transcription.local.LocalAsrWarmer
 import org.buddytools.talkt.transcription.Transcriber
-import org.buddytools.talkt.transcription.TranscriptSource
 import org.buddytools.talkt.transcription.TranscriptionGraph
 import org.buddytools.talkt.ui.Cloud
 import org.buddytools.talkt.ui.Ink
@@ -82,12 +72,12 @@ import org.buddytools.thinkingorbs.ThinkingOrbParameters
 import java.io.File
 
 class CaptureActivity : ComponentActivity() {
-    private val recorder by lazy { WavRecorder(RecordingStore(filesDir)) }
+    private val recorder by lazy { WavRecorder(RecordingStore(filesDir, accountId)) }
     private lateinit var settings: TalktSettings
     private lateinit var transcriber: Transcriber
     private var state by mutableStateOf<CaptureState>(CaptureState.Preparing)
     private var editorMode = false
-    private var selectedAction by mutableStateOf(VoiceAction.Transcribe)
+    private lateinit var accountId: String
     private var source = ""
     private var claimedActive = false
     private var wakeDetectedAt = 0L
@@ -101,16 +91,18 @@ class CaptureActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val owner = org.buddytools.talkt.auth.TalktAuth.userId
+        if (owner == null) {
+            startActivity(Intent(this, org.buddytools.talkt.MainActivity::class.java))
+            finish()
+            return
+        }
+        accountId = owner
         current?.get()?.finish()
         current = java.lang.ref.WeakReference(this)
         claimedActive = true
         settings = TalktSettings(this)
-        transcriber = TranscriptionGraph.create(this, settings)
-        if (settings.transcriptionMode != TranscriptionMode.GeminiOnly) {
-            LocalAsrWarmer.prewarm(this, settings.languageCodes.singleOrNull().orEmpty())
-        } else {
-            LocalAsrWarmer.release()
-        }
+        transcriber = TranscriptionGraph.create(settings, accountId)
         source = intent.getStringExtra(EXTRA_SOURCE).orEmpty()
         wakeDetectedAt = intent.getLongExtra(EXTRA_WAKE_DETECTED_AT, 0L)
         microphoneHandoffMillis = maxOf(
@@ -122,14 +114,10 @@ class CaptureActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         editorMode = EditorBridge.captureTarget(preserveExisting = true) != null || EditorBridge.hasFreshTarget()
         Log.i(TAG, "capture opened source=$source editorMode=$editorMode accessibility=${EditorBridge.isConnected}")
-        selectedAction = defaultVoiceAction(settings.agentEnabled, editorMode)
         setContent {
             TalktTheme {
                 CaptureScreen(
                     state = state,
-                    selectedAction = selectedAction,
-                    agentEnabled = settings.agentEnabled,
-                    onActionSelected = { selectedAction = it },
                     onStop = ::finishRecording,
                     onClose = ::finish,
                     onEnableAccessibility = ::openAccessibilitySettings,
@@ -147,7 +135,7 @@ class CaptureActivity : ComponentActivity() {
             transcribing?.takeIf { it.exists() }?.let { file ->
                 // lifecycleScope cancels the in-flight transcription; finish it in the background.
                 Log.i(TAG, "capture closed while transcribing; handing ${file.name} to the background transcriber")
-                PendingTranscriptionService.start(this, file, source)
+                PendingTranscriptionService.start(this, file, source, accountId)
             }
             if (source == "power") CaptureBus.finishPowerSession()
             if (wasCurrent) WakeWordService.resume(this)
@@ -164,7 +152,7 @@ class CaptureActivity : ComponentActivity() {
             recording.file?.delete()
             return
         }
-        PendingTranscriptionService.start(this, kept, source)
+        PendingTranscriptionService.start(this, kept, source, accountId)
     }
 
     private fun openAccessibilitySettings() {
@@ -182,6 +170,7 @@ class CaptureActivity : ComponentActivity() {
 
     private fun beginRecording() {
         runCatching {
+            org.buddytools.talkt.auth.TalktAuth.ensureUser(accountId)
             recorder.start(settings.silenceTimeoutSeconds * 1_000L) { reason ->
                 Log.i(TAG, "recorder auto-stop: $reason")
                 runOnUiThread(::finishRecording)
@@ -237,7 +226,6 @@ class CaptureActivity : ComponentActivity() {
                 state = CaptureState.Error(it.message ?: "Could not prepare the recording")
                 return
             }
-        val accountId = org.buddytools.talkt.auth.TalktAuth.userId
         state = CaptureState.Processing(label = "Transcribing")
         transcribing = file
         lifecycleScope.launch {
@@ -249,37 +237,28 @@ class CaptureActivity : ComponentActivity() {
                     return@onSuccess
                 }
                 val elapsed = SystemClock.elapsedRealtime() - startedAt
-                val source = when (transcript.source) {
-                    TranscriptSource.OnDevice -> "On device"
-                    TranscriptSource.Gemini -> "Cloud"
+                Log.i(TAG, "transcribed via cloud in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
+                val archived = runCatching { archive(transcript.text, kind = "transcript", source = "Cloud") }
+                if (archived.isFailure) {
+                    state = CaptureState.Error("Could not save the transcript. The recording is kept in History.")
+                    return@onSuccess
                 }
-                Log.i(TAG, "transcribed via $source in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
+                if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@onSuccess
                 copy(transcript.text)
-                val action = selectedAction.withAgentEnabled(settings.agentEnabled)
-                state = when (action) {
-                    VoiceAction.Transcribe -> {
-                        val inserted = editorMode && EditorBridge.commit(transcript.text)
-                        val outcome = when {
-                            inserted -> TranscriptOutcome.Inserted
-                            EditorBridge.isConnected -> TranscriptOutcome.Copied
-                            else -> TranscriptOutcome.CopiedAccessibilityOff
-                        }
-                        Log.i(TAG, "transcript delivered: $outcome")
-                        archive(transcript.text, kind = if (inserted) "insert" else "copy", source = source)
-                        CaptureState.Complete(transcript.text, outcome)
-                    }
-                    VoiceAction.AskAgent -> {
-                        AgentRunService.start(this@CaptureActivity, transcript.text, source)
-                        CaptureState.Complete(transcript.text, TranscriptOutcome.SentToAgent)
-                    }
+                val inserted = editorMode && EditorBridge.commit(transcript.text)
+                val outcome = when {
+                    inserted -> TranscriptOutcome.Inserted
+                    EditorBridge.isConnected -> TranscriptOutcome.Copied
+                    else -> TranscriptOutcome.CopiedAccessibilityOff
                 }
+                Log.i(TAG, "transcript delivered: $outcome")
+                state = CaptureState.Complete(transcript.text, outcome)
                 settings.latestResult = transcript.text
                 // The transcript is archived; the audio has done its job.
                 clip.close()
                 delay(
                     when ((state as? CaptureState.Complete)?.outcome) {
                         TranscriptOutcome.CopiedAccessibilityOff -> 4_000L
-                        TranscriptOutcome.SentToAgent -> 1_800L
                         else -> 1_100L
                     },
                 )
@@ -292,9 +271,9 @@ class CaptureActivity : ComponentActivity() {
                     clip.close()
                     state = CaptureState.Error(error.message ?: "I didn't hear anything")
                 } else {
-                    // Keep the audio; the Cabinet can retry it later.
+                    // Keep the audio; History can retry it later.
                     Log.i(TAG, "recording kept for retry: ${file.name}")
-                    state = CaptureState.Error("${error.message ?: "Talkt could not finish"}. The recording is saved in the Cabinet.")
+                    state = CaptureState.Error("${error.message ?: "Talkt could not finish"}. The recording is saved in History.")
                 }
             }
         }
@@ -311,7 +290,7 @@ class CaptureActivity : ComponentActivity() {
 
     private suspend fun archive(text: String, kind: String, source: String, reply: String? = null) {
         withContext(Dispatchers.IO) {
-            runCatching { TranscriptStore(this@CaptureActivity).append(text, kind, source, reply) }
+            TranscriptStore(this@CaptureActivity, accountId).append(text, kind, source, reply)
         }
     }
 
@@ -322,6 +301,7 @@ class CaptureActivity : ComponentActivity() {
         private const val EXTRA_WAKE_DETECTED_AT = "wake_detected_at"
         private const val EXTRA_MICROPHONE_HANDOFF_MILLIS = "microphone_handoff_millis"
         private var current: java.lang.ref.WeakReference<CaptureActivity>? = null
+        val isActive: Boolean get() = current?.get() != null
 
         fun intent(
             context: Context,
@@ -338,7 +318,7 @@ class CaptureActivity : ComponentActivity() {
     }
 }
 
-private enum class TranscriptOutcome { Inserted, Copied, CopiedAccessibilityOff, SentToAgent }
+private enum class TranscriptOutcome { Inserted, Copied, CopiedAccessibilityOff }
 
 private sealed interface CaptureState {
     data object Preparing : CaptureState
@@ -351,9 +331,6 @@ private sealed interface CaptureState {
 @Composable
 private fun CaptureScreen(
     state: CaptureState,
-    selectedAction: VoiceAction,
-    agentEnabled: Boolean,
-    onActionSelected: (VoiceAction) -> Unit,
     onStop: () -> Unit,
     onClose: () -> Unit,
     onEnableAccessibility: () -> Unit,
@@ -375,10 +352,6 @@ private fun CaptureScreen(
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if ((state is CaptureState.Preparing || state is CaptureState.Listening) && agentEnabled) {
-                    VoiceActionSelector(selectedAction, onActionSelected)
-                    Spacer(Modifier.height(14.dp))
-                }
                 when (state) {
                     CaptureState.Preparing -> ThinkingContent(label = "Getting ready")
                     CaptureState.Listening -> ListeningContent(onStop)
@@ -386,31 +359,6 @@ private fun CaptureScreen(
                     is CaptureState.Complete -> CompleteContent(state, onEnableAccessibility)
                     is CaptureState.Error -> ErrorContent(state.message, onClose)
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun VoiceActionSelector(
-    selectedAction: VoiceAction,
-    onActionSelected: (VoiceAction) -> Unit,
-) {
-    val actions = VoiceAction.entries
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-        actions.forEachIndexed { index, action ->
-            SegmentedButton(
-                selected = selectedAction == action,
-                onClick = { onActionSelected(action) },
-                shape = SegmentedButtonDefaults.itemShape(index, actions.size),
-            ) {
-                Text(
-                    text = when (action) {
-                        VoiceAction.Transcribe -> "Transcript only"
-                        VoiceAction.AskAgent -> "Also ask agent"
-                    },
-                    fontSize = 12.sp,
-                )
             }
         }
     }
@@ -500,7 +448,6 @@ private fun CompleteContent(state: CaptureState.Complete, onEnableAccessibility:
     when (state.outcome) {
         TranscriptOutcome.Inserted -> Text("Inserted", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         TranscriptOutcome.Copied -> Text("Copied to clipboard", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-        TranscriptOutcome.SentToAgent -> Text("Copied · asking your agent", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         TranscriptOutcome.CopiedAccessibilityOff -> {
             Text(
                 "Copied. Talkt's accessibility service is off, so the text was not typed into the field.",

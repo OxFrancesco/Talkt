@@ -29,9 +29,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -49,12 +46,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import org.buddytools.talkt.agent.AgentRunService
 import org.buddytools.talkt.cabinet.CabinetActivity
 import org.buddytools.talkt.capture.PendingTranscriptionService
 import org.buddytools.talkt.capture.RecordingStore
 import org.buddytools.talkt.data.TalktSettings
-import org.buddytools.talkt.data.TranscriptionMode
 import org.buddytools.talkt.trigger.TalktAccessibilityService
 import org.buddytools.talkt.ui.Cloud
 import org.buddytools.talkt.ui.Ink
@@ -67,6 +62,19 @@ import org.buddytools.talkt.wakeword.WakeWordAvailability
 import org.buddytools.talkt.wakeword.WakeWordModel
 import org.buddytools.talkt.wakeword.WakeWordPrerequisites
 import org.buddytools.talkt.wakeword.WakeWordService
+
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.activity.compose.BackHandler
+import com.clerk.api.Clerk
+import com.clerk.ui.auth.AuthView
+import org.buddytools.talkt.auth.TalktAuth
+import org.buddytools.talkt.capture.CaptureActivity
 
 class MainActivity : ComponentActivity() {
     private lateinit var settings: TalktSettings
@@ -84,22 +92,36 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         settings = TalktSettings(this)
         refreshLocalState()
-        // Agent answers arrive as notifications once the capture bubble has closed.
-        if (settings.agentEnabled && Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
-            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
         setContent {
             TalktTheme {
-                TalktHome(
-                    settings = settings,
-                    localState = localState,
-                    onRequestMicrophone = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
-                    onOpenAccessibility = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
-                    onRequestAssistant = ::requestAssistantRole,
-                    onRequestUnrestrictedBattery = ::requestUnrestrictedBattery,
-                    onWakeWordEnabled = ::setWakeWordEnabled,
-                    onAgentEnabled = ::requestAgentNotifications,
-                )
+                if (BuildConfig.CLERK_PUBLISHABLE_KEY.isBlank()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Sign-in is unavailable in this build", color = Warning)
+                    }
+                } else {
+                    val initialized by Clerk.isInitialized.collectAsStateWithLifecycle()
+                    val user by Clerk.userFlow.collectAsStateWithLifecycle()
+                    when {
+                        !initialized -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                        user == null -> AuthView(isDismissible = false)
+                        else -> key(user?.id) {
+                            LaunchedEffect(user?.id) { recoverRecordings() }
+                            TalktHome(
+                                settings = settings,
+                                localState = localState,
+                                onRecord = {
+                                    if (localState.microphone) startActivity(CaptureActivity.intent(this, "app"))
+                                    else microphonePermission.launch(Manifest.permission.RECORD_AUDIO)
+                                },
+                                onRequestMicrophone = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
+                                onOpenAccessibility = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                                onRequestAssistant = ::requestAssistantRole,
+                                onRequestUnrestrictedBattery = ::requestUnrestrictedBattery,
+                                onWakeWordEnabled = ::setWakeWordEnabled,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -107,11 +129,19 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         refreshLocalState()
-        if (settings.wakeWordEnabled && localState.wakeWordAvailability == WakeWordAvailability.Ready) {
+        if (TalktAuth.userId != null && settings.wakeWordEnabled && localState.wakeWordAvailability == WakeWordAvailability.Ready) {
             WakeWordService.start(this)
         }
         // Recordings left behind by a killed bubble get their automatic attempt while we are in front.
-        if (RecordingStore(filesDir).pending().isNotEmpty()) PendingTranscriptionService.start(this)
+        recoverRecordings()
+    }
+
+    private fun recoverRecordings() {
+        val owner = TalktAuth.userId ?: return
+        if (CaptureActivity.isActive) return
+        val recordings = RecordingStore(filesDir, owner)
+        recordings.adoptOrphans()
+        if (recordings.pending().isNotEmpty()) PendingTranscriptionService.start(this)
     }
 
     private fun requestUnrestrictedBattery() {
@@ -170,19 +200,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun requestAgentNotifications(enabled: Boolean) {
-        if (!enabled) {
-            AgentRunService.stop(this)
-        } else if (Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
-            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
     private fun setWakeWordEnabled(enabled: Boolean) {
         settings.wakeWordEnabled = enabled
         if (enabled) {
             WakeWordService.start(this)
-            if (Build.VERSION.SDK_INT >= 33 && !AgentRunService.canNotify(this)) {
+            if (Build.VERSION.SDK_INT >= 33 && !androidx.core.app.NotificationManagerCompat.from(this).areNotificationsEnabled()) {
                 notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
@@ -208,7 +230,7 @@ private data class LocalState(
 }
 
 @Composable
-private fun TalktHome(
+private fun TalktSettingsScreen(
     settings: TalktSettings,
     localState: LocalState,
     onRequestMicrophone: () -> Unit,
@@ -216,15 +238,13 @@ private fun TalktHome(
     onRequestAssistant: () -> Unit,
     onRequestUnrestrictedBattery: () -> Unit,
     onWakeWordEnabled: (Boolean) -> Unit,
-    onAgentEnabled: (Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     var silenceTimeoutSeconds by remember { mutableIntStateOf(settings.silenceTimeoutSeconds) }
     var volumeTriggerEnabled by remember { mutableStateOf(settings.volumeTriggerEnabled) }
     var powerTriggerEnabled by remember { mutableStateOf(settings.powerTriggerEnabled) }
     var wakeWordEnabled by remember { mutableStateOf(settings.wakeWordEnabled) }
-    var agentEnabled by remember { mutableStateOf(settings.agentEnabled) }
-    var transcriptionMode by remember { mutableStateOf(settings.transcriptionMode) }
     var languageCodes by remember { mutableStateOf(settings.languageCodes) }
 
     LazyColumn(
@@ -239,12 +259,12 @@ private fun TalktHome(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    "Talkt",
+                    "Settings",
                     color = Cloud,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
-                org.buddytools.talkt.auth.ProfileButton()
+                TextButton(onClick = onBack) { Text("Done") }
             }
         }
 
@@ -267,7 +287,7 @@ private fun TalktHome(
                     Column(Modifier.weight(1f)) {
                         Text("Text insertion is off", color = Warning, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                         Text(
-                            "Transcripts are only copied. Turn on the Talkt accessibility service to type them into the field you were in. Android switches it off whenever Talkt is force-stopped.",
+                            "Enable Talkt to insert text into the app you are using.",
                             color = Muted,
                             fontSize = 12.sp,
                         )
@@ -283,7 +303,7 @@ private fun TalktHome(
                     Column(Modifier.weight(1f)) {
                         Text("Battery may stop Talkt", color = Warning, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                         Text(
-                            "Samsung puts unused apps to sleep, which also turns off text insertion and the wake word. Set Talkt to unrestricted.",
+                            "Allow background use for recording shortcuts.",
                             color = Muted,
                             fontSize = 12.sp,
                         )
@@ -373,56 +393,8 @@ private fun TalktHome(
             }
         }
 
-        item { GroupHeader("Agent") }
-        item {
-            GroupRow(shape = GroupShape.Single) {
-                Column(Modifier.weight(1f)) {
-                    Text("Agent", color = Cloud, fontSize = 16.sp)
-                    Text(
-                        if (agentEnabled) "Choose for each recording" else "Every recording is transcription only",
-                        color = Muted,
-                        fontSize = 12.sp,
-                    )
-                }
-                Switch(
-                    checked = agentEnabled,
-                    onCheckedChange = {
-                        agentEnabled = it
-                        settings.agentEnabled = it
-                        onAgentEnabled(it)
-                    },
-                )
-            }
-        }
-
-        item { GroupHeader("Transcription") }
         item {
             GroupColumn(shape = GroupShape.Top) {
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    TranscriptionMode.entries.forEachIndexed { index, mode ->
-                        SegmentedButton(
-                            selected = transcriptionMode == mode,
-                            onClick = {
-                                transcriptionMode = mode
-                                settings.transcriptionMode = mode
-                            },
-                            shape = SegmentedButtonDefaults.itemShape(index, TranscriptionMode.entries.size),
-                        ) {
-                            Text(
-                                when (mode) {
-                                    TranscriptionMode.LocalFirst -> "Local first"
-                                    TranscriptionMode.OnDeviceOnly -> "Device only"
-                                    TranscriptionMode.GeminiOnly -> "Cloud"
-                                },
-                                fontSize = 12.sp,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        item {
-            GroupColumn(shape = GroupShape.Middle) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Stop after silence", color = Cloud, fontSize = 16.sp, modifier = Modifier.weight(1f))
                     Text("${silenceTimeoutSeconds}s", color = Mint, fontSize = 14.sp, fontWeight = FontWeight.Medium)
@@ -479,20 +451,65 @@ private fun TalktHome(
             }
         }
 
-        item {
-            GroupRow(
-                shape = GroupShape.Single,
-                onClick = { context.startActivity(Intent(context, CabinetActivity::class.java)) },
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text("Cabinet", color = Cloud, fontSize = 16.sp)
-                    Text("All your transcripts, stored on this phone", color = Muted, fontSize = 12.sp)
+        item { Spacer(Modifier.height(24.dp)) }
+    }
+}
+
+@Composable
+private fun TalktHome(
+    settings: TalktSettings,
+    localState: LocalState,
+    onRecord: () -> Unit,
+    onRequestMicrophone: () -> Unit,
+    onOpenAccessibility: () -> Unit,
+    onRequestAssistant: () -> Unit,
+    onRequestUnrestrictedBattery: () -> Unit,
+    onWakeWordEnabled: (Boolean) -> Unit,
+) {
+    val context = LocalContext.current
+    var showSettings by remember { mutableStateOf(false) }
+    var latest by remember { mutableStateOf(settings.latestResult) }
+    LifecycleResumeEffect(Unit) {
+        latest = settings.latestResult
+        onPauseOrDispose { }
+    }
+    BackHandler(showSettings) { showSettings = false }
+    if (showSettings) {
+        TalktSettingsScreen(settings, localState, onRequestMicrophone, onOpenAccessibility,
+            onRequestAssistant, onRequestUnrestrictedBattery, onWakeWordEnabled,
+            onBack = { showSettings = false })
+        return
+    }
+    Column(
+        Modifier.fillMaxSize().background(Ink).statusBarsPadding().padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("Talkt", color = Cloud, fontSize = 32.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            TextButton(onClick = { showSettings = true }) { Text("Settings") }
+            org.buddytools.talkt.auth.ProfileButton()
+        }
+        Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.Center) {
+            if (latest.isBlank()) {
+                Text("Record your first transcript", color = Cloud, fontSize = 24.sp)
+                Spacer(Modifier.height(12.dp))
+                Text("Your audio is sent to the cloud for transcription.", color = Muted, fontSize = 16.sp)
+            } else {
+                androidx.compose.foundation.text.selection.SelectionContainer {
+                    Text(latest, color = Cloud, fontSize = 22.sp, maxLines = 12, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
-                Text("Open", color = Mint, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                TextButton(onClick = {
+                    context.getSystemService(android.content.ClipboardManager::class.java)
+                        .setPrimaryClip(android.content.ClipData.newPlainText("Talkt transcript", latest))
+                }) { Text("Copy") }
             }
         }
-
-        item { Spacer(Modifier.height(24.dp)) }
+        Button(onClick = onRecord, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(16.dp)) {
+            Text(if (localState.microphone) "Record" else "Enable microphone", fontSize = 18.sp)
+        }
+        TextButton(onClick = { context.startActivity(Intent(context, CabinetActivity::class.java)) }, modifier = Modifier.fillMaxWidth()) {
+            Text("History", fontSize = 16.sp)
+        }
     }
 }
 
@@ -576,6 +593,6 @@ private fun LanguageChip(
 
 private fun updatedLanguages(current: Set<String>, toggled: String): Set<String> = when {
     toggled.isEmpty() -> emptySet()
-    toggled in current -> current - toggled
-    else -> current + toggled
+    toggled in current -> emptySet()
+    else -> setOf(toggled)
 }

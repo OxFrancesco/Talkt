@@ -55,7 +55,7 @@ private fun CloudBackupControls(owner: String?) {
         onDismissRequest = { dialog = false },
         title = { Text("Back up transcripts?") },
         text = { Column {
-            Text("Save new transcripts and agent replies to your Talkt account. Local copies stay available offline. Deleting a local note keeps its cloud copy.")
+            Text("Save new transcripts to your Talkt account. Local copies stay available offline. Deleting a local note keeps its cloud copy.")
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = includeExisting, onCheckedChange = { includeExisting = it })
                 Text("Include existing transcripts")

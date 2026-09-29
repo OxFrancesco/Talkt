@@ -14,5 +14,7 @@ folder to gather information, feedback, patterns, and templates before writing c
 - `resources/sherpa-onnx` — Official Sherpa-ONNX source — Android offline ASR JNI/AAR integration, models, and streaming/offline examples
 - `resources/thinking-orbs-kotlin` — Native Jetpack Compose Thinking Orbs band animation reference
 - `resources/mcp-remote` — Native OAuth MCP proxy for Talkt connectors
+- `resources/google-workspace-java` — Official Google Drive API examples for file creation and uploads
+- `resources/clerk-android` — Official Clerk Android SDK and authentication UI reference
 
 <!-- codeview:end -->

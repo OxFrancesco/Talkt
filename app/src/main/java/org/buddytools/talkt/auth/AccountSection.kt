@@ -42,7 +42,7 @@ import com.clerk.api.Clerk
 import com.clerk.api.network.serialization.ClerkResult
 import kotlinx.coroutines.launch
 import org.buddytools.talkt.BuildConfig
-import org.buddytools.talkt.agent.AgentRunService
+import org.buddytools.talkt.capture.PendingTranscriptionService
 import org.buddytools.talkt.ui.Cloud
 import org.buddytools.talkt.ui.Muted
 import org.buddytools.talkt.ui.Warning
@@ -83,7 +83,7 @@ private fun AccountDialog(onClose: () -> Unit) {
         AlertDialog(
             onDismissRequest = onClose,
             title = { Text("Your account") },
-            text = { Text("Sign-in is unavailable in this build. Device transcription still works.", color = Warning) },
+            text = { Text("Sign-in is unavailable in this build. Please try again later.", color = Warning) },
             confirmButton = { TextButton(onClick = onClose) { Text("Done") } },
         )
         return
@@ -94,29 +94,7 @@ private fun AccountDialog(onClose: () -> Unit) {
     var message by remember(user?.id) { mutableStateOf<String?>(null) }
     var busy by remember(user?.id) { mutableStateOf(false) }
     if (user == null) {
-        Dialog(onDismissRequest = onClose) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = SurfaceRaised,
-                border = BorderStroke(1.dp, Hairline),
-            ) {
-                Column(Modifier.fillMaxWidth()) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text("Sign in to Talkt", color = Cloud, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-                        IconButton(onClick = onClose) {
-                            Icon(Icons.Outlined.Close, contentDescription = "Close sign-in", tint = Muted, modifier = Modifier.size(20.dp))
-                        }
-                    }
-                    Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 24.dp)) {
-                        GoogleSignInButton(onClose)
-                    }
-                }
-            }
-        }
+        LaunchedEffect(Unit) { onClose() }
         return
     }
     AccountDetailsDialog(
@@ -130,7 +108,8 @@ private fun AccountDialog(onClose: () -> Unit) {
                 try {
                     when (Clerk.auth.signOut()) {
                         is ClerkResult.Success -> {
-                            context.stopService(Intent(context, AgentRunService::class.java))
+                            context.stopService(Intent(context, PendingTranscriptionService::class.java))
+                            org.buddytools.talkt.wakeword.WakeWordService.stop(context)
                             context.getSystemService(NotificationManager::class.java).cancelAll()
                         }
                         is ClerkResult.Failure -> message = "Could not sign out. Check your connection and try again."

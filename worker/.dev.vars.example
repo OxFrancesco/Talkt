@@ -1,13 +1,3 @@
-# App requests use Clerk session JWTs. Public Clerk configuration is in wrangler.jsonc.
-# Create separate private values for these channels. Never reuse provider tokens.
-TALKT_RUNNER_TOKEN=replace-with-a-long-random-runner-token
-TELEGRAM_BOT_TOKEN=replace-with-the-dedicated-bot-token
-TELEGRAM_WEBHOOK_SECRET=replace-with-a-separate-random-webhook-secret
-TELEGRAM_OWNER_ID=replace-with-the-verified-numeric-telegram-user-id
-# Optional direct provider connections. Leave absent until authorized.
-# NATIVE_LINEAR_TOKEN=
-# NATIVE_NOTION_TOKEN=
-# NATIVE_GITHUB_TOKEN=
-# NATIVE_CLOUDFLARE_TOKEN=
-# Model connections are stored in the authenticated agent's provider connection store.
-GEMINI_API_KEY=replace-with-a-gemini-api-key
+# Clerk verification configuration is public in wrangler.jsonc.
+# This key stays on the Worker, never in the Android app.
+OPENROUTER_API_KEY=replace-with-an-openrouter-api-key

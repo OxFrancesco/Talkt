@@ -1,0 +1,3 @@
+Synthetic speech generated locally with macOS say, Samantha voice.
+Text: This is a Talkt transcription test. The blue notebook is on the kitchen table.
+Converted with ffmpeg to 16 kHz mono PCM WAV. Contains no user recording.

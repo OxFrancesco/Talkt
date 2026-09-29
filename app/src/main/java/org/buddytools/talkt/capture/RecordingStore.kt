@@ -18,8 +18,8 @@ data class PendingRecording(
  * instead of nothing. Files use the `.part` suffix while recording and become `.wav` once the
  * header is final; a `.part` file found at process start is an orphan and is adopted as-is.
  */
-class RecordingStore(root: File) {
-    val directory: File = File(root, DIRECTORY_NAME)
+class RecordingStore(root: File, owner: String? = null) {
+    val directory: File = File(root, DIRECTORY_NAME + org.buddytools.talkt.data.accountStorageSuffix(owner))
 
     fun newRecordingFile(now: Long = System.currentTimeMillis()): File {
         directory.mkdirs()

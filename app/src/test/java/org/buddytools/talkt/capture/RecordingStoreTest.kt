@@ -13,6 +13,22 @@ class RecordingStoreTest {
     private val root: File = Files.createTempDirectory("talkt-recordings").toFile()
     private val store = RecordingStore(root)
 
+    @Test fun pendingRecordingsStayWithTheirAccount() {
+        val root = kotlin.io.path.createTempDirectory("talkt-recording-accounts").toFile()
+        try {
+            val alice = RecordingStore(root, "user_alice")
+            val bob = RecordingStore(root, "user_bob")
+            val part = alice.newRecordingFile()
+            part.writeBytes(WavFormat.header(0) + ByteArray(320))
+            assertTrue(bob.adoptOrphans().isEmpty())
+            assertTrue(bob.pending().isEmpty())
+            alice.adoptOrphans()
+            assertEquals(1, alice.pending().size)
+            assertTrue(RecordingStore(root).pending().isEmpty())
+            assertTrue(bob.pending().isEmpty())
+        } finally { root.deleteRecursively() }
+    }
+
     @Test
     fun `a recording killed mid-way is adopted with a repaired header`() {
         // Simulate the recorder: zero-size header, then PCM, then the process dies.

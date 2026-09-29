@@ -6,7 +6,7 @@ import kotlin.math.sqrt
  * Decides when a capture is over. Three exits, checked on every PCM buffer:
  *  - trailing silence after speech ([silenceTimeoutMillis], the normal path),
  *  - no speech at all for [noSpeechTimeoutMillis] (a silenced or dead mic; see [heardSpeech]),
- *  - [maxDurationMillis] elapsed regardless (Gemini and the local engine both cap input length).
+ *  - [maxDurationMillis] elapsed regardless (keeps each dictation short).
  *
  * Speech is judged against the room, not an absolute level: the noise floor is the quietest
  * buffer in the last [FLOOR_WINDOW_BUFFERS], and a buffer counts as speech when it is at least

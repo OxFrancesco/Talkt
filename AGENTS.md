@@ -43,17 +43,17 @@ this Fold (Android 17) even `adb shell device_config put privacy camera_mic_icon
 refused (flag not in the shell allowlist). Only privileged assistants with `HotwordDetectionService`
 are exempt.
 
-## On-device ASR models (not in git)
+## Cloud transcription
 
-Run `bun run models:download` before building a fresh clone. This downloads the pinned
-Parakeet TDT 0.6B v3 INT8 files to `app/src/main/assets/models/parakeet-tdt-v3/` and
-verifies their SHA-256 hashes. `bun run models:check` verifies existing files offline.
-The Android asset-merge tasks also reject missing or invalid model files.
+Sign-in and account creation use Clerk. Recordings require a signed-in account and are sent
+through the authenticated Worker to OpenRouter `x-ai/grok-stt-1.0`. Store `OPENROUTER_API_KEY`
+as a Worker secret. No provider key belongs in the Android app.
 
-The model files total 670.5 MB and remain gitignored. Remove any obsolete local
-`models/whisper-tiny/` assets before building to avoid shipping both models.
-The APK bundles Parakeet, so a fresh install can transcribe without a model download.
-The pinned source and file hashes are in `models/parakeet-tdt-v3.json`.
+The APK excludes the retired Parakeet assets. Sherpa remains only for the optional local
+wake-word trigger. Do not restore local transcription or agent routes.
+
+Pending recordings are isolated by Clerk account. Older unassigned recordings remain in
+`files/recordings/`; never automatically upload them as a newly signed-in account.
 
 <!-- codeview:start -->
 
@@ -70,5 +70,7 @@ folder to gather information, feedback, patterns, and templates before writing c
 - `resources/sherpa-onnx` — Official Sherpa-ONNX source — Android offline ASR JNI/AAR integration, models, and streaming/offline examples
 - `resources/thinking-orbs-kotlin` — Native Jetpack Compose Thinking Orbs band animation reference
 - `resources/mcp-remote` — Native OAuth MCP proxy for Talkt connectors
+- `resources/google-workspace-java` — Official Google Drive API examples for file creation and uploads
+- `resources/clerk-android` — Official Clerk Android SDK and authentication UI reference
 
 <!-- codeview:end -->

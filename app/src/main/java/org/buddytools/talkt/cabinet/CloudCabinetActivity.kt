@@ -67,7 +67,7 @@ private fun CloudCabinetScreen(owner: String?, onBack: () -> Unit) {
         finally { busy = false }
     }
 
-    LazyColumn(Modifier.fillMaxSize().background(Ink).statusBarsPadding(),
+    LazyColumn(Modifier.fillMaxSize().background(Ink).safeDrawingPadding(),
         contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onBack) { Text("Back") }

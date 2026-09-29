@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
@@ -248,27 +250,32 @@ private fun TalktSettingsScreen(
     var languageCodes by remember { mutableStateOf(settings.languageCodes) }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Ink).statusBarsPadding(),
+        modifier = Modifier.fillMaxSize().background(Ink).safeDrawingPadding(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         item {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, top = 20.dp, bottom = 20.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     "Settings",
+                    modifier = Modifier.weight(1f),
                     color = Cloud,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
-                TextButton(onClick = onBack) { Text("Done") }
+                TextButton(onClick = onBack, modifier = Modifier.widthIn(min = 52.dp), contentPadding = PaddingValues(0.dp)) { Text("Done") }
             }
         }
 
-        item { org.buddytools.talkt.cloud.CloudBackupSection() }
+        item {
+            GroupColumn(shape = GroupShape.Single) {
+                org.buddytools.talkt.cloud.CloudBackupSection()
+            }
+        }
 
         if (!localState.microphone) {
             item {
@@ -393,13 +400,15 @@ private fun TalktSettingsScreen(
             }
         }
 
+        item { GroupGap() }
         item {
             GroupColumn(shape = GroupShape.Top) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("Stop after silence", color = Cloud, fontSize = 16.sp, modifier = Modifier.weight(1f))
                     Text("${silenceTimeoutSeconds}s", color = Mint, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                 }
                 Slider(
+                    modifier = Modifier.fillMaxWidth(),
                     value = silenceTimeoutSeconds.toFloat(),
                     onValueChange = {
                         silenceTimeoutSeconds = it.toInt()
@@ -481,7 +490,7 @@ private fun TalktHome(
         return
     }
     Column(
-        Modifier.fillMaxSize().background(Ink).statusBarsPadding().padding(24.dp),
+        Modifier.fillMaxSize().background(Ink).safeDrawingPadding().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -537,6 +546,7 @@ private fun GroupRow(shape: GroupShape, onClick: (() -> Unit)? = null, content: 
             .background(SurfaceRaised)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 18.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
@@ -562,7 +572,7 @@ private fun GroupHeader(text: String) {
         color = Muted,
         fontSize = 13.sp,
         fontWeight = FontWeight.Medium,
-        modifier = Modifier.padding(start = 6.dp, top = 20.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 18.dp, top = 16.dp, bottom = 8.dp),
     )
 }
 

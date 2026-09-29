@@ -9,6 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.buddytools.talkt.ui.Cloud
+import org.buddytools.talkt.ui.Muted
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.clerk.api.Clerk
 import org.buddytools.talkt.data.TranscriptStore
@@ -37,18 +40,27 @@ private fun CloudBackupControls(owner: String?) {
     val enabled = remember(revision, state) { state?.enabled == true }
     val status = remember(revision, state) { state?.preferences?.getString("status", null) }
     LaunchedEffect(owner) { CloudBackupWorker.enqueue(context, owner) }
-    Column(Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 4.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Cloud backup", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text("Cloud backup", color = Cloud, fontSize = 16.sp, modifier = Modifier.weight(1f))
             Switch(checked = enabled, enabled = owner != null, onCheckedChange = {
                 if (it) dialog = true else owner?.let { id -> CloudBackupWorker.disable(context, id) }
             })
         }
         if (owner == null) Text("Sign in to back up and search transcripts", style = MaterialTheme.typography.bodyMedium)
-        status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-        if (owner != null) Row {
-            if (enabled) TextButton(onClick = { CloudBackupWorker.enqueue(context, owner) }) { Text("Back up now") }
-            TextButton(onClick = { context.startActivity(Intent(context, CloudCabinetActivity::class.java)) }) { Text("Search cloud transcripts") }
+        status?.let { Text(it, color = Muted, fontSize = 12.sp) }
+        if (owner != null) FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            if (enabled) TextButton(
+                onClick = { CloudBackupWorker.enqueue(context, owner) },
+                contentPadding = PaddingValues(0.dp),
+            ) { Text("Back up now") }
+            TextButton(
+                onClick = { context.startActivity(Intent(context, CloudCabinetActivity::class.java)) },
+                contentPadding = PaddingValues(0.dp),
+            ) { Text("Search cloud transcripts") }
         }
     }
     if (dialog) AlertDialog(

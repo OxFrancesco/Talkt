@@ -46,6 +46,8 @@ android {
         compose = true
         buildConfig = true
     }
+    sourceSets["main"].java.srcDir("../wear-shared/src/main/kotlin")
+    sourceSets["main"].res.srcDir("../wear-shared/src/main/res")
     androidResources {
         noCompress += "onnx"
         ignoreAssetsPattern = "parakeet-tdt-v3:whisper-tiny"
@@ -54,6 +56,8 @@ android {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-wearable:20.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
     implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("com.clerk:clerk-android-api:1.1.5")
     implementation("com.clerk:clerk-android-ui:1.1.5")

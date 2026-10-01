@@ -1,0 +1,7 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_record" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_background" android:contentDescription="@string/widget_record"
+    android:padding="16dp">
+    <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+        android:src="@drawable/ic_talkt_wave" android:scaleType="fitCenter" android:importantForAccessibility="no" />
+</FrameLayout>

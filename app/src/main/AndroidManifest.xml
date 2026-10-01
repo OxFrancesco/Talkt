@@ -18,6 +18,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Talkt">
 
+        <receiver android:name=".widget.TalktWidgetProvider" android:exported="false" android:label="Talkt">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/talkt_widget" />
+        </receiver>
+
+        <service android:name=".wear.WearRecordingService" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/talkt/wear/v1/" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name="com.clerk.api.sso.SSOReceiverActivity"
             android:exported="false"

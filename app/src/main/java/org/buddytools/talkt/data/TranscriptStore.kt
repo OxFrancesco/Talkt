@@ -19,17 +19,21 @@ class TranscriptStore(context: Context, private val userId: String? = org.buddyt
     private val suffix = accountStorageSuffix(userId)
     private val file = File(context.filesDir, if (suffix.isEmpty()) FILE_NAME else "transcripts-$suffix.jsonl")
 
-    fun append(text: String, kind: String, source: String, reply: String? = null) {
+    fun append(text: String, kind: String, source: String, reply: String? = null, id: String? = null) {
         if (text.isBlank()) return
         val entry = JSONObject()
-            .put("id", java.util.UUID.randomUUID().toString())
+            .put("id", id ?: java.util.UUID.randomUUID().toString())
             .put("time", System.currentTimeMillis())
             .put("text", text)
             .put("kind", kind)
             .put("source", source)
             .putOpt("reply", reply)
         synchronized(LOCK) {
-            file.appendText(entry.toString() + "\n")
+            if (id != null && list().any { it.id == id }) return
+            java.io.FileOutputStream(file, true).use { output ->
+                output.write((entry.toString() + "\n").toByteArray())
+                output.fd.sync()
+            }
         }
         runCatching { org.buddytools.talkt.cloud.CloudBackupWorker.enqueue(appContext, userId) }
     }

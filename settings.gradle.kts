@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Talkt"
 include(":app")
+include(":wear")

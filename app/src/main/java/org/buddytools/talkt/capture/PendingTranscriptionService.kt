@@ -5,14 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -21,16 +18,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.buddytools.talkt.R
 import org.buddytools.talkt.cabinet.CabinetActivity
-import org.buddytools.talkt.data.TalktSettings
-import org.buddytools.talkt.data.TranscriptStore
-import org.buddytools.talkt.transcription.NoSpeechException
-import org.buddytools.talkt.transcription.RecordedClip
-import org.buddytools.talkt.transcription.TranscriptionGraph
 import java.io.File
 
 /**
@@ -62,11 +53,10 @@ class PendingTranscriptionService : Service() {
         ensureChannel()
         inFlight += 1
         promote(progressNotification(files.size))
-        val source = intent?.getStringExtra(EXTRA_SOURCE).orEmpty()
 
         scope.launch {
             queue.withLock {
-                files.forEach { file -> transcribe(file, source, owner) }
+                files.forEach { file -> SavedRecordingTranscriber.transcribe(this@PendingTranscriptionService, file, owner) }
             }
             if (--inFlight == 0) {
                 stopForeground(STOP_FOREGROUND_REMOVE)
@@ -82,55 +72,6 @@ class PendingTranscriptionService : Service() {
         super.onDestroy()
     }
 
-    private suspend fun transcribe(file: File, source: String, accountId: String) {
-        if (!file.exists()) return
-        val settings = TalktSettings(this)
-        val startedAt = SystemClock.elapsedRealtime()
-        val clip = runCatching { RecordedClip.open(file) }.getOrElse {
-            Log.w(TAG, "pending recording ${file.name} is unreadable, dropping it: ${it.message}")
-            file.delete()
-            return
-        }
-        Log.i(TAG, "pending transcription started for ${file.name} (${clip.durationMillis}ms)")
-        runCatching { TranscriptionGraph.create(settings, accountId).transcribe(clip) }
-            .onSuccess { transcript ->
-                if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@onSuccess
-                val saved = runCatching { TranscriptStore(this, accountId).append(transcript.text, kind = "transcript", source = "Cloud") }
-                if (saved.isFailure) {
-                    notify(RESULT_ID_BASE + file.hashCode(), resultNotification("Recording kept", "Could not save the transcript. Retry from History."))
-                    return@onSuccess
-                }
-                val elapsed = SystemClock.elapsedRealtime() - startedAt
-                Log.i(TAG, "pending transcription of ${file.name} done in ${elapsed}ms (${transcript.text.length} chars)")
-                withContext(Dispatchers.Main) {
-                    if (accountId != org.buddytools.talkt.auth.TalktAuth.userId) return@withContext
-                    runCatching {
-                        getSystemService(ClipboardManager::class.java)
-                            .setPrimaryClip(ClipData.newPlainText("Talkt transcript", transcript.text))
-                    }
-                    settings.latestResult = transcript.text
-                    clip.close()
-                    notify(RESULT_ID_BASE + file.hashCode(), resultNotification("Recording transcribed", transcript.text))
-                }
-            }
-            .onFailure { error ->
-                if (error is kotlinx.coroutines.CancellationException) return@onFailure
-                if (error is NoSpeechException) {
-                    Log.i(TAG, "pending recording ${file.name} had no speech, dropping it")
-                    clip.close()
-                    return@onFailure
-                }
-                Log.w(TAG, "pending transcription of ${file.name} failed: ${error.message}")
-                notify(
-                    RESULT_ID_BASE + file.hashCode(),
-                    resultNotification(
-                        "Recording kept",
-                        "${error.message ?: "Talkt could not transcribe it"}. Open History to retry.",
-                    ),
-                )
-            }
-    }
-
     private fun progressNotification(count: Int): Notification =
         NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
@@ -141,27 +82,12 @@ class PendingTranscriptionService : Service() {
             .setContentIntent(openCabinet())
             .build()
 
-    private fun resultNotification(title: String, body: String): Notification =
-        NotificationCompat.Builder(this, CHANNEL)
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-            .setAutoCancel(true)
-            .setContentIntent(openCabinet())
-            .build()
-
     private fun openCabinet(): PendingIntent = PendingIntent.getActivity(
         this,
         0,
         Intent(this, CabinetActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
-
-    private fun notify(id: Int, notification: Notification) {
-        if (!androidx.core.app.NotificationManagerCompat.from(this).areNotificationsEnabled()) return
-        getSystemService(NotificationManager::class.java).notify(id, notification)
-    }
 
     private fun promote(notification: Notification) {
         if (Build.VERSION.SDK_INT >= 34) {
@@ -184,7 +110,6 @@ class PendingTranscriptionService : Service() {
         private const val EXTRA_SOURCE = "source"
         private const val CHANNEL = "talkt.recordings"
         private const val ONGOING_ID = 51
-        private const val RESULT_ID_BASE = 5_100
 
         /**
          * Transcribes one kept recording, or every pending one when [file] is null. Returns false

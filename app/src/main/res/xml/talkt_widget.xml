@@ -1,0 +1,5 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/talkt_widget" android:previewLayout="@layout/talkt_widget"
+    android:previewImage="@drawable/widget_preview" android:description="@string/widget_description"
+    android:minWidth="110dp" android:minHeight="48dp" android:targetCellWidth="2" android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen" android:updatePeriodMillis="0" />

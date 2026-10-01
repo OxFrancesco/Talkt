@@ -140,6 +140,7 @@ class MainActivity : ComponentActivity() {
 
     private fun recoverRecordings() {
         val owner = TalktAuth.userId ?: return
+        org.buddytools.talkt.wear.WearInboxWorker.enqueue(this)
         if (CaptureActivity.isActive) return
         val recordings = RecordingStore(filesDir, owner)
         recordings.adoptOrphans()

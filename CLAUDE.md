@@ -16,5 +16,6 @@ folder to gather information, feedback, patterns, and templates before writing c
 - `resources/mcp-remote` — Native OAuth MCP proxy for Talkt connectors
 - `resources/google-workspace-java` — Official Google Drive API examples for file creation and uploads
 - `resources/clerk-android` — Official Clerk Android SDK and authentication UI reference
+- `resources/wear-os-samples` — Official Android Wear OS samples for modules, Compose, Data Layer, and device behavior
 
 <!-- codeview:end -->

@@ -1,0 +1,4 @@
+<resources>
+    <string name="widget_record">Record with Talkt</string>
+    <string name="widget_description">Tap to record audio</string>
+</resources>

@@ -113,6 +113,13 @@ class WavRecorder(private val store: RecordingStore) {
         )
     }
 
+    fun discard(): Recording {
+        val result = stop()
+        val file = result.file
+        check(file == null || !file.exists() || file.delete()) { "Could not discard the recording" }
+        return result
+    }
+
     private val silenceWatcher = object : AudioManager.AudioRecordingCallback() {
         override fun onRecordingConfigChanged(configs: List<AudioRecordingConfiguration>) {
             if (Build.VERSION.SDK_INT < 29) return

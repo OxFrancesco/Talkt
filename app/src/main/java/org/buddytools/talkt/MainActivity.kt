@@ -520,6 +520,9 @@ private fun TalktHome(
         TextButton(onClick = { context.startActivity(Intent(context, CabinetActivity::class.java)) }, modifier = Modifier.fillMaxWidth()) {
             Text("History", fontSize = 16.sp)
         }
+        TextButton(onClick = { context.startActivity(Intent(context, org.buddytools.talkt.snippets.SnippetsActivity::class.java)) }, modifier = Modifier.fillMaxWidth()) {
+            Text("Snippets", fontSize = 16.sp)
+        }
     }
 }
 

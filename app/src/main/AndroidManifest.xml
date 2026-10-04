@@ -59,6 +59,7 @@
             android:theme="@style/Theme.Talkt.Capture" />
 
         <activity android:name=".cabinet.CloudCabinetActivity" android:exported="false" />
+        <activity android:name=".snippets.SnippetsActivity" android:exported="false" />
 
         <activity
             android:name=".cabinet.CabinetActivity"

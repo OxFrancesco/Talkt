@@ -24,8 +24,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,6 +39,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Tab
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,11 +56,15 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.buddytools.talkt.data.TalktSettings
 import org.buddytools.talkt.data.TranscriptStore
+import org.buddytools.talkt.data.Snippet
+import org.buddytools.talkt.data.SnippetStore
+import org.buddytools.talkt.snippets.SnippetsActivity
 import org.buddytools.talkt.trigger.EditorBridge
 import org.buddytools.talkt.transcription.NoSpeechException
 import org.buddytools.talkt.transcription.RecordedClip
@@ -84,9 +94,13 @@ class CaptureActivity : ComponentActivity() {
     private var microphoneHandoffMillis = 0L
     /** Recording currently being transcribed by this bubble; still on disk until archived. */
     private var transcribing: File? = null
+    private var stopWatcher: Job? = null
+    private var recordingSession = 0
 
     private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) beginRecording() else state = CaptureState.Error("Microphone permission is required")
+        if (state == CaptureState.Preparing) {
+            if (granted) beginRecording() else state = CaptureState.Error("Microphone permission is required")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,6 +135,13 @@ class CaptureActivity : ComponentActivity() {
                     onStop = ::finishRecording,
                     onClose = ::finish,
                     onEnableAccessibility = ::openAccessibilitySettings,
+                    onListen = ::selectListening,
+                    onSnippets = ::selectSnippets,
+                    onUseSnippet = ::useSnippet,
+                    onManageSnippets = {
+                        startActivity(Intent(this, SnippetsActivity::class.java))
+                        finish()
+                    },
                 )
             }
         }
@@ -169,11 +190,14 @@ class CaptureActivity : ComponentActivity() {
     }
 
     private fun beginRecording() {
+        if (state != CaptureState.Preparing) return
+        val session = ++recordingSession
+        CaptureBus.consumeStopRequest()
         runCatching {
             org.buddytools.talkt.auth.TalktAuth.ensureUser(accountId)
             recorder.start(settings.silenceTimeoutSeconds * 1_000L) { reason ->
                 Log.i(TAG, "recorder auto-stop: $reason")
-                runOnUiThread(::finishRecording)
+                runOnUiThread { if (recordingSession == session) finishRecording() }
             }
         }
             .onSuccess {
@@ -186,7 +210,8 @@ class CaptureActivity : ComponentActivity() {
                         "wakeToMicMs=${detectionToMicMillis ?: -1} handoffMs=$microphoneHandoffMillis",
                 )
                 state = CaptureState.Listening
-                lifecycleScope.launch {
+                stopWatcher?.cancel()
+                stopWatcher = lifecycleScope.launch {
                     while (state is CaptureState.Listening) {
                         if (CaptureBus.consumeStopRequest()) {
                             finishRecording()
@@ -197,6 +222,48 @@ class CaptureActivity : ComponentActivity() {
                 }
             }
             .onFailure { state = CaptureState.Error(it.message ?: "Could not start microphone") }
+    }
+
+    private fun selectListening() {
+        if (state !is CaptureState.Snippets && state !is CaptureState.Error) return
+        state = CaptureState.Preparing
+        ensureRecordingPermission()
+    }
+
+    private fun selectSnippets() {
+        if (state !is CaptureState.Listening && state != CaptureState.Preparing && state !is CaptureState.Error) return
+        state = CaptureState.Snippets(emptyList())
+        ++recordingSession
+        stopWatcher?.cancel()
+        CaptureBus.consumeStopRequest()
+        runCatching { recorder.discard() }
+            .onSuccess { Log.i(TAG, "recording discarded for snippets: duration=${it.durationMillis}ms") }
+            .onFailure { state = CaptureState.Error(it.message ?: "Could not discard the recording"); return }
+        runCatching {
+            org.buddytools.talkt.auth.TalktAuth.ensureUser(accountId)
+            SnippetStore(this, accountId).list()
+        }.onSuccess { state = CaptureState.Snippets(it) }
+            .onFailure { state = CaptureState.Error(it.message ?: "Could not load snippets") }
+    }
+
+    private fun useSnippet(snippet: Snippet) {
+        if (state !is CaptureState.Snippets) return
+        runCatching {
+            org.buddytools.talkt.auth.TalktAuth.ensureUser(accountId)
+            copy(snippet.text, "Talkt snippet")
+            val inserted = editorMode && EditorBridge.commit(snippet.text)
+            val outcome = when {
+                inserted -> TranscriptOutcome.Inserted
+                EditorBridge.isConnected -> TranscriptOutcome.Copied
+                else -> TranscriptOutcome.CopiedAccessibilityOff
+            }
+            Log.i(TAG, "snippet delivered: $outcome")
+            state = CaptureState.Complete(snippet.text, outcome)
+            lifecycleScope.launch {
+                delay(if (outcome == TranscriptOutcome.CopiedAccessibilityOff) 4_000L else 1_100L)
+                finish()
+            }
+        }.onFailure { state = CaptureState.Error(it.message ?: "Could not use snippet") }
     }
 
     private fun finishRecording() {
@@ -279,13 +346,13 @@ class CaptureActivity : ComponentActivity() {
         }
     }
 
-    private fun copy(text: String) {
+    private fun copy(text: String, label: String = "Talkt transcript") {
         val clipboard = getSystemService(ClipboardManager::class.java)
         val existing = runCatching {
             clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
         }.getOrNull()
         if (existing == text) return
-        clipboard.setPrimaryClip(ClipData.newPlainText("Talkt transcript", text))
+        clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
     }
 
     private suspend fun archive(text: String, kind: String, source: String, reply: String? = null) {
@@ -318,27 +385,33 @@ class CaptureActivity : ComponentActivity() {
     }
 }
 
-private enum class TranscriptOutcome { Inserted, Copied, CopiedAccessibilityOff }
+internal enum class TranscriptOutcome { Inserted, Copied, CopiedAccessibilityOff }
 
-private sealed interface CaptureState {
+internal sealed interface CaptureState {
     data object Preparing : CaptureState
     data object Listening : CaptureState
+    data class Snippets(val entries: List<Snippet>) : CaptureState
     data class Processing(val label: String) : CaptureState
     data class Complete(val detail: String, val outcome: TranscriptOutcome) : CaptureState
     data class Error(val message: String) : CaptureState
 }
 
 @Composable
-private fun CaptureScreen(
+internal fun CaptureScreen(
     state: CaptureState,
     onStop: () -> Unit,
     onClose: () -> Unit,
     onEnableAccessibility: () -> Unit,
+    onListen: () -> Unit,
+    onSnippets: () -> Unit,
+    onUseSnippet: (Snippet) -> Unit,
+    onManageSnippets: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.58f))
+            .safeDrawingPadding()
             .padding(16.dp),
         contentAlignment = Alignment.BottomCenter,
     ) {
@@ -352,15 +425,48 @@ private fun CaptureScreen(
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (state == CaptureState.Preparing || state == CaptureState.Listening || state is CaptureState.Snippets || state is CaptureState.Error) {
+                    PrimaryTabRow(selectedTabIndex = if (state is CaptureState.Snippets) 1 else 0, containerColor = SurfaceRaised) {
+                        Tab(selected = state !is CaptureState.Snippets, onClick = onListen,
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant, text = { Text("Listening") })
+                        Tab(selected = state is CaptureState.Snippets, onClick = onSnippets,
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant, text = { Text("Snippets") })
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
                 when (state) {
                     CaptureState.Preparing -> ThinkingContent(label = "Getting ready")
                     CaptureState.Listening -> ListeningContent(onStop)
+                    is CaptureState.Snippets -> SnippetsContent(state.entries, onUseSnippet, onManageSnippets, onClose)
                     is CaptureState.Processing -> ThinkingContent(label = state.label)
                     is CaptureState.Complete -> CompleteContent(state, onEnableAccessibility)
                     is CaptureState.Error -> ErrorContent(state.message, onClose)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SnippetsContent(entries: List<Snippet>, onUse: (Snippet) -> Unit, onManage: () -> Unit, onClose: () -> Unit) {
+    if (entries.isEmpty()) {
+        Text("No snippets yet", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 20.dp))
+    } else {
+        LazyColumn(Modifier.fillMaxWidth().heightIn(max = 280.dp)) {
+            items(entries, key = { it.id }) { snippet ->
+                Column(Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Use ${snippet.title}") { onUse(snippet) }
+                    .padding(vertical = 12.dp, horizontal = 4.dp)) {
+                    Text(snippet.title, color = Cloud)
+                    Spacer(Modifier.height(4.dp))
+                    Text(snippet.text, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        TextButton(onClick = onManage) { Text(if (entries.isEmpty()) "Add snippet" else "Manage snippets") }
+        TextButton(onClick = onClose) { Text("Close") }
     }
 }
 

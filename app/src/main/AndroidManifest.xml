@@ -18,6 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Talkt">
 
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
+
         <receiver android:name=".widget.TalktWidgetProvider" android:exported="false" android:label="Talkt">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

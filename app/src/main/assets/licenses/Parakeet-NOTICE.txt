@@ -1,12 +1,16 @@
-Parakeet TDT 0.6B v3
+Parakeet CTC 0.6B and TDT 0.6B v3
 
-Original model: NVIDIA
+Original models: NVIDIA
+https://huggingface.co/nvidia/parakeet-ctc-0.6b
 https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
 
-ONNX INT8 conversion: sherpa-onnx contributors
-https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8
+Optional GGUF models are imported separately. QVAC converts and quantizes the original weights to GGUF. Talkt does not further modify the files.
 
-The export converts and quantizes the original weights to INT8 ONNX. Talkt does not further modify the files.
+Runtime engine: QVAC Parakeet C++, Apache 2.0
+https://github.com/tetherto/qvac-fabric-speech.cpp
+Runtime backend: QVAC GGML, MIT
+https://github.com/tetherto/qvac-ext-ggml
+OpenCL headers: Khronos Group, Apache 2.0
 
 Licensed under Creative Commons Attribution 4.0 International.
 https://creativecommons.org/licenses/by/4.0/

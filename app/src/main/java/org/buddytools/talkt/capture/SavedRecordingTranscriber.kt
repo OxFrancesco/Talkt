@@ -48,7 +48,7 @@ object SavedRecordingTranscriber {
         try {
             val transcript = TranscriptionGraph.create(settings, owner).transcribe(clip)
             TalktAuth.ensureUser(owner)
-            archive.append(transcript.text, kind = "transcript", source = "Cloud", id = transcriptId)
+            archive.append(transcript.text, kind = "transcript", source = transcript.source, id = transcriptId)
             Log.i("Talkt", "pending transcription of ${file.name} done in ${SystemClock.elapsedRealtime() - started}ms")
             withContext(Dispatchers.Main) {
                 if (TalktAuth.userId == owner) {
@@ -57,6 +57,7 @@ object SavedRecordingTranscriber {
                             .setPrimaryClip(ClipData.newPlainText("Talkt transcript", transcript.text))
                     }
                     settings.latestResult = transcript.text
+                    settings.latestTranscriptionDetail = transcript.detail
                     notify(context, file, "Recording transcribed", transcript.text)
                 }
                 clip.close()

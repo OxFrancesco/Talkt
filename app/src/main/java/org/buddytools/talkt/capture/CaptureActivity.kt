@@ -304,8 +304,8 @@ class CaptureActivity : ComponentActivity() {
                     return@onSuccess
                 }
                 val elapsed = SystemClock.elapsedRealtime() - startedAt
-                Log.i(TAG, "transcribed via cloud in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
-                val archived = runCatching { archive(transcript.text, kind = "transcript", source = "Cloud") }
+                Log.i(TAG, "transcribed via ${transcript.source} in ${elapsed}ms (${transcript.text.length} chars, audio ${recording.durationMillis}ms)")
+                val archived = runCatching { archive(transcript.text, kind = "transcript", source = transcript.source) }
                 if (archived.isFailure) {
                     state = CaptureState.Error("Could not save the transcript. The recording is kept in History.")
                     return@onSuccess
@@ -321,6 +321,7 @@ class CaptureActivity : ComponentActivity() {
                 Log.i(TAG, "transcript delivered: $outcome")
                 state = CaptureState.Complete(transcript.text, outcome)
                 settings.latestResult = transcript.text
+                settings.latestTranscriptionDetail = transcript.detail
                 // The transcript is archived; the audio has done its job.
                 clip.close()
                 delay(

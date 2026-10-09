@@ -26,9 +26,32 @@ android {
         ndk {
             abiFilters += "arm64-v8a"
         }
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON", "-DCMAKE_BUILD_TYPE=RelWithDebInfo")
+                if (providers.gradleProperty("talktHexagon").orNull == "true") {
+                    arguments += "-DTALKT_HEXAGON=ON"
+                    providers.environmentVariable("HEXAGON_SDK_ROOT").orNull?.let { arguments += "-DHEXAGON_SDK_ROOT=$it" }
+                    providers.environmentVariable("HEXAGON_TOOLS_ROOT").orNull?.let { arguments += "-DHEXAGON_TOOLS_ROOT=$it" }
+                }
+            }
+        }
 
         buildConfigField("String", "DEFAULT_API_URL", "\"https://talkt-api.oddofrancesco000.workers.dev\"")
         buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"$clerkPublishableKey\"")
+    }
+
+    ndkVersion = "27.1.12297006"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+    sourceSets["main"].assets.srcDir("build/generated/parakeet-assets")
+    if (providers.gradleProperty("talktHexagon").orNull == "true") {
+        sourceSets["main"].jniLibs.srcDir("build/generated/hexagon")
+        packaging.jniLibs.keepDebugSymbols += "**/libggml-htp*.so"
     }
 
     buildTypes {
@@ -53,6 +76,11 @@ android {
         ignoreAssetsPattern = "parakeet-tdt-v3:whisper-tiny"
     }
     packaging.resources.excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+}
+
+tasks.configureEach {
+    if (name == "mergeDebugAssets") dependsOn("externalNativeBuildDebug")
+    if (name == "mergeReleaseAssets") dependsOn("externalNativeBuildRelease")
 }
 
 dependencies {

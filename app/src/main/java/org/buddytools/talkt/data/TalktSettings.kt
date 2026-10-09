@@ -4,7 +4,28 @@ import android.content.Context
 import org.buddytools.talkt.BuildConfig
 
 class TalktSettings(context: Context) {
+    val appContext: Context = context.applicationContext
     private val preferences = context.getSharedPreferences("talkt", Context.MODE_PRIVATE)
+
+    var transcriptionMode: String
+        get() = preferences.getString("transcription_mode", "cloud") ?: "cloud"
+        set(value) { require(value in setOf("cloud", "parakeet")); preferences.edit().putString("transcription_mode", value).apply() }
+
+    var parakeetBackend: String
+        get() = preferences.getString("parakeet_backend", "opencl") ?: "opencl"
+        set(value) { require(value in setOf("cpu", "opencl", "hexagon")); preferences.edit().putString("parakeet_backend", value).apply() }
+
+    var parakeetModelFile: String
+        get() = preferences.getString("parakeet_model_file", "").orEmpty()
+        set(value) = preferences.edit().putString("parakeet_model_file", value).apply()
+
+    var parakeetModelName: String
+        get() = preferences.getString("parakeet_model_name", "").orEmpty()
+        set(value) = preferences.edit().putString("parakeet_model_name", value).apply()
+
+    var latestTranscriptionDetail: String
+        get() = preferences.getString("transcription_detail" + accountStorageSuffix(org.buddytools.talkt.auth.TalktAuth.userId), "").orEmpty()
+        set(value) = preferences.edit().putString("transcription_detail" + accountStorageSuffix(org.buddytools.talkt.auth.TalktAuth.userId), value).apply()
 
     init { preferences.edit().remove("app_token").apply() }
 

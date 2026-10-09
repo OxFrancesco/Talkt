@@ -1,16 +1,19 @@
 # Third-party notices
 
-## Parakeet TDT 0.6B v3
+## Parakeet
 
-Talkt bundles NVIDIA's Parakeet TDT 0.6B v3 speech recognition weights under
-Creative Commons Attribution 4.0 International, CC BY 4.0.
+The optional on-device transcription mode uses QVAC's Parakeet C++ engine under Apache 2.0 and QVAC's GGML speech backend under MIT. OpenCL headers are provided by the Khronos Group under Apache 2.0. Talkt's generated OpenCL dispatch bridge loads the phone's vendor driver directly. The pinned native build copies their full licenses into the APK's `assets/licenses/` directory.
 
-- Original model and author: NVIDIA, https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
-- ONNX INT8 conversion: sherpa-onnx contributors, https://huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8
-- The shipped export converts and quantizes the original weights to INT8 ONNX. Talkt does not further modify those files.
+- Engine: https://github.com/tetherto/qvac-fabric-speech.cpp
+- GGML: https://github.com/tetherto/qvac-ext-ggml
+- OpenCL headers: https://github.com/KhronosGroup/OpenCL-Headers
+
+NVIDIA Parakeet model weights are imported separately, not bundled in the APK. NVIDIA's CTC 0.6B and TDT 0.6B v3 checkpoints use Creative Commons Attribution 4.0 International, CC BY 4.0. QVAC converts and quantizes them to GGUF. Talkt does not modify the imported weights.
+
+- Original models and author: NVIDIA, https://huggingface.co/nvidia/parakeet-ctc-0.6b and https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
 - License: https://creativecommons.org/licenses/by/4.0/
 
-The APK includes this attribution and the full license in `assets/licenses/`.
+The APK includes attribution and the full model license in `assets/licenses/`.
 
 ## Thinking orbs
 

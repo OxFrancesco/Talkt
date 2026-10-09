@@ -18,5 +18,7 @@ folder to gather information, feedback, patterns, and templates before writing c
 - `resources/clerk-android` — Official Clerk Android SDK and authentication UI reference
 - `resources/wear-os-samples` — Official Android Wear OS samples for modules, Compose, Data Layer, and device behavior
 - `resources/android-compose` — Official Material 3 and adaptive Compose UI samples
+- `resources/qvac-fabric-speech` — QVAC Parakeet GGUF speech engine and Android accelerator integration
+- `resources/qvac-ext-ggml` — QVAC GGML Hexagon HTP and OpenCL speech backends
 
 <!-- codeview:end -->

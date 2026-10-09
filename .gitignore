@@ -2,6 +2,7 @@
 # codeview reference codebases
 resources/
 .gradle/
+.cxx/
 .idea/
 .kotlin/
 **/build/

@@ -278,6 +278,13 @@ private fun TalktSettingsScreen(
             }
         }
 
+        item {
+            GroupColumn(shape = GroupShape.Single) {
+                org.buddytools.talkt.transcription.ParakeetSection(settings)
+            }
+        }
+        item { GroupGap() }
+
         if (!localState.microphone) {
             item {
                 GroupRow(shape = GroupShape.Single, onClick = onRequestMicrophone) {
@@ -479,8 +486,10 @@ private fun TalktHome(
     val context = LocalContext.current
     var showSettings by remember { mutableStateOf(false) }
     var latest by remember { mutableStateOf(settings.latestResult) }
+    var transcriptionDetail by remember { mutableStateOf(settings.latestTranscriptionDetail) }
     LifecycleResumeEffect(Unit) {
         latest = settings.latestResult
+        transcriptionDetail = settings.latestTranscriptionDetail
         onPauseOrDispose { }
     }
     BackHandler(showSettings) { showSettings = false }
@@ -503,10 +512,14 @@ private fun TalktHome(
             if (latest.isBlank()) {
                 Text("Record your first transcript", color = Cloud, fontSize = 24.sp)
                 Spacer(Modifier.height(12.dp))
-                Text("Your audio is sent to the cloud for transcription.", color = Muted, fontSize = 16.sp)
+                Text(if (settings.transcriptionMode == "parakeet") "Your audio is transcribed on this phone." else "Your audio is sent to the cloud for transcription.", color = Muted, fontSize = 16.sp)
             } else {
                 androidx.compose.foundation.text.selection.SelectionContainer {
                     Text(latest, color = Cloud, fontSize = 22.sp, maxLines = 12, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                }
+                if (transcriptionDetail.isNotBlank()) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(transcriptionDetail, color = Muted, fontSize = 14.sp)
                 }
                 TextButton(onClick = {
                     context.getSystemService(android.content.ClipboardManager::class.java)
